@@ -1,0 +1,113 @@
+\newcommand\textschwa{\rotatebox{180}{\parbox[t][0.5em][c]{0.5em}{e}}}
+
+\PrerenderUnicode{ş}
+\PrerenderUnicode{ı}
+\PrerenderUnicode{ğ}
+\PrerenderUnicode{à}
+
+\newcommand\turcodocslice[3]{
+  \begin{center}
+    \begin{tabular}{c}
+      \includegraphics{parole/#1.png}\\[1cm]
+      \RL{#2}\\[1cm]
+      #3\\
+    \end{tabular}
+  \end{center}
+}
+
+\newcommand\frameturcodocslice[5]{
+  \myframe{#1}{frame:#2}{
+    \setfarsi
+    \novocalize
+    \turcodocslice{#3}{#4}{#5}
+  }
+}
+
+\selectlanguage{italian}
+
+\mode
+<presentation>
+{
+  \usetheme{TURCO}
+  \setbeamercovered{transparent}
+}
+
+\mode
+<all>
+
+%\mytitle{Documento 1099}{Documento 1099}{Seminari di LLC Turca}
+
+%\mytitle{Una lettera privata}{Notizie linguistiche e storiche sull'ottomano del 1600. Analisi di una lettera di Ca\Ayn{}fer Paşa, ex-beylerbeyi di Cipro, al doge di Venezia}
+
+\mytitle{Notizie sull'ottomano del 1600}{Notizie linguistiche e storiche\\ sull'ottomano del 1600.\\ Analisi di una lettera di Ca\Ayn{}fer Paşa,\\ ex-beylerbeyi di Cipro, al doge di Venezia}{}
+
+\myauthor{Chiara Paci}
+
+\myinstitute{Tesi di laurea in Lingue e culture dell'Eurasia e del Mediterraneo}
+
+%\date{\today}
+\date{22 marzo 2010}
+
+\mode
+<presentation>
+
+\pgfdeclareimage[height=0.8cm]{plogo}{logo}
+\logo{\pgfuseimage{plogo}}
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+\AtBeginSection[]{
+  \begin{frame}<beamer>
+    \frametitle{Indice}
+    \tableofcontents[sectionstyle=show/shaded,subsectionstyle=hide/hide/hide]
+  \end{frame}
+}
+
+\mode
+<all>
+
+\begin{document}
+\novocalize
+\setcnash
+\setottoman
+\settrans{ottoman}
+\setnoquot % per le figure con pgf/tikz: altrimenti non si puÃ² usare <->
+
+\openpresentazionenotoc
+
+\mode
+<all>
+
+
+\input{sez_butezde}
+
+\input{sez_documento}
+
+\input{sez_presentazione}
+
+\input{sez_fonologia}
+
+\input{sez_armonia}
+
+\input{sez_suffissi}
+
+%\input{sez_turche}
+
+\input{sez_datazione}
+
+\input{sez_esposizione}
+
+\input{sez_periodo}
+
+\input{sez_conti}
+
+\input{sez_moneta}
+
+\input{sez_storia_cotone}
+
+\input{sez_altro}
+
+\end{document}
+
+
+
+

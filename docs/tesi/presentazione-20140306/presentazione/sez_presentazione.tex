@@ -1,0 +1,78 @@
+\mysection{Presentazione}
+
+\myframe{Linee di ricerca}{frame:ricerca}{
+    \begin{tikzpicture}[x=3cm,y=2cm,node distance=1,
+      linea/.style={line width=2pt,draw=red},
+      lineb/.style={line width=2pt,draw=black},
+      linec/.style={line width=2pt,draw=white},
+      nodea/.style={draw=blue}
+    ]
+    \node (docpos) {\includegraphics[scale=0.8]{img/doc-rid.jpg}};
+    \only<2-3>{
+      \node (storiapos) at ($(docpos)+(1,1)$) {analisi storica};
+    }
+    \only<2>{
+      \draw[->,linea] (docpos) to (storiapos);
+    }
+    \only<3>{
+      \node (lingpos) at ($(docpos)+(1,-1)$) {analisi linguistica};
+    }
+    \only<3> {
+      \draw[->,linea] (docpos) to (lingpos);
+      \draw[->,lineb] (docpos) to (storiapos);
+    }
+    \only<4->{
+      \node (fonologia) at ($(docpos)+(1,1)$) {fonologia};
+    }
+    \only<4>{
+      \draw[->,linea] (docpos) to (fonologia);
+    }
+    \only<5->{
+      \node (morfologia) at ($(docpos)+(1,0)$) {morfologia};
+      \draw[->,lineb] (docpos) to (fonologia);
+    }
+    \only<5> {
+      \draw[->,linea] (docpos) to (morfologia);
+    }
+    \only<6->{
+      \node (sintassi) at ($(docpos)+(1,-1)$) {sintassi};
+      \draw[->,lineb] (docpos) to (morfologia);
+    }
+    \only<6> {
+      \draw[->,linea] (docpos) to (sintassi);
+    }
+    \only<7->{
+      \node (lessico) at ($(fonologia)+(1,0.5)$) {lessico};
+      \draw[->,lineb] (docpos) to (sintassi);
+    }
+    \only<7> {
+      \draw[->,linea] (fonologia) to (lessico);
+    }
+    \only<8->{
+      \node (suffissi) at ($(fonologia)+(1,-0.5)$) {suffissi};
+      \draw[->,lineb] (fonologia) to (lessico);
+    }
+    \only<8> {
+      \draw[->,linea] (fonologia) to (suffissi);
+      \draw[->,linea] (morfologia) to (suffissi);
+    }
+    \only<9->{
+      \node (macro) at ($(sintassi)+(1,-0.5)$) {macro-sintassi};
+      \draw[->,lineb] (fonologia) to (suffissi);
+      \draw[->,lineb] (morfologia) to (suffissi);
+    }
+    \only<9> {
+      \draw[->,linea] (sintassi) to (macro);
+    }
+    \only<10->{
+      \node (micro) at ($(sintassi)+(1,0.5)$) {micro-sintassi};
+      \draw[->,lineb] (sintassi) to (macro);
+    }
+    \only<10> {
+      \draw[->,linea] (sintassi) to (micro);
+    }
+    
+  \end{tikzpicture}
+}
+
+\myframe{Statistiche}{frame:statistiche}{\input{frame/statistiche}}

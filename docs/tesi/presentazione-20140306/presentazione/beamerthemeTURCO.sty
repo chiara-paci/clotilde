@@ -1,0 +1,81 @@
+\ProvidesPackageRCS $Header: beamerthemeTURCO.sty,v 0.1 2007/04/11 $
+
+\mode<presentation>
+
+\useoutertheme[hideothersubsections,right,height=2em,width=4em]{sidebar}
+\useinnertheme{rounded}
+\usefonttheme{structureitalicserif}      
+
+%\usecolortheme{wolverine}
+
+\definecolor{giallopallido}{rgb}{1.0,1.0,0.8}
+\definecolor{giallino}{rgb}{1.0,1.0,0.9}
+\definecolor{giallo}{rgb}{1.0,1.0,0.5}
+\definecolor{marrone}{rgb}{0.5,0.4,0.2}
+\definecolor{rosso}{rgb}{0.5,0,0}
+\definecolor{verde}{rgb}{0,0.5,0}
+
+
+% ca!x!cb=x% ca + (100-x)% cb
+
+%\setbeamercolor{alerted text}{fg=red}
+
+\setbeamercolor{palette primary}{fg=marrone,bg=giallopallido}
+\setbeamercolor{palette secondary}{fg=marrone,bg=giallopallido}
+\setbeamercolor{palette tertiary}{fg=marrone}
+\setbeamercolor{palette quaternary}{fg=marrone}
+
+\setbeamercolor{palette frametitle primary}{fg=red}
+\setbeamercolor{palette frametitle secondary}{fg=green}
+\setbeamercolor{palette frametitle tertiary}{fg=blue}
+\setbeamercolor{palette frametitle quaternary}{fg=yellow}
+
+\setbeamercolor{sidebar}{fg=marrone,bg=giallopallido}
+\setbeamercolor{palette sidebar primary}{fg=marrone,bg=giallo}
+\setbeamercolor{palette sidebar secondary}{fg=rosso,bg=giallo}
+\setbeamercolor{palette sidebar tertiary}{fg=marrone,bg=giallopallido}
+\setbeamercolor{palette sidebar quaternary}{fg=black,bg=giallopallido}
+
+\setbeamercolor{titlelike}{parent=palette primary}
+
+\setbeamercolor{structure}{bg=white,fg=marrone}
+
+\setbeamercolor{description item}{bg=giallopallido,fg=marrone}
+\setbeamercolor{block title}{fg=giallopallido,bg=marrone}
+\setbeamercolor{block body}{bg=giallino,fg=black}
+
+\setbeamercolor{portale box}{fg=black,bg=portalecolor}
+\setbeamercolor{author box}{fg=black,bg=authorcolor}
+\setbeamercolor{sviluppo box}{fg=black,bg=sviluppocolor}
+\setbeamercolor{tammaster box}{fg=black,bg=tammastercolor}
+\setbeamercolor{webseal box}{fg=black,bg=websealcolor}
+\setbeamercolor{applicazione box}{fg=black,bg=applcolor}
+\setbeamercolor{dati box}{fg=black,bg=daticolor}
+\setbeamercolor{autenticazione box}{fg=black,bg=authcolor}
+
+%\setbeamercolor{frametitle}{bg=yellow!90!orange,fg=marrone}
+%\setbeamercolor{frametitle right}{bg=yellow!60!orange,fg=marrone}
+
+%\setbeamercolor{upper separation line head}{fg=red}
+%\setbeamercolor{middle separation line head}{fg=red}
+%\setbeamercolor{lower separation line head}{fg=red}
+
+\setbeamertemplate{block begin}
+{
+  \par\vskip\medskipamount%
+  %\begin{beamerboxesrounded}[colsep*=.75ex]{block title}
+  \begin{beamerboxesrounded}[upper=block title,lower=block body,shadow=true]
+    {\usebeamerfont*{block title}\insertblocktitle}
+    \usebeamerfont{block body}%
+}
+
+\setbeamertemplate{block end}
+{\end{beamerboxesrounded}\vskip\smallskipamount}
+
+
+\mode
+<all>
+
+%%% Local Variables: 
+%%% TeX-master: "~/texmf/tex/latex/beamer/test/test.tex"
+%%% End: 
