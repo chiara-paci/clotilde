@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - {{ application }} {{ caseset }}{% endblock %}
+
+{% block content %}
+
+<div id="largecontent">
+<h1>{{ caseset }}</h1>
+
+<h2>Languages:</h2>
+
+<ul>
+{% for l in caseset.language_set.all %}
+<li><a href="{{ l.get_absolute_url }}">{{ l }}</a></li>
+{% endfor %}
+</ul>
+
+<h2>Pairs:</h2>
+
+<table>
+<tr>
+{% for p in caseset.pairs.all %}
+<td>{{ p }}{% autoescape off %}{% cycle "</td>" "</td>" "</td>" "</td>" "</td>" "</td>" "<td></tr><tr>" %}{% endautoescape %}
+{% endfor %}
+</tr>
+</table>
+</div>
+
+{% endblock %}
