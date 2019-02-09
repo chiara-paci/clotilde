@@ -5,9 +5,11 @@ import re,time
 
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from morphology.models import *
-from languages.models import *
-from base.models import *
+#from morphology.models import *
+#from languages.models import *
+#from base.models import *
+
+from base import models
 
 ##### language
 
@@ -46,8 +48,8 @@ def get_or_create_language(comp):
 
     def casepairs_add(cset,pairs_def):
         for (lower,upper) in pairs_def:
-            cpair,created=CasePair.objects.get_or_create(lower=lower,upper=upper)
-            if created: print "Create %s: %s,%s" % ("case pair",lower,upper)
+            cpair,created=models.CasePair.objects.get_or_create(lower=lower,upper=upper)
+            if created: print("Create %s: %s,%s" % ("case pair",lower,upper))
             if not cset.pairs.filter(id=cpair.id).exists():
                 cset.pairs.add(cpair)
 
@@ -56,49 +58,61 @@ def get_or_create_language(comp):
         for (tid,tname,tdisabled,torder,tfg,tbg,tregexp) in regs_def:
             torder=int(torder)
             tdisabled=(tdisabled=='1')
-            tr,created=TokenRegexp.objects.get_or_create(name=tname,regexp=tregexp)
+            tr,created=models.TokenRegexp.objects.get_or_create(name=tname,regexp=tregexp)
             if created:    
-                print "Create %s: %s,%s" % ("token regexp",tname,tregexp)
+                print("Create %s: %s,%s" % ("token regexp",tname,tregexp))
 
-            trst,created=TokenRegexpSetThrough.objects.get_or_create(token_regexp=tr,token_regexp_set=tset,
-                                                                     defaults={"bg_color":tbg,"fg_color":tfg,
-                                                                               "order":torder,"disabled":tdisabled})
+            trst,created=models.TokenRegexpSetThrough.objects.get_or_create(token_regexp=tr,token_regexp_set=tset,
+                                                                            defaults={"bg_color":tbg,"fg_color":tfg,
+                                                                                      "order":torder,"disabled":tdisabled})
             if created:
-                print "Create %s: %s/%d:%s" % ("token regexp set through",tset.name,torder,tname)
+                print("Create %s: %s/%d:%s" % ("token regexp set through",tset.name,torder,tname))
                                                           
             if period_id and tid==period_id: 
                 ret=tr
         return(ret)
     
     try:
-        language=Language.objects.get(name=langpar["name"])
+        language=models.Language.objects.get(name=langpar["name"])
         tokenregexpset=language.token_regexp_set
         caseset=language.case_set
         casepairs_add(caseset,caseset_pairs_def)
         tokenregexps_add(tokenregexpset,tokenregexpset_regexps_def)
-    except ObjectDoesNotExist, e:
-        caseset,created=CaseSet.objects.get_or_create(name=caseset_name)
-        if created: print "Create %s: %s" % ("caseset",unicode(caseset))
-        tokenregexpset,created=TokenRegexpSet.objects.get_or_create(name=tokenregexpset_name)
-        if created: print "Create %s: %s" % ("tokenregexpset",unicode(tokenregexpset))
+    except models.Language.DoesNotExist as e:
+        caseset,created=models.CaseSet.objects.get_or_create(name=caseset_name)
+        if created: print("Create %s: %s" % ("caseset",str(caseset)))
+        tokenregexpset,created=models.TokenRegexpSet.objects.get_or_create(name=tokenregexpset_name)
+        if created: print("Create %s: %s" % ("tokenregexpset",str(tokenregexpset)))
         casepairs_add(caseset,caseset_pairs_def)
         period_sep=tokenregexps_add(tokenregexpset,tokenregexpset_regexps_def,period_id=langpar["period_sep"])
-        ao,created=AlphabeticOrder.objects.get_or_create(name=ao_name,order=ao_order)
+        ao,created=models.AlphabeticOrder.objects.get_or_create(name=ao_name,order=ao_order)
         if created:
-            print "Create %s: %s" % ("alphabetic order",ao_name)
-        language=Language.objects.create(name=langpar["name"],token_regexp_set=tokenregexpset,case_set=caseset,
-                                         period_sep=period_sep,alphabetic_order=ao)
+            print("Create %s: %s" % ("alphabetic order",ao_name))
+        language=models.Language.objects.create(name=langpar["name"],token_regexp_set=tokenregexpset,case_set=caseset,
+                                                period_sep=period_sep,alphabetic_order=ao)
     return(language)
 
+
+
 class Command(BaseCommand):
-    args = '<language>'
+    requires_migrations_checks = True
     help = 'Export <language>'
 
+
+    args = '<language>'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'language',
+            help='Language file',
+        )
+
     def handle(self, *args, **options):
-        fname=args[0]
+        fname = options["language"]
+        #fname=args[0]
         fd=open(fname,'r')
         text=fd.read()
-        text=unicode(text,'utf-8')
+        #text=str(text)
         fd.close()
         
         lines=text.split('\n')
@@ -111,7 +125,7 @@ class Command(BaseCommand):
             t=l.split(':')
             k=t[0]
             v=':'.join(t[1:])
-            if not comp.has_key(k): comp[k]=[]
+            if not k in comp: comp[k]=[]
             comp[k].append(v)
 
         language=get_or_create_language(comp)

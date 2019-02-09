@@ -70,7 +70,7 @@ class TokenRegexpSet(AbstractName):
     regexps = models.ManyToManyField(TokenRegexp,through='TokenRegexpSetThrough',blank=True)
 
     def regexp_all(self):
-        regs=map(lambda x: r'\[/?'+x+r'\]',MARKERS)
+        regs=[ r'\[/?'+x+r'\]' for x in MARKERS ]
         for rel in self.tokenregexpsetthrough_set.all():
             if rel.disabled: continue
             regs.append(rel.regexp())
