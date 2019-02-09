@@ -4,9 +4,9 @@
 import re,time
 
 from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ObjectDoesNotExist
-from corpora.models import Corpus,WDConcorso,WDForum,WDAuthor,WDText
-from languages.models import Language
+#from django.core.exceptions import ObjectDoesNotExist
+from corpora import models #import Corpus,WDConcorso,WDForum,WDAuthor,WDText
+from base import models as base_models
 
 RE_TESTO_CONC=re.compile('(\[?MIB? *[0-9Q]+\])[ -]*(.*)',re.IGNORECASE)
 RE_TESTO_RIV=re.compile('(\[RIV\]) *(.*)',re.IGNORECASE)
@@ -47,7 +47,7 @@ class Testo(object):
         self.forum=forum
         self.text=""
 
-    def __unicode__(self): 
+    def __str__(self): 
         if self.revisione: 
             rev="R"
         else:
@@ -57,7 +57,7 @@ class Testo(object):
     def load(self):
         fd=open(self.testi_dir+"/"+self.tid+".txt","r")
         self.text=fd.read()
-        self.text=unicode(self.text,'utf-8')
+        #self.text=str(self.text,'utf-8')
         fd.close()
 
 class DBForum(object):
@@ -71,14 +71,11 @@ class DBForum(object):
             self.wd_id=FID_MIB
         self.wd_id=int(self.wd_id)
 
-    def __unicode__(self):
-        return(unicode(self.wd_id)+" - "+self.title)
+    def __str__(self):
+        return(str(self.wd_id)+" - "+self.title)
 
     def get_db_object(self):
-        try:
-            c=WDForum.objects.get(wd_id=self.wd_id)
-        except ObjectDoesNotExist, e:
-            c=WDForum.objects.create(wd_id=self.wd_id,title=self.title)
+        c,created=models.WDForum.objects.get_or_create(wd_id=self.wd_id,defaults={"title": self.title})
         return(c)
 
 class DBConcorso(object):
@@ -94,14 +91,11 @@ class DBConcorso(object):
         else:
             self.title="Mezzogiorno d'Inchiostro %s" % self.tag[2:]
 
-    def __unicode__(self):
+    def __str__(self):
         return(self.tag+" - "+self.title)
 
     def get_db_object(self):
-        try:
-            c=WDConcorso.objects.get(tag=self.tag)
-        except ObjectDoesNotExist, e:
-            c=WDConcorso.objects.create(tag=self.tag,title=self.title)
+        c,created=models.WDConcorso.objects.get_or_create(tag=self.tag,defaults={"title": self.title})
         return(c)
 
 class DBAuthor(object):
@@ -109,14 +103,11 @@ class DBAuthor(object):
         self.name=name
         self.wd_id=int(aid)
 
-    def __unicode__(self):
-        return(unicode(self.wd_id)+" - "+self.name)
+    def __str__(self):
+        return(str(self.wd_id)+" - "+self.name)
 
     def get_db_object(self):
-        try:
-            c=WDAuthor.objects.get(wd_id=self.wd_id)
-        except ObjectDoesNotExist, e:
-            c=WDAuthor.objects.create(wd_id=self.wd_id,name=self.name)
+        c,created=models.WDAuthor.objects.get_or_create(wd_id=self.wd_id,defaults={"name":self.name})
         return(c)
 
 class DBTesto(object):
@@ -134,13 +125,12 @@ class DBTesto(object):
         self.text=testo.text
 
     def get_db_object(self):
-        try:
-            c=WDText.objects.get(wd_id=self.wd_id)
-        except ObjectDoesNotExist, e:
-            c=WDText.objects.create(wd_id=self.wd_id,corpus=self.corpus,
-                                    author=self.author,concorso=self.concorso,
-                                    forum=self.forum,title=self.title,
-                                    pub_date=self.pub_date,text=self.text)
+        c,created=models.WDText.objects.get_or_create(wd_id=self.wd_id,
+                                                      defaults={
+                                                          "corpus":self.corpus,
+                                                          "author":self.author,"concorso":self.concorso,
+                                                          "forum":self.forum,"title":self.title,
+                                                          "pub_date":self.pub_date,"text":self.text} )
         return(c)
         
 
@@ -148,15 +138,21 @@ class Command(BaseCommand):
     args = '<directory>'
     help = 'Load Antologia MI texts'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'dir',
+            help='Dir',
+        )
+
     def handle(self, *args, **options):
-        base_dir=args[0]
+        base_dir=options["dir"]
         elenco=base_dir+"/elenco.txt"
         testi_dir=base_dir+"/ripuliti"
         testi=[]
 
         fd=open(elenco,"r")
         for l in fd.readlines():
-            l=unicode(l,'utf-8')
+            #l=str(l,'utf-8')
             l=l.strip()
             if not l: continue
             l=l.replace(':http://www.writersdream.org/forum/topic/',':')
@@ -166,37 +162,36 @@ class Command(BaseCommand):
             testi.append(t)
         fd.close()
 
-        #for t in testi:
-        #    print unicode(t)
-
-        concorsi=map(DBConcorso,list(set(map(lambda x: x.concorso,testi))))
+        concorsi=[ DBConcorso(t) for t in list(set([x.concorso for x in testi])) ]
         db_concorsi={}
         for c in concorsi:
-            print "concorso",unicode(c)
+            print("concorso",str(c))
             db_c=c.get_db_object()
             db_concorsi[c.tag]=db_c
 
-        forum=map(DBForum,list(set(map(lambda x: x.forum,testi))))
+        forum=[ DBForum(t) for t in list(set([x.forum for x in testi])) ]
         db_forum={}
         for f in forum:
-            print "forum",unicode(f)
+            print("forum",str(f))
             db_f=f.get_db_object()
             db_forum[f.title]=db_f
-        print
+        print()
 
-        autori=map(lambda (a,b): DBAuthor(a,b),
-                   list(set(map(lambda x: (x.autore,x.aid),testi))))
+        autori=[ DBAuthor(a,b) for a,b in list(set([(x.autore,x.aid) for x in testi])) ]
+
+        # autori=map(lambda (a,b): DBAuthor(a,b),
+        #            list(set(map(lambda x: (x.autore,x.aid),testi))))
         db_autori={}
         for a in autori:
-            print "autori",unicode(a)
+            print("autori",str(a))
             db_a=a.get_db_object()
             db_autori[a.wd_id]=db_a
 
         desc = "Corpus dei racconti selezionati per l'Antologia MI di Wirter's Dream"
-        lang = Language.objects.get(name="italiano")
-        corpus,created=Corpus.objects.get_or_create(name="Antologia MI",
-                                                    defaults={'description':desc,
-                                                              'language': lang})
+        lang = base_models.Language.objects.get(name="italiano")
+        corpus,created=models.Corpus.objects.get_or_create(name="Antologia MI",
+                                                           defaults={'description':desc,
+                                                                     'language': lang})
 
         for t in testi:
             d_t=DBTesto(corpus,t,db_autori,db_concorsi,db_forum)
