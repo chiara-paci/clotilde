@@ -1,0 +1,97 @@
+{% load i18n %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="{{ LANGUAGE_CODE }}" xml:lang="{{ LANGUAGE_CODE }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<head>
+<title>{{ SITE_NAME }}{% block title %}{% endblock %}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="icon" href="{{ SITE_ICON }}" type="image/png">
+<link rel="stylesheet" type="text/css" href="{{ BASECSS }}">
+<script type="text/javascript" src="{{ JQUERY }}"></script>
+
+{% block css %}{% endblock %} 
+<script>//<![CDATA[    
+$(document).ready(function() {
+jQuery(document).ajaxSend(function(event, xhr, settings) {
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function sameOrigin(url) {
+        // url could be relative or scheme relative or absolute
+        var host = document.location.host; // host + port
+        var protocol = document.location.protocol;
+        var sr_origin = '//' + host;
+        var origin = protocol + sr_origin;
+        // Allow absolute or scheme relative URLs to same origin
+        return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+            (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+            // or any other URL that isn't scheme relative or absolute i.e relative.
+            !(/^(\/\/|http:|https:).*/.test(url));
+    }
+    function safeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
+        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    }
+});
+
+$('.menu').hover(
+    function () {
+	//mostra sottomenu
+	$('ul', this).stop(true, true).delay(50).slideDown(100);
+	}, 
+    function () {
+	//nascondi sottomenu
+	$('ul', this).stop(true, true).slideUp(200);		
+	}
+);
+
+{% block script %}{% endblock script %}
+});
+//]]></script>
+</head>
+
+<body>
+  <div id="header">
+    <div id="headertitle">{% block bigtitle %}{{ SITE_NAME }}{% endblock %}</div>
+    <div id="headermenu"><ul id="ulheadermenu">
+      {% for x,xlist in HEADERMENU %}
+      <li class="menu {% if forloop.last %} last{% endif %}">
+	<a href="{{ x.url }}">{{ x.long }}</a>
+	{% if xlist %}
+	<ul>
+	  {% for l in xlist %}
+	  <li class="item"><a href="{{ l.url }}">{{ l.long }}</a>
+	  {% endfor %}
+	</ul>
+	{% endif %}
+      </li>
+      {% endfor %}</ul>
+    </div>
+  </div>
+  
+  <div id="content">
+  {% block content %}
+    <div id="right">
+      {% block applicationmenu %}{% endblock %}
+    </div>    
+    <div id="left">
+      {% block centercontent %}{% endblock %}
+    </div>
+  {% endblock %}
+  </div>
+
+</body>
+</html>

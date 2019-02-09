@@ -1,0 +1,21 @@
+{% extends "form.html" %}
+{% load i18n %}
+
+{% block actionlabel %}Save{% endblock %}
+
+{% block formfields %}
+{{ formset.management_form }}
+<tr><th>rule</th><th>pattern</th><th>&nbsp;</th><th>replacement</th><th>dict_entry</th></tr>
+{% for form in formset.forms %}
+<tr><td>{{ form.rule }}</td><td>{{ form.pattern }}</td><td>&#8614;</td><td>{{ form.replacement }}</td></tr>
+{% endfor %}
+{% endblock %}
+
+{% block postform %}
+<ul>
+{% for c in cls %}
+<li>{{ c }}</li>
+{% endfor %}
+</ul>
+{% endblock %}
+

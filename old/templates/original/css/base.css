@@ -1,0 +1,272 @@
+{% load css_tags %}
+
+/*** font ***/
+
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('/static/fonts/fontawesome-webfont.eot?v=3.0.1');
+  src: url('/static/fonts/fontawesome-webfont.eot?#iefix&v=3.0.1') format('embedded-opentype'),
+    url('/static/fonts/fontawesome-webfont.woff?v=3.0.1') format('woff'),
+    url('/static/fonts/fontawesome-webfont.ttf?v=3.0.1') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.awesome {
+    font-family: 'FontAwesome';
+}
+
+@font-face{
+    font-family: Sniglet;
+    src: url('/static/fonts/Sniglet-webfont.woff'), 
+         url('/static/fonts/Sniglet-webfont.ttf'), 
+         url('/static/fonts/Sniglet-webfont.eot'),
+         url('/static/fonts/Sniglet-webfont.svg'); 
+} 
+
+.sniglet {
+    font: 11pt Sniglet, serif;
+}
+
+@font-face{
+    font-family: Mothproof_Script;
+    src: url('/static/fonts/Mothproof_Script-webfont.woff'), 
+         url('/static/fonts/Mothproof_Script-webfont.ttf'), 
+         url('/static/fonts/Mothproof_Script-webfont.eot'),
+         url('/static/fonts/Mothproof_Script-webfont.svg'); 
+} 
+
+.mothproof {
+    font: 11pt Mothproof_Script, serif;
+}
+
+@font-face{
+    font-family: DidactGothic;
+    src: url('/static/fonts/DidactGothic.ttf'), 
+         url('/static/fonts/DidactGothic.eot'); 
+} 
+
+.richstyle {
+    font: 11pt DidactGothic, 'FreeSans', Helvetica, Arial, sans-serif;
+}
+
+@font-face{
+    font-family: CC;
+    src: url('/static/fonts/cc-icons.ttf'), 
+         url('/static/fonts/cc-icons.eot'); 
+} 
+
+.cc {
+    font: 12pt CC;
+}
+
+/*** base objects (default) ***/
+
+body {
+    font: 11pt DidactGothic, Helvetica, Arial, 'FreeSans', sans-serif;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    {% background_gradient "top" COLOR_BODY_BACK_START COLOR_BODY_BACK_STOP %}
+    color: {{ COLOR_TEXT_FORE }};
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+}
+
+a { 
+    color: {{ COLOR_LINK_INLINE_FORE }};
+    text-decoration: none;
+}
+
+a:active, a:hover {
+    color: {{ COLOR_LINK_INLINE_ACTIVE_FORE }};
+    background-color: {{ COLOR_LINK_INLINE_ACTIVE_BACK }};
+}
+
+p {
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    text-align: justify;
+    text-indent: 1em;
+    line-height: 1.5em;
+}
+
+h1 { font-size: 200%; }
+h2 { font-size: 150%; }
+h3 { font-size: 120%; }
+h4 { font-size: 100%; }
+h5 { font-size: 100%; }
+
+h1, h2, h3, h4, h5, p.subtitle {
+    color: {{ COLOR_TITLE_FORE }};
+}
+
+h1 {
+    background-color: {{ COLOR_TITLE_BACK }};
+}
+
+h1 {
+    border-bottom: 1px solid {{ COLOR_TITLE_FORE }};
+    border-top: 1px solid {{ COLOR_TITLE_FORE }};
+    text-align: center;
+}
+
+h2 {
+    border-bottom: 1px solid {{ COLOR_TITLE_FORE }};
+}
+
+p.subtitle {
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 1em;
+    text-align: right;
+    text-indent: 0;
+    line-height: 1em;
+    font-size: 80%;
+}
+
+#header {
+    width: 100%;
+    background-color: {{ COLOR_HEADER_BACK }};
+}
+
+#headertitle {
+    background-color: {{ COLOR_HEADERTITLE_BACK }};
+    font-size: 200%;
+    color: {{ COLOR_HEADERTITLE_FORE }};
+    text-shadow: 1px 1px 2px {{ COLOR_HEADERTITLE_TEXT_SHADOW }};
+    letter-spacing: 20px;
+    text-align: center;
+    padding: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font: 2.5em Mothproof_Script, 'Comic Sans MS', serif;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+#headermenu {
+    bottom: 0;
+    left: 0;
+    height: 30px;
+    line-height: 30px;
+    padding: 0;
+    padding-bottom: 3pt;
+    padding-top: 3pt;
+    margin-left: 5%;
+    margin-right: 5%;
+    background-color: {{ COLOR_MENU_BACK }};
+}
+
+#headermenu ul {
+    list-style: none;
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+#headermenu ul ul {
+    position:absolute;
+    left:0;
+    margin:0;
+    padding:0;
+    list-style:none;
+    width: 100%;
+    display: none;
+}
+
+#headermenu li:hover ul {
+    display: inline;
+}
+
+#headermenu li.item {
+    width: 100%;
+}
+
+#headermenu li.menu {
+    display: block;
+    position: relative;
+    width: 13%;
+}
+
+#headermenu li {
+    z-index: 500;
+    float: left;
+    margin-right: 1.5%;
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+}
+
+#headermenu li.last {
+    margin: 0;
+}
+
+#applicationmenu {
+    float: right;
+   padding: 3pt;
+    margin: 1em;
+    background-color: {{ COLOR_MENU_BACK }};
+}
+
+#applicationmenu ul {
+    list-style: none;
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+#applicationmenu li {
+    margin: 3pt;
+    padding: 3pt;
+}
+
+#applicationmenu li, 
+#applicationmenu a,
+#headermenu li, 
+#headermenu a {
+    {% background_gradient "top" COLOR_MENU_ITEM_BACK_START COLOR_MENU_ITEM_BACK_STOP %}
+    color: {{ COLOR_MENU_ITEM_FORE }};
+}
+
+#applicationmenu li:hover, 
+#applicationmenu li:active, 
+#applicationmenu li.selected, 
+#applicationmenu a.selected, 
+#applicationmenu a:active, 
+#applicationmenu a:hover,
+#headermenu li:hover, 
+#headermenu li:active, 
+#headermenu li.selected, 
+#headermenu a.selected, 
+#headermenu a:active, 
+#headermenu a:hover {
+    {% background_gradient "top" COLOR_MENU_ITEM_ACTIVE_BACK_START COLOR_MENU_ITEM_ACTIVE_BACK_STOP %}
+    color: {{ COLOR_MENU_ITEM_ACTIVE_FORE }};
+}
+
+#applicationmenu a,
+#headermenu a {
+    display: block;
+}
+
+#content{
+    {% background_gradient "top" COLOR_CONTENT_BACK_START COLOR_CONTENT_BACK_STOP %}
+    padding: 1em;
+    min-height: 800px;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+#largecontent, #text {
+    background-color: {{ COLOR_TEXT_BACK }};
+    padding: 1em;
+}
+

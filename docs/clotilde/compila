@@ -1,0 +1,111 @@
+#! /bin/bash
+
+BASE=/home/chiara
+#BASE=/penna/trasporto
+#BASE=/newbooks/miei
+#BASE=/home/chiara/venezia
+
+TEXINPUTS=$BASE/spinoza:$TEXINPUTS
+TEXINPUTS=/usr/local/share/texmf:$TEXINPUTS
+BSTINPUTS=$BASE/spinoza:$BSTINPUTS
+BIBINPUTS=$BASE/spinoza:$BIBINPUTS
+
+MFINPUTS=$BASE/spinoza/fonts/mfdef:$MFINPUTS
+
+export MFINPUTS TEXINPUTS BIBINPUTS BSTINPUTS
+
+THOME=$BASE/clotilde/docs/clotilde
+MAIN=clotilde
+
+set -e
+
+function help {
+    echo "$0 { -A | -t <num> | -b <num> | -m <num> } "
+    echo "A: tutto"
+    echo "b: bibliografia"
+    echo "t: latex"
+    echo "m: index"
+}
+
+function add_seq {
+    S=$1
+    a=$2
+    n=$3
+    while [ "$n" -gt 0 ]
+    do
+	S="$S $a"
+	let n=$n-1
+    done
+    echo $S
+}
+
+function esegui {
+    cmd="$1"
+    t=$2
+    n=0
+    echo $t
+    while [ $n -lt $t ]
+    do
+	$cmd
+	let n=$n+1
+    done
+}
+
+function biblio {
+    p=$1
+    for i in $( ls $p*.bbl | sed 's/.bbl//g' )
+    do
+	bibtex $i
+    done
+}
+
+function index {
+    for i in $( ls *.idx | sed 's/.idx//g' )
+    do
+	makeindex $i
+    done
+}
+
+while getopts "At:b:hm:" opzione
+do
+    case $opzione in
+	h) help;exit;;
+	t) 
+	    num=$OPTARG
+	    seq=$(add_seq "$seq" tex $num)
+	    ;;
+	b) 
+	    num=$OPTARG
+	    seq=$(add_seq "$seq" bib $num)
+	    ;;
+	m) 
+	    num=$OPTARG
+	    seq=$(add_seq "$seq" idx $num)
+	    ;;
+	A) #seq="tex bib idx tex tex";;
+	    seq="tex bib tex tex";;
+    esac
+done
+
+if [ ! "$seq" ]
+then
+    seq=tex
+fi
+
+OPWD=$(pwd)
+
+cd $THOME
+
+for azione in $seq
+do
+    case "$azione" in
+	tex) 
+	    #pdflatex $MAIN
+	    xelatex --shell-escape $MAIN
+	    ;;
+	bib) biblio $MAIN;;
+	idx) index $MAIN ;;
+    esac
+done
+
+cd $OPWD

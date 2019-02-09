@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - Page not found{% endblock %}
+
+{% block content %}
+<div id="errors" class="contentbox">
+<p>{% trans "We're sorry" %}.</p>
+<hr/>
+<p>{% trans "The requested page could not be found" %}.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "corpora/text_detail.html" %}
+{% load i18n %}
+
+{% block css %}
+<style>
+{% for name,label,fg,bg in style_list %}
+span.{{ label }} {
+    color: {{ fg }};
+    background-color: {{ bg }};
+    border-left: 1px solid {{ fg }};
+    padding-right: 1em;
+}
+{% endfor %}
+
+span.not-found {
+    color: #ffffff;
+    background-color: #900000;
+    border-left: 1px solid #ffffff;
+    padding-right: 1em;
+}
+</style>
+{% endblock %} 
+
+{% block output %}
+
+{% block legend %}
+<ul>
+{% for name,label,fg,bg in style_list %}
+<li><span style="color: {{ fg }};background-color: {{ bg }};">{{ name }}</span></li>
+{% endfor %}
+<li><span style="color: #ffffff;background-color: #900000;">not matched</span></li>
+</ul>
+{% endblock %}
+
+{% block outputview %}
+<div class="text">{{ newtext|safe }}</div>
+{% endblock %}
+
+{% endblock %}

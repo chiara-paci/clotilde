@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - Helper Italiano{% endblock %}
+
+{% block script %}
+{% include "helper_italiano/includes/scripts/declinazione_aggettivi.js" %}
+{% endblock %}
+
+{% block content %}
+
+<div id="largecontent">
+<h1>{{ par }}</h1>
+
+{% with "helper_italiano/includes/example_declinazione_aggettivo_singolare.html" as incl_singolare %}
+{% with "helper_italiano/includes/example_declinazione_aggettivo_plurale.html" as incl_plurale %}
+<center>
+<table class="shadow inflection">
+<tr>
+  <td class="button" rowspan=2 id="edit"><img src="{{ ICON_EDIT }}"/></td>
+  <td class="button" rowspan=2 id="save"><img src="{{ ICON_SAVE }}"/></td>
+  <td colspan="4">&nbsp;</td>
+  <td class="button" rowspan=2 id="refresh"><img src="{{ ICON_RECYCLE }}"/></td>
+  <td colspan="4" class="right bottom"><span class="note">stem</span></td>
+</tr>
+<tr>
+  <td colspan="4">&nbsp;</td>
+  <td colspan="4" class="right top"><input type="text" id="stem" value="{{ stem }}"/></td>
+</tr>
+<tr><td colspan="9">&nbsp</td></tr>
+<tr>
+  <td colspan="2" class="borderbottomright">&nbsp</td>
+  <th class="hdr borderbottomright">maschile</th><th class="hdr borderbottomright">femminile</th>
+  <td rowspan="7" class="spc">&nbsp</td>
+  <td colspan="2" class="borderbottomright">&nbsp</td>
+  <th class="hdr borderbottomright">maschile</th><th class="hdr borderbottomright">femminile</th>
+</tr>
+
+{% for degree,rules in arules %}
+<tr><th rowspan="2" class="borderbottomright">{{ degree }}</th><th class="borderbottomright">singolare</th>
+{% include "helper_italiano/includes/declinazione_gender_number.html" %}
+{% endfor %}
+
+</table>
+</center>
+{% endwith %}{% endwith %}
+
+</div>
+
+{% endblock %}

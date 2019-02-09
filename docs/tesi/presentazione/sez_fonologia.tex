@@ -1,0 +1,42 @@
+\mysection{Fonologia}
+
+\newcommand\ored[2]{\only<#1->{\only<#1>{\color{red}}#2}}
+
+\myframe{Consonanti del turco ottomano.}{frame:consonanti}{
+\resizebox{\textwidth}{!}{\begin{tabular}{|>{\it}l|*{7}{>{\centering}p{1.2em}@{}>{\centering}p{1.2em}|}}
+\hline
+&\multicolumn{2}{c|}{\rotatebox{90}{\it bilabiali}} &
+\multicolumn{2}{c|}{\rotatebox{90}{\it labiodentali}} &
+\multicolumn{2}{c|}{\rotatebox{90}{\it dentali}} &
+\multicolumn{2}{c|}{\rotatebox{90}{\it palato-alveolari \mbox{ }}} &
+\multicolumn{2}{c|}{\rotatebox{90}{\it palatali}} &
+\multicolumn{2}{c|}{\rotatebox{90}{\it velari}} &
+\multicolumn{2}{c|}{\rotatebox{90}{\it glottidali}}
+\\[2mm]
+\hline
+occlusive & p & b & & & t& d & & & \ored{3}{ḱ} & \ored{3}{ǵ} & k & g &&\\[2mm]
+\hline
+nasali    & & m & & & 
+\multicolumn{3}{c}{ }& 
+\multicolumn{3}{l|}{n} 
+& & \ored{2}{ŋ} &&\\[2mm]
+\hline
+laterali  & &  & & & & l &  & & &  & & \ored{3}{ł} & & \\[2mm]
+\hline
+vibranti  & &  & & & & r &  &  &&&& & &\\[2mm]
+\hline
+fricative & \multicolumn{2}{r}{f} & \multicolumn{2}{l|}{v}
+          & s & z & ş & j & \ored{3}{ĥ} & & \ored{2}{$\chi$} & \ored{2}{$\gamma$} & h&\\[2mm]
+\hline
+affricate && && && & ç&c &&&&&&\\[2mm]
+\hline
+approssimante &&w&&&&&&&&y&&&&\\[2mm]
+\hline
+\end{tabular}
+}}
+
+%\newcommand\textschwa{\rotatebox{180}{\parbox[t][0.5em][c]{0.5em}{e}}}
+
+\myframe{Sistema vocalico.}
+        {frame:armonia}
+        {\input{frame/armonia.tex}}

@@ -1,0 +1,126 @@
+\newcommand\temptabscritta[3]{\begin{tabular}[t]{>{\centering}p{#1}}#2\\#3\\\end{tabular}}
+
+\begin{scriptsize}
+\begin{tikzpicture}
+  [x=4mm,y=4mm,node distance=0,
+    %>=triangle 45,
+    stgrid/.style={draw=#1,},
+    agrid/.style={stgrid=black!10},
+    bgrid/.style={stgrid=cyan!50},
+    cgrid/.style={stgrid=magenta!50},
+    anchortab/.style={circle,draw},
+    tab/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!30,
+    },
+    alpha/.style={tab=green},
+    morph/.style={tab=blue},
+    morphcalc/.style={tab=bluea},
+    syntax/.style={tab=yellow},
+    syntaxcalc/.style={tab=yellowa},
+    lexicon/.style={tab=red},
+    lexiconcalc/.style={tab=reda},
+    back/.style={tab=lightgray}
+  ]
+
+  %% \draw[agrid] (-24,-16) grid[xstep=1,ystep=1] (16,17);
+  %% \draw[bgrid] (-24,-16) grid[xstep=4,ystep=4] (16,17);
+  %% \draw[cgrid] (-24,-16) grid[xstep=16,ystep=16] (16,17);
+
+  \draw[back] (-8,-6)--(-8,14)--(8,14)--(8,-6)--cycle; 
+  \node (database) at (0,13.2) {database};
+
+  \draw[alpha] (-7,9)--(-7,12)--(7,12)--(7,9)--cycle;
+  \node (tabelle base) at (0,10.5) {tabelle base};
+
+  \draw[back] (-7,-1)--(-7,8)--(7,8)--(7,-1)--cycle;
+  \node (grammatica) at (0,7.5) {grammatica};
+
+  \draw[morphcalc] (-6,4) --(-6,7) [sharp corners]--(0,7)--(0,4) [rounded corners]--cycle;
+  \draw[morph] (0,4) [sharp corners]--(0,7)[rounded corners]--(6,7)--(6,4) [sharp corners]--cycle;
+  \node (morph derivate) at (-3,5) {\temptabscritta{24mm}{morfologia}{tabelle derivate}};
+  \node (morph primarie) at (3,5) {\temptabscritta{24mm}{morfologia}{tabelle primarie}};
+
+  \draw[syntaxcalc] (-6,0) --(-6,3) [sharp corners]--(0,3)--(0,0) [rounded corners]--cycle;
+  \draw[syntax] (0,0) [sharp corners]--(0,3)[rounded corners]--(6,3)--(6,0) [sharp corners]--cycle;
+  \node (syntax derivate) at (-3,1) {\temptabscritta{24mm}{sintassi}{tabelle derivate}};
+  \node (syntax primarie) at (3,1) {\temptabscritta{24mm}{sintassi}{tabelle primarie}};
+
+  \draw[lexiconcalc] (-7,-5) --(-7,-2) [sharp corners]--(0,-2)--(0,-5) [rounded corners]--cycle;
+  \draw[lexicon] (0,-5) [sharp corners]--(0,-2)[rounded corners]--(7,-2)--(7,-5) [sharp corners]--cycle;
+  \node (lexicon derivate) at (-3.5,-4) {\temptabscritta{28mm}{lessico}{tabelle derivate}};
+  \node (lexicon primarie) at (3.5,-4) {\temptabscritta{28mm}{lessico}{tabelle primarie}};
+
+  \draw[back] (9,-6)--(9,14)--(16,14)--(16,-6)--cycle; 
+  \node (modins1) at (12.5,13) {moduli};
+  \node (modins2) at (12.5,12) {applicativi di};
+  \node (modins3) at (12.5,11) {inserimento};
+
+  \node (utente) at (12.5,16) {\bf utente};
+  \draw[->] (utente)--(12.5,14);
+
+  \draw[back] (10,4)--(10,7)--(15,7)--(15,4)--cycle; 
+  \node (modins1) at (12.5,6) {moduli};
+  \node (modins2) at (12.5,5) {generici};
+
+  \draw[back] (10,-1)--(10,3)--(15,3)--(15,-1)--cycle; 
+  \node (modins1) at (12.5,2) {moduli};
+  \node (modins2) at (12.5,1) {specifici};
+  \node (modins2) at (12.5,0) {per lingua};
+
+  \draw[<-] (7,10.5)--(9,10.5);
+  \draw[<-] (6,5.5)--(9,5.5);
+  \draw[<-] (6,1.5)--(9,1.5);
+  \draw[<-] (7,-3.5)--(9,-3.5);
+
+  \draw[back] (-24,-4)--(-24,14)--(-9,14)--(-9,-4)--cycle; 
+  \node (modana1) at (-19,13) {moduli applicativi};
+  \node (modana1) at (-19,12.2) {di analisi};
+
+  \draw[alpha] (-10,9.5)--(-10,11.5)--(-18,11.5)--(-18,9.5)--cycle;
+  \node (palpha) at (-14,10.5) {parsing preliminare};
+
+  \draw[morph] (-10,4.5)--(-10,6.5)--(-18,6.5)--(-18,4.5)--cycle;
+  \node (pmorph) at (-14,5.5) {parsing morfologico};
+
+  \draw[syntax] (-10,-0.5)--(-10,1.5)--(-18,1.5)--(-18,-0.5)--cycle;
+  \node (psyntax) at (-14,0.5) {parsing sintattico};
+
+  \draw[->] (-7,10.5)--(-10,10.5);
+  \draw[->] (-6,5.5)--(-10,5.5);
+  \draw[->,dotted] (-7,10.5) to[out=180,in=0] (-10,5.5);
+  \draw[->,dotted] (-7,10.5) to[out=180,in=0] (-10,0.5);
+  \draw[->,dotted] (-6,5.5) to[out=180,in=0] (-10,0.5);
+  \draw[->] (-6,1.5) to[out=180,in=0] (-10,0.5);
+  \draw[->] (-7,-3.5) to[out=180,in=0] (-10,0.5);
+
+  \node (talpha1) at (-16,8.5) {token};
+  \node (tmorph1) at (-16,3.5) {token};
+  \node (tsyn1) at (-16,-1.5) {token};
+  \node (talpha2) at (-16,7.5) {iniziali};
+  \node (tmorph2) at (-16,2.5) {morfologici};
+  \node (tsyn2) at (-16,-2.5) {sintattici};
+
+  \draw[->] (-14,9.5)--(-14,6.5);
+  \draw[->] (-14,4.5)--(-14,1.5);
+
+  \draw[back] (-19,-0.5)--(-19,11.5)--(-23,11.5)--(-23,-0.5)--cycle;
+  \node (output) at (-21,9) {output};
+
+
+  \draw[->] (-18,10.5)--(-19,10.5);
+  \draw[->] (-18,5.5)--(-19,5.5);
+  \draw[->] (-18,0.5)--(-19,0.5);
+
+  \node (documenti) at (-14,16) {\bf documenti};
+  \draw[->] (documenti)--(-14,11.5);
+
+  \draw[->] (-21,-0.5)--(-21,-5.5);
+
+  \node (out1) at (-21,-6) {\bf dizionario};
+  \node (out2) at (-21,-7) {\bf grammatica};
+  \node (out3) at (-21,-8) {\bf oggetti non};
+  \node (out3) at (-21,-8.5) {\bf analizzabili};
+
+\end{tikzpicture}
+\end{scriptsize}

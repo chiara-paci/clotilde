@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block script %}
+{% include "helper_italiano/includes/scripts/dizionario_corpus.js" %}
+{% endblock %}
+
+{% block css %}
+<style>
+{% for name,label,bg,fg,rexp,rexp_t in rexp_list %}
+.{{ label }} {
+    color: {{ fg }};
+    background-color: {{ bg }};
+}
+{% endfor %}
+
+.not-found {
+    color: #ffffff;
+    background-color: #900000;
+}
+</style>
+{% endblock %} 
+
+{% block content %}
+
+<h1>{{ corpus }}</h1>
+
+<p class="subtitle">{{ corpus.description }}</p>
+
+<ul>
+{% for name,label,bg,fg,rexp,rexp_t in rexp_list %}
+{% if reg.disabled %}
+{% else %}
+<li><span style="color: {{ fg }};background-color: {{ bg }};">{{ name }}: {{ rexp_t }}</span></li>
+{% endif %}
+{% endfor %}
+<li><span style="color: #ffffff;background-color: #900000;">not matched</span></li>
+</ul>
+
+<div class="text">
+<table>
+{% for lab,type,tok,words in token_list %}
+{% if words %}
+{% for w in words %}
+<tr class="{{ lab }} action">
+  {% if forloop.first %}<td class="{{ lab }}" rowspan="{{ words|length }}">{{ tok|safe }}</td>{% endif %}
+  <td>{{ w }}</td><td>{{ w.part_of_speech }}</td><td>{{ w.stem }}</td><td>{{ w.get_class_string }}</td></tr>
+{% endfor %}
+{% else %}
+<tr><td class="{{ lab }} value">{{ tok|safe }}</td>
+  <td class="{{ lab }}">{{ type }}</td>
+  <td colspan="3">
+    <ul class="hmenu">
+      <li class="action"><a href="" class="nomipropri">&#x21c9; nomi propri</a></li>
+      <li class="action"><a href="" class="verbi">&#x21c9; verbi</a></li>
+      <li class="action"><a href="" class="nomi">&#x21c9; nomi</a></li>
+    </ul>
+  </td>
+</tr>
+{% endif %}
+{% endfor %}
+</table>
+</div>
+{% endblock %}

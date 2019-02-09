@@ -1,0 +1,16 @@
+  <th class="borderbottomright">plurale</th>
+  <td class="borderbottomright">
+    <table  id="{{ degree }}pluralemaschile">
+      {% for t,flag in example.pluralemaschile %}
+      <tr><td>{% if flag %}<b>{{ t }}</b>{% else %}{{ t }}{% endif %}</td></tr>
+      {% endfor %}
+    </table>
+  </td>
+  <td class="borderbottomright">
+      <table id="{{ degree }}pluralefemminile">
+      {% for t,flag in example.pluralefemminile %}
+      <tr><td>{% if flag %}<b>{{ t }}</b>{% else %}{{ t }}{% endif %}</td></tr>
+      {% endfor %}
+      </table>
+  </td>
+

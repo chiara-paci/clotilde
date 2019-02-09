@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - {{ application }} {{ corpus }}{% endblock %}
+
+{% block content %}
+
+<div id="largecontent">
+<h1>{{ corpus }}</h1>
+
+<p class="subtitle">{{ corpus.language }}</p>
+
+<p>{{ corpus.description }}</p>
+
+{% with corpus.text_set.all as object_list %}
+{% include "corpora/includes/texts.html" %}
+{% endwith %}
+
+</div>
+
+{% endblock %}

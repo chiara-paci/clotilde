@@ -1,0 +1,161 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import sys
+import os
+import optparse
+import re
+
+HOMEHOME="/home/chiara"
+
+HOME=HOMEHOME+"/tesi/elab"
+ORIG=HOMEHOME+"/tesi/testo/documento-tesi"
+
+sys.path.append(HOME)
+
+ORIG=HOMEHOME+"/tesi/testo/documento-tesi"
+
+usage = "usage: %prog [options]"
+parser = optparse.OptionParser(usage=usage,version="0.1")
+# parser.add_option("-r", "--result-dir", dest="res_dir", 
+#                   help="directory of report of kadtestmaster (default: %default)",
+# 		  metavar="DIR")
+parser.add_option("-i", "--input", dest="finput", 
+		  help="input FILE (default: %default)",
+ 		  metavar="FILE")
+parser.add_option("-g", "--glossario", dest="glossario", 
+		  help="input FILE (default: %default)",
+ 		  metavar="FILE")
+parser.add_option("-r", "--radici", dest="radici", 
+		  help="radici FILE (default: %default)",
+ 		  metavar="FILE")
+parser.add_option("-s", "--suffissi", dest="suffissi", 
+		  help="suffissi FILE (default: %default)",
+ 		  metavar="FILE")
+parser.add_option("-o", "--output", dest="foutput", 
+		  help="output FILE (default: %default)",
+ 		  metavar="FILE")
+parser.add_option("-E","--cerca-simili", action="store_true",
+                  dest="cerca_simili",
+                  help="cerca simili (default: %default)")
+parser.add_option("-S", "--reprint", action="store_true", 
+		  dest="reprint",
+		  help="reprint (default: %default)")
+parser.add_option("-R", "--radici-analyze", action="store_true", 
+		  dest="radanalyze",
+		  help="analizza radici (default: %default)")
+parser.add_option("-K", "--radici-calcola", action="store_true", 
+		  dest="radcalcola",
+		  help="calcola radici (default: %default)")
+parser.add_option("-I", "--init", action="store_true", 
+		  dest="init_radici",
+		  help="inizializza le radici (default: %default)")
+parser.add_option("-P", "--parole", action="store_true", 
+		  dest="parole",
+		  help="parole (default: %default)")
+parser.add_option("-C", "--csv", action="store_true", 
+		  dest="csv",
+		  help="csv (default: %default)")
+parser.add_option("-G","--analizza-glossario", action="store_true",
+                  dest="analizza_glossario",
+                  help="analizza glossario (default: %default)")
+
+RADICI_DEFAULT=HOME+"/radici.csv"
+SUFFISSI_DEFAULT=HOME+"/suffissi.csv"
+FINPUT_DEFAULT=ORIG+"/trascrizione.tex"
+GLOSSARIO_DEFAULT=ORIG+"/glossario.db"
+
+parser.set_defaults(finput=FINPUT_DEFAULT,
+                    glossario=GLOSSARIO_DEFAULT,
+                    radici=RADICI_DEFAULT,radanalyze=False,
+                    cerca_simili=False,suffissi=SUFFISSI_DEFAULT,analizza_glossario=False,
+                    foutput="-",parole=False,csv=False,radcalcola=False,
+                    reprint=False)
+
+(options, args) = parser.parse_args()
+
+filtro=re.compile("^/.*")
+finput=options.finput
+if not finput: finput="-"
+if finput!="-":
+    if not filtro.match(finput):
+	finput=os.getcwd()+"/"+finput
+foutput=options.foutput
+if not foutput: foutput="-"
+if foutput!="-":
+    if not filtro.match(foutput):
+	foutput=os.getcwd()+"/"+foutput
+radici=options.radici
+if not radici: radici=RADICI_DEFAULT
+if not filtro.match(radici):
+    radici=os.getcwd()+"/"+radici
+glossario=options.glossario
+if not glossario: glossario=GLOSSARIO_DEFAULT
+if not filtro.match(glossario):
+    glossario=os.getcwd()+"/"+glossario
+suffissi=options.suffissi
+if not suffissi: suffissi=SUFFISSI_DEFAULT
+if not filtro.match(suffissi):
+    suffissi=os.getcwd()+"/"+suffissi
+
+from Analisi import Documento, Glossario, Parola
+from Analisi import Radici, Documento, Glossario, Parola
+
+d=Documento(finput,foutput)
+d.load()
+
+if options.reprint:
+    d.reprint()
+    sys.exit()
+
+d.parole()
+
+# if options.parole:
+#     d.print_parole()
+#     sys.exit()
+
+# if options.csv:
+#     d.print_csv()
+#     sys.exit()
+
+# if options.cerca_simili:
+#     d.cerca_simili()
+#     sys.exit()
+
+g=Glossario(glossario)
+g.load()
+
+if options.analizza_glossario:
+    g.add_parole(d.words["Turco"],len(d.righe),d.max_len)
+    if foutput and foutput!="-":
+        fd=open(foutput,'w')
+        print "Opening "+foutput
+    else:
+        fd=sys.stdout
+    g.print_items(fd)
+    g.print_matrix(fd)
+    if foutput and foutput!="-":
+        fd.close()
+    sys.exit()
+
+# r=Radici(radici,suffissi)
+# r.load()
+
+# if options.init_radici:
+#     for p in d.words["Turco"]:
+#         if r.has_key(p): continue
+#         r[p]=None
+#     r.save(d.words["Turco"])
+#     sys.exit()
+
+# if options.radanalyze:
+#     r.cerca(d.words["Turco"])
+#     r.print_latex(sys.stdout)
+#     sys.exit()
+
+# if options.radcalcola:
+#     r.cerca(d.words["Turco"])
+#     r.save(d.words["Turco"])
+#     sys.exit()
+
+

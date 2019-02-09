@@ -1,0 +1,28 @@
+#!/bin/bash
+
+BASE_DIR=/home/chiara/clotilde
+DATA_DIR=${BASE_DIR}/data
+DYNAMIC=${BASE_DIR}/dynamic
+
+ANTOLOGIA_DIR=${DATA_DIR}/antologia-mi
+
+case $# in
+    0)
+	echo "Syntax: $0 <date>"
+	echo "<date>: "
+	ls $DATA_DIR/italiano*.lang | sed 's/.*italiano-/    /g' | sed 's/.lang//g'
+	exit
+	;;
+    1)D=${1};;
+esac
+
+ITALIANO=${DATA_DIR}/italiano-${D}.lang
+HITALIANO=${DATA_DIR}/hitaliano-${D}.hlp
+
+cd $DYNAMIC
+./manage.py syncdb
+./manage.py import_language_base $ITALIANO
+#./manage.py rebuild_stem
+#./manage.py rebuild_word
+#./manage.py import_helper_italiano $HITALIANO
+./manage.py load_antologia_mi $ANTOLOGIA_DIR

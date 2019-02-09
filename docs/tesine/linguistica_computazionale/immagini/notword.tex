@@ -1,0 +1,51 @@
+\begin{scriptsize}
+\begin{tikzpicture}
+  [x=5mm,y=5mm,node distance=0,
+    %>=triangle 45,
+    stgrid/.style={draw=#1!10,},
+    agrid/.style={stgrid=black},
+    bgrid/.style={stgrid=cyan},
+    anchortab/.style={circle,draw},
+    tab/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!20,
+    },
+    tabtop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1,
+    },
+    tabsoft/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!5,
+    },
+    tabsofttop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1!25,
+    },
+    multirel/.style={tab=gray},
+    multireltop/.style={tabtop=gray},
+    alpha/.style={tab=green},
+    alphatop/.style={tabtop=green},
+    morph/.style={tab=blue},
+    morphtop/.style={tabtop=blue},
+    syntax/.style={tab=yellow},
+    syntaxtop/.style={tabtop=yellow},
+    lexicon/.style={tab=red},
+    lexicontop/.style={tabtop=red},
+  ]
+
+  \begin{dbtabella}{alpha}{11}{-3}{12}{3}{\alphapref}{language}
+    \tablerow{name}{varchar(1024)}
+    \tablerow{period sep}{f.k. tokenregexp}
+    \tablerow{token regexp set}{f.k. tokenregexpset}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{0}{0}{9}{3}{morphology}{notword}
+    \tablerow{name}{varchar(1024)}
+    \tablerow{word}{varchar(1024)}
+    \tablelink{language}{language}
+  \end{dbtabella}
+
+
+\end{tikzpicture}
+\end{scriptsize}

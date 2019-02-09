@@ -1,0 +1,155 @@
+\begin{sideways}
+\begin{scriptsize}
+\begin{tikzpicture}
+  [x=1mm,y=1mm,node distance=3,
+    >=triangle 45,
+    stgrid/.style={draw=#1!10,},
+    agrid/.style={stgrid=black},
+    bgrid/.style={stgrid=cyan},
+    anchortab/.style={circle,draw},
+    rbox/.style={rounded corners=4mm,
+      top color=white, 
+      bottom color=#1!80,
+      draw=#1!80
+    },
+    qbox/.style={sharp corners,
+      top color=white, 
+      bottom color=#1!80,
+      draw=#1!80
+    },
+    input/.style={rbox=red},
+    output/.style={rbox=blue},
+    action/.style={qbox=green}
+  ]
+
+  %\draw[gray!40] (0,0) grid [step=1] (230,170);
+  %\draw[cyan] (0,0) grid [step=5] (230,170);
+  %\draw[magenta] (0,0) grid [step=10] (230,170);
+
+  \node[input]  (testi) {\cloparv{omino}{testi}};
+  \node[action] (trascrizione) [below=of testi] {\clopar{omino}{trascrizione}}; 
+  \node[action] (verifica)     [right=of trascrizione] {\clopar{omino}{verifica e introduzione di marker}}; 
+  \node[action] (ocr)          [above=of verifica] {\clopar{computer}{OCR}};
+
+  \draw[->] (testi) to (trascrizione);
+  \draw[->] (testi) to (ocr);
+  \draw[->] (trascrizione) to (verifica);
+  \draw[->] (ocr) to (verifica);
+
+  \node[input] (dizionari online) [right=of ocr] {\cloparv{globo}{dizionari on-line e/o di terzi}};
+  \node[input] (altri database) [right=of dizionari online] {\cloparv{globo}{altri database}};
+  \node[input] (dizionari) [right=of altri database] {\cloparv{omino}{dizionari}};
+  \node[input] (altre fonti) [right=of dizionari] {\cloparv{omino}{altre fonti e ricerche}};
+  \node[input] (grammatiche) [right=of altre fonti] {\cloparv{omino}{grammatiche}};
+
+  \puntomediosouth{dizionari online}{altri database};
+  \puntomediosouth{dizionari}{altre fonti};
+  \puntomediosouth{grammatiche}{altre fonti};
+
+  %\node (medio dizionari altrefonti) at ($.5*(dizionari)+.5*(altrefonti)-(0,3.5)$) { };
+  %\node (medio grammatiche altrefonti) at ($.5*(grammatiche)+.5*(altrefonti)-(0,3.5)$) { };
+
+  \node[action] (ricerca lessico) at ($(medio dizionari online altri database.south)+(0,-12)$) {\clopar{computer}{moduli di ricerca (lessico)}};
+  \node[action] (regole) at ($(medio grammatiche altre fonti.south)+(0,-12)$) {\clopar{omino}{inserimento di regole (presunte)}};
+  \node[action] (compilazione) at ($.5*(ricerca lessico)+.5*(regole)$) {\clopar{omino}{compilazione e/o trascrizione di dizionari e lemmari}};
+
+  \draw[->] (altre fonti) to (compilazione);
+  \draw[->] (altre fonti) to (regole);
+  \draw[->] (dizionari) to (compilazione);
+  \draw[->] (grammatiche) to (regole);
+  \draw[->] (altri database) to (ricerca lessico);
+  \draw[->] (dizionari online) to (ricerca lessico);
+
+  \puntomediosouth{ricerca lessico}{compilazione};
+
+  \node[action] (conversione lessico) [below=of medio ricerca lessico compilazione] {\clopar{computer}{moduli di conversione (lessico)}};
+  \node[action] (conversione regole) at ($(conversione lessico)+(40,0)$) {\clopar{computer}{moduli di conversione (regole)}};
+
+  \draw[->] (ricerca lessico) to (conversione lessico);
+  \draw[->] (compilazione) to (conversione lessico);
+  \draw[->] (regole) to (conversione regole);
+
+  \node[output] (testi digitalizzati) at ($(verifica.south east)+(10,-20)$) {\clobigbox{testi digitalizzati}};
+
+  \draw[->] (verifica) to (testi digitalizzati);
+
+  \node[action] (analisi statistica) at ($(conversione lessico.south)+(-20,-22)$) 
+       {\clopar{computer}{moduli di analisi morfologica, sintattica, lessicale basati su dati statistici}};
+  \node[action] (analisi regole) at ($(conversione regole.south)+(-20,-22)$) {\clopar{computer}{moduli di analisi morfologica, sintattica, lessicale basati su regole}};
+
+  \draw[->] (conversione lessico) to (analisi statistica);
+  \draw[->] (conversione lessico) to (analisi regole);
+  \draw[->] (conversione regole) to (analisi regole);
+  \draw[->] (testi digitalizzati) to (analisi statistica);
+  \draw[->] (testi digitalizzati) to [out=-30,in=150] (analisi regole.north);
+  \draw[->] (analisi regole) to (analisi statistica);
+
+  \node[output] (non verificati) [below right=of conversione regole] {\clobigbox{oggetti non verificati}};
+  \node[output] (regole verificate) [below=of non verificati] {\clobigbox{regole grammaticali verificate}};
+  \node[output] (glossari) [below=of regole verificate] {\clobigbox{glossari, dizionari con esempi}};
+  \node[output] (testi analizzati) [below=of glossari] {\clobigbox{testi analizzati}};
+
+  \draw[->] (analisi regole) to (non verificati);
+  \draw[->] (analisi regole) to (regole verificate);
+  \draw[->] (analisi regole) to (glossari);
+  \draw[->] (analisi regole) to (testi analizzati);
+
+  \draw[<-] (regole.east) to [out=0,in=0] (non verificati.east);
+  \draw[<-] (regole.east) to [out=0,in=0] (regole verificate.east);
+  \draw[<-] (regole.east) to [out=0,in=0] (glossari.east);
+  \draw[<-] (regole.east) to [out=0,in=0] (testi analizzati.east);
+
+  \node[input] (informazioni strutturate) [left=of testi digitalizzati.north west] {\cloparv{omino}{informazioni strutturate}};
+  \node[input] (informazioni non strutturate) [left=of informazioni strutturate] {\cloparv{omino}{informazioni non strutturate}};
+
+  \puntomediosouth{informazioni strutturate}{informazioni non strutturate}
+
+  \node[action] (annotazione documentale) [below=of medio informazioni strutturate informazioni non strutturate] {\clopar{omino}{annotazione documentale}};
+  \draw[->] (informazioni strutturate) to (annotazione documentale);
+  \draw[->] (informazioni non strutturate) to (annotazione documentale);
+
+  \node[action] (catalogazione) at ($(annotazione documentale.south)+(-5,-20)$) {\clopar{computer}{moduli di ricerca, catalogazione e conversione}};
+  \node[input] (altri corpus) [below left=of catalogazione] {\cloparv{globo}{altri corpus}};
+  \node[input] (fonti online) [above left=of catalogazione] {\cloparv{globo}{fonti online}};
+  \node[input] (database bibliografici) [left=of catalogazione.west] {\cloparv{globo}{database bibliografici}};
+
+  \draw[->] (annotazione documentale) to (catalogazione);
+  \draw[->] (fonti online) to (catalogazione);
+  \draw[->] (database bibliografici) to (catalogazione);
+  \draw[->] (altri corpus) to (catalogazione);
+
+  \puntomediosouth{analisi regole}{analisi statistica}
+
+  \node[action] (analisi semantica) at ($(medio analisi regole analisi statistica.south)+(0,-16)$) {\clopar{computer}{moduli di analisi semantica e pragmatica}};
+  \node[action] (annotazione) at ($(analisi semantica.west)+(-50,0)$) {\clopar{computer}{moduli di annotazione}};
+
+  \draw[->] (annotazione documentale) to [out=0,in=90] (annotazione);
+  \draw[->] (catalogazione) to (annotazione);
+  \draw[->] (testi digitalizzati) to (annotazione);
+  \draw[->] (analisi regole) to [in=30,out=-140] (annotazione);
+  \draw[->] (analisi statistica) to (annotazione);
+
+
+
+  \draw[->] (catalogazione) to (analisi semantica);
+  \draw[->] (annotazione) to (analisi semantica);
+  \draw[->] (analisi regole) to (analisi semantica);
+  \draw[->] (analisi statistica) to (analisi semantica);
+
+
+  \node[output] (corpus annotato) at ($(annotazione.south)+(0,-20)$) {\clobigbox{corpus annotato}};
+  \node[output] (enciclopedia) at ($(corpus annotato.east)+(20,0)$) {\clobigbox{enciclopedia di fatti, luoghi, persone, ecc.}};
+  \node[output] (dati quantitativi) at ($(enciclopedia.east)+(20,0)$) {\clobigbox{estrazione di dati quantitativi}};
+
+  \node[action] (annotazione manuale) [above left=of corpus annotato] {\clopar{omino}{regole di annotazione manuale}};
+
+  \draw[->] (analisi semantica) to (enciclopedia);
+  \draw[->] (analisi semantica) to (dati quantitativi);
+  \draw[->] (annotazione) to (corpus annotato);
+  \draw[->] (corpus annotato) to [out=180,in=-90] (annotazione manuale);
+  \draw[->] (annotazione manuale) to [out=90,in=180] (annotazione);
+
+
+\end{tikzpicture}
+\end{scriptsize}
+\end{sideways}

@@ -1,0 +1,246 @@
+\newcommand\drawover[2]{
+  \draw[lineback] ($0.75*#1+0.25*#2$) to ($0.75*#2+0.25*#1$);
+  \draw[grid] #1 to #2;
+}
+
+\newcommand\drawcontrasto[4]{
+  \draw[<->] #1 to #2;
+  \draw #1 -- node[fill=white,sloped]{\tiny #3} ($0.5*#1+0.5*#2$);
+  \draw ($0.5*#1+0.5*#2$) -- node[fill=white,sloped]{\tiny #4} #2;
+}
+
+\def\alphapref{languages}
+
+%% \newcommand\tablerow[6]{
+%%   \draw (#1,#2) -- ($(#1+#3,#2)$) -- ($(#1+#3,#2+1)$) -- ($(#1,#2+1)$) -- cycle;
+%%   \node (#4#5) at ($(#1+#3*0.25,#2+.5)$) {#5};
+%%   \node (#4#5def) at ($(#1+#3*0.75,#2+.5)$) {\it #6};
+%% }
+
+\newcounter{dbtablerow}
+\setcounter{dbtablerow}{0}
+
+%\c@dbtabley
+
+\newenvironment{dbtabella}[7]{
+  \def\dbtablestyle{#1}
+  \def\dbtablex{#2}
+  \def\dbtabley{#3}
+  \def\dbtablelen{#4}
+  \def\dbtablenrows{#5}
+  \def\dbtablepref{#6}
+  \def\dbtablename{#7}
+  \setcounter{dbtablerow}{0}
+  \filldraw[\dbtablestyle] (\dbtablex,\dbtabley) 
+  -- ($(\dbtablex+\dbtablelen,\dbtabley)$) 
+  -- ($(\dbtablex+\dbtablelen,\dbtabley-\dbtablenrows-2)$) 
+  -- ($(\dbtablex,\dbtabley-\dbtablenrows-2)$)  -- cycle;
+  \filldraw[\dbtablestyle top] (\dbtablex,\dbtabley) 
+  -- ($(\dbtablex+\dbtablelen,\dbtabley)$) 
+  [sharp corners] -- ($(\dbtablex+\dbtablelen,\dbtabley-1)$) 
+  -- ($(\dbtablex,\dbtabley-1)$) [rounded corners]  -- cycle;
+  \node (\dbtablename) at ($(\dbtablex+\dbtablelen/2,\dbtabley-.6)$) {\bf \dbtablename};
+  \draw[\dbtablestyle] ($(\dbtablex,\dbtabley-1)$) -- ($(\dbtablex+\dbtablelen,\dbtabley-1)$);
+  \node[anchortab] (\dbtablename id) at ($(\dbtablex,\dbtabley-1.6)$) {};
+  \node (\dbtablename id lab) at ($(\dbtablex+\dbtablelen*.3,\dbtabley-1.6)$) {id};
+  \node (\dbtablename id def) at ($(\dbtablex+\dbtablelen*.7,\dbtabley-1.6)$) {\it integer};
+  \stepcounter{dbtablerow}
+}{}
+
+\newcommand\tablerow[2]{
+  \draw[\dbtablestyle] ($(\dbtablex,\dbtabley-1-\thedbtablerow)$) 
+  -- ($(\dbtablex+\dbtablelen,\dbtabley-1-\thedbtablerow)$);
+  \node (\dbtablename #1) at ($(\dbtablex+\dbtablelen*.3,\dbtabley-1.6-\thedbtablerow)$) {#1};
+  \node (\dbtablename #1 def) at ($(\dbtablex+\dbtablelen*.7,\dbtabley-1.6-\thedbtablerow)$) {\it #2};
+  \stepcounter{dbtablerow}
+}
+
+\newcommand\tablelink[3][right]{
+  \draw[\dbtablestyle] ($(\dbtablex,\dbtabley-1-\thedbtablerow)$) 
+  -- ($(\dbtablex+\dbtablelen,\dbtabley-1-\thedbtablerow)$);
+  \node (\dbtablename #2) at ($(\dbtablex+\dbtablelen*.3,\dbtabley-1.6-\thedbtablerow)$) {#2};
+  \node (\dbtablename #2 def) at ($(\dbtablex+\dbtablelen*.7,\dbtabley-1.6-\thedbtablerow)$) {\it f.k.};
+  \ifthenelse{\equal{#1}{right}}%
+  {\draw[->] ($(\dbtablex+\dbtablelen,\dbtabley-1.6-\thedbtablerow)$) to [out=0,in=180] (#3id.west);}%
+  {\draw[->] ($(\dbtablex,\dbtabley-1.6-\thedbtablerow)$) to [out=180,in=180] (#3id.west);}
+  \stepcounter{dbtablerow}
+}
+
+
+\begin{tiny}
+\begin{tikzpicture}
+  [x=3.5mm,y=3.5mm,node distance=0,
+    %>=triangle 45,
+    stgrid/.style={draw=#1!10,},
+    agrid/.style={stgrid=black},
+    bgrid/.style={stgrid=cyan},
+    anchortab/.style={circle,draw},
+    tab/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!20,
+    },
+    tabtop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1,
+    },
+    tabsoft/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!5,
+    },
+    tabsofttop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1!25,
+    },
+    multirel/.style={tab=gray},
+    multireltop/.style={tabtop=gray},
+    alpha/.style={tab=green},
+    alphatop/.style={tabtop=green},
+    morph/.style={tab=blue},
+    morphtop/.style={tabtop=blue},
+    syntax/.style={tab=yellow},
+    syntaxtop/.style={tabtop=yellow},
+    lexicon/.style={tab=red},
+    lexicontop/.style={tabtop=red},
+  ]
+
+  \draw[agrid] (-10,-20) grid[xstep=1,ystep=1] (10,10);
+  \draw[bgrid] (-10,-20) grid[xstep=5,ystep=5] (10,10);
+
+%%% alpha
+
+  \begin{dbtabella}{alpha}{26}{30}{8}{1}{\alphapref}{category}
+    \tablerow{name}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{15}{30}{9}{2}{\alphapref}{classification}
+    \tablerow{exponent}{varchar(1024)}
+    \tablelink{category}{category}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{20}{16}{8}{1}{\alphapref}{partofspeech}
+    \tablerow{name}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{32}{21}{8}{2}{\alphapref}{tokenregexp}
+    \tablerow{name}{varchar(1024)}
+    \tablerow{regexp}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{32}{9}{8}{1}{\alphapref}{tokenregexpset}
+    \tablerow{name}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{33}{16}{9}{4}{\alphapref}{tokenregexpsetthrough}
+    \tablerow{order}{integer}
+    \tablerow{disabled}{boolean}
+    \tablelink[left]{token regexp}{tokenregexp}
+    \tablelink[left]{token regexp set}{tokenregexpset}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{20}{12}{9}{3}{\alphapref}{language}
+    \tablerow{name}{varchar(1024)}
+    \tablelink{period sep}{tokenregexp}
+    \tablelink{token regexp set}{tokenregexpset}
+  \end{dbtabella}
+
+%%%%
+
+  \begin{dbtabella}{morph}{20}{6}{9}{3}{morphology}{notword}
+    \tablerow{name}{varchar(1024)}
+    \tablerow{word}{varchar(1024)}
+    \tablelink[left]{language}{language}
+  \end{dbtabella}
+
+  
+  \begin{dbtabella}{morph}{20}{25}{10}{2}{morphology}{regexpreplacement}
+    \tablerow{pattern}{varchar(1024)}
+    \tablerow{replacement}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{-9}{30}{9}{2}{morphology}{morphologicalrule}
+    \tablelink{regexp}{regexpreplacement}
+    \tablerow{dict entry}{boolean}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-7}{42}{11}{3}{\alphapref}{morphologicalruleclassification}
+    \tablelink[left]{morphologicalrule}{morphologicalrule}
+    \tablelink{classification}{classification}
+    \tablerow{negate}{boolean}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{3}{30}{9}{4}{morphology}{paradigma}
+    \tablerow{name}{varchar(1024)}
+    \tablelink{category}{category}
+    \tablelink{part of speech}{partofspeech}
+    \tablelink{language}{language}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-7}{36}{9}{2}{\alphapref}{}
+    \tablelink[left]{morphologicalrule}{morphologicalrule}
+    \tablelink{paradigma}{paradigma}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{20}{0}{8}{1}{\alphapref}{tema}
+    \tablerow{name}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{-9}{13}{9}{6}{morphology}{derivation}
+    \tablerow{name}{varchar(1024)}
+    \tablelink{regexp}{regexpreplacement}
+    \tablelink{root part of speech}{partofspeech}
+    \tablelink{dst part of speech}{partofspeech}
+    \tablelink{paradigma}{paradigma}
+    \tablelink{tema}{tema}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-7}{25}{11}{3}{\alphapref}{derivationrootclassification}
+    \tablelink[left]{derivation}{derivation}
+    \tablelink{classification}{classification}
+    \tablerow{negate}{boolean}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-7}{19}{11}{3}{\alphapref}{derivationdstclassification}
+    \tablelink[left]{derivation}{derivation}
+    \tablelink{classification}{classification}
+    \tablerow{negate}{boolean}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{-9}{-8}{9}{4}{morphology}{fusionselect}
+    \tablerow{name}{varchar(1024)}
+    \tablelink{regexp}{regexpreplacement}
+    \tablelink{part of speech}{partofspeech}
+    \tablelink{tema}{tema}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-7}{4}{11}{3}{\alphapref}{fusionselectclassification}
+    \tablelink[left]{fusion select}{fusionselect}
+    \tablelink{classification}{classification}
+    \tablerow{negate}{boolean}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{3}{-13}{9}{2}{morphology}{fusionrule}
+    \tablerow{name}{varchar(1024)}
+    \tablelink{language}{language}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-7}{-2}{9}{3}{\alphapref}{fusionselectrule}
+    \tablelink[left]{fusion select}{fusionselect}
+    \tablelink{fusion rule}{fusionrule}
+    \tablerow{pos}{integer}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{-9}{-21}{9}{4}{morphology}{root}
+    \tablerow{root}{varchar(1024)}
+    \tablelink{language}{language}
+    \tablelink{tema}{tema}
+    \tablelink{part of speech}{partofspeech}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-7}{-15}{11}{3}{\alphapref}{rootclassification}
+    \tablelink[left]{root}{root}
+    \tablelink{classification}{classification}
+    \tablerow{negate}{boolean}
+  \end{dbtabella}
+
+\end{tikzpicture}
+\end{tiny}

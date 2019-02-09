@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - {{ application }} {{ object.title }}{% endblock %}
+
+{% block centercontent %}
+
+<h1>Language</h1>
+
+<ul>
+{% for c in language_list %}
+<li><a href="{{ c.get_absolute_url }}">{{ c }}</a></li>
+{% endfor %}
+</ul>
+
+
+{% endblock %}

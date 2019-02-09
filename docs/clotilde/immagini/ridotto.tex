@@ -1,0 +1,82 @@
+\begin{scriptsize}
+\begin{tikzpicture}
+  [x=1mm,y=1mm,node distance=0,
+    >=triangle 45,
+    stgrid/.style={draw=#1!10,},
+    agrid/.style={stgrid=black},
+    bgrid/.style={stgrid=cyan},
+    anchortab/.style={circle,draw},
+    rbox/.style={rounded corners=4mm,
+      top color=white, 
+      bottom color=#1!80,
+      draw=#1!80
+    },
+    qbox/.style={sharp corners,
+      top color=white, 
+      bottom color=#1!80,
+      draw=#1!80
+    },
+    data/.style={rbox=red},
+    output/.style={rbox=blue},
+    action/.style={qbox=green}
+  ]
+
+  %\draw[gray!40] (0,0) grid [step=1] (150,200);
+  %\draw[cyan] (0,0) grid [step=5] (150,200);
+  %\draw[magenta] (0,0) grid [step=10] (150,200);
+
+  %\draw [data] (0,0) rectangle (10,10);
+
+  %\draw (5,5) node {ciao};
+
+  \draw (-5.5,130) node {\resizebox{10mm}{!}{\includegraphics{immagini/arrow.png}}};
+  \draw (-5.5,160) node {\resizebox{10mm}{!}{\includegraphics{immagini/arrow.png}}};
+
+  \clobox{output}{0,0}{globo}{visualizzazione con altri tool}
+  \clobox{action}{0,30}{globo}{altri tool}
+  \clobox{data}{40,30}{computer}{input ad altri tool}
+  \clobox{data}{0,60}{globo}{ouput di altri tool}
+  \clobox{data}{0,90}{globo}{altre fonti di informazione}
+  \clobox{data}{0,150}{omino}{dati forniti dall'utente}
+  \clobox{data}{0,120}{omino}{testi}
+  \clobox{action}{80,30}{computer}{moduli di conversione verso altri formati}
+  \clobox{action}{40,90}{computer}{moduli di ricerca e normalizzazione}
+  \clobox{action}{40,60}{computer}{moduli di conversione da altri formati}
+  \clobox{output}{80,180}{computer}{visualizzazione tramite Clotilde}
+  \clobox{action}{40,180}{omino}{verifica del risultato}
+
+  \draw[action] (40,120) rectangle ($(40,120)+(30,50)$);
+  \draw ($(40,120)+(15,10)$) node {\resizebox{!}{8mm}{\includegraphics{immagini/computer.png}}};
+  \draw ($(40,120)+(15,40)$) node {\resizebox{!}{8mm}{\includegraphics{immagini/omino.png}}};
+  \draw ($(40,120)+(15,25)$) node {\parbox{19mm}{\scriptsize\centering moduli di ausilio al data entry}};
+
+  \draw[action] (80,60) rectangle ($(80,60)+(30,110)$);
+  \draw ($(80,60)+(15,20)$) node {\resizebox{!}{8mm}{\includegraphics{immagini/computer.png}}};
+  \draw ($(80,60)+(15,55)$) node {\parbox{19mm}{\scriptsize\centering motore interno}};
+
+  \draw[data] (120,60) rectangle ($(120,60)+(30,110)$);
+  \draw ($(120,60)+(15,20)$) node {\resizebox{!}{8mm}{\includegraphics{immagini/computer.png}}};
+  \draw ($(120,60)+(15,55)$) node {\parbox{19mm}{\scriptsize\centering database di Clotilde}};
+
+  \draw[->] (15,30)--(15,20);
+  \draw[->] (15,50)--(15,60);
+  \draw[->] (40,40)--(30,40);
+  \draw[->] (80,40)--(70,40);
+  \draw[->] (95,60)--(95,50);
+  \draw[->] (110,115)--(120,115);
+  \draw[->] (30,70)--(40,70);
+  \draw[->] (30,100)--(40,100);
+  \draw[->] (30,130)--(40,130);
+  \draw[->] (30,160)--(40,160);
+  \draw[->] (70,70)--(80,70);
+  \draw[->] (70,100)--(80,100);
+  \draw[->] (70,145)--(80,145);
+  \draw[->] (80,115)--(60,115)--(60,110);
+
+  \draw[->] (55,180)--(55,170);
+  \draw[->] (95,170)--(95,180);
+
+  \draw[->] (80,190)--(70,190);
+
+\end{tikzpicture}
+\end{scriptsize}

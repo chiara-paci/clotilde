@@ -1,0 +1,24 @@
+\newcommand\clobox[4]{
+  \draw[#1] (#2) rectangle ($(#2)+(30,20)$);
+  \draw ($(#2)+(5,10)$) node {\resizebox{!}{8mm}{\includegraphics{immagini/#3.png}}};
+  \draw ($(#2)+(20,10)$) node {\parbox{19mm}{\scriptsize\centering #4}};
+}
+
+\newcommand\clopar[2]{
+  \parbox[m]{9mm}{\centering\resizebox{!}{7mm}{\includegraphics{immagini/#1.png}}}\parbox[m]{19mm}{\centering #2}
+}
+
+\newcommand\cloparv[2]{
+  \parbox[m]{19mm}{\centering \parbox[m]{9mm}{\centering\resizebox{!}{7mm}{\includegraphics{immagini/#1.png}}}\\#2}
+}
+
+\newcommand\clobigbox[1]{
+\vbox to 4em {\vfil
+\hbox to 27mm{\parbox{26mm}{\centering #1}}%
+\vfil
+}}
+
+\newcommand\puntomediosouth[2]{
+  \node (medio #1 #2) at ($.5*(#1.south)+.5*(#2.south)$) { };
+}
+

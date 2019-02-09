@@ -1,0 +1,479 @@
+% glossario
+
+\voceottomana{v}{T}{AtB}{}{at-}{lanciare, gettare}{}
+\voceottomana{n}{A}{a^gl}{bib/redhouse1997}{ecil, ecl}{causa, ragione}{sec/sec:ecil;bib/kiefferbianchi18351/10}
+\subvoceottomana{}{}{b.U a^gldan}{}{bu ecilden}{a causa di questo, per questo}{bib/kiefferbianchi18351/10}
+\voceottomana{n}{AT}{:Cdam}{bib/redhouse1997}{adam, âdem (arcaico)}{uomo}{bib/kiefferbianchi18351/18}
+\voceottomana[next]{n}{A}{irsAl}{bib/redhouse1997}{irsal}{invio}{bib/kiefferbianchi18351/23}
+\subvoceottomana{v}{TP}{irsAl :EtB}{}{irsal ėt-}{inviare}{bib/kiefferbianchi18351/23}
+\voceottomana{avv}{T}{^Erken}{}{ėrken}{di gran mattino, di buon ora}{bib/kiefferbianchi18351/25}
+\vottvariante{}{^Er}{}{ėr}{bib/kiefferbianchi18351/19}
+\vottvariante{}{:Er}{}{ėr}{bib/kiefferbianchi18351/155}
+\subvoceottomana{}{}{:Er gI^c}{}{ėr geç}{presto o tardi \verificare[trascrizione]}{bib/kiefferbianchi18351/155}
+\voceottomana[next]{n}{A}{istifsAr}{bib/redhouse1997}{istifsar}{inchiesta, azione di fare domande; informazione}{bib/kiefferbianchi18351/35}
+\subvoceottomana{v}{AT}{istifsAr :EtB}{}{istifsar ėt-}{informarsi}{bib/kiefferbianchi18351/35}
+\voceottomana[next:4]{agg}{P}{:CsUd.H}{bib/redhouse1997}{asude}{quieto, tranquillo}{bib/kiefferbianchi18351/42}
+\subvoceottomana{agg}{P}{:CsUd.H .hAl}{bib/redhouse1997}{asude hal}{che gode della tranquillità}{bib/kiefferbianchi18351/42}
+\voceottomana[next]{n}{A}{i.zhAr}{bib/redhouse1997}{izhar}{manifestazione, esposizione, testimonianza}{bib/kiefferbianchi18351/56}
+\subvoceottomana{v}{AT}{i.zhAr :EtB}{bib/redhouse1997}{izhar ėt-}{mostrare, manifestare}{bib/kiefferbianchi18351/56}
+\voceottomana{n}{A}{i`tibAr}{bib/redhouse1997}{i'tibar, itibar}{stima, considerazione, credito,onore}{bib/kiefferbianchi18351/57}
+\voceottomana{n}{A}{i`tiqAd}{bib/redhouse1997}{i'tikad, itikad, itikat}{fede, confidenza, credo}{bib/kiefferbianchi18351/58}
+\voceottomana{n}{A}{i`timAd}{bib/redhouse1997}{i'timad, itimat}{fede, confidenza, credo}{bib/kiefferbianchi18351/59}
+\subvoceottomana{avv}{A}{i`timAd^a}{bib/redhouse1997}{i'timaden}{facendo affidamento}{bib/kiefferbianchi18351/59}
+\voceottomana[prev]{aggc}{A}{aqdam}{bib/redhouse1997}{akdem}{più vecchio}{bib/kiefferbianchi18351/74}
+\subvoceottomana{avv}{AT}{b.Undan aqdam}{}{bundan akdem}{precedentemente}{bib/kiefferbianchi18351/74}
+\voceottomana[next]{n}{A}{iktifA}{bib/redhouse1997/526}{iktifa}{sufficienza}{bib/kiefferbianchi18351/77}
+\subvoceottomana{v}{AT}{iktifA :EtB}{}{iktifa ėt-}{essere abbastanza; accontentarsi}{bib/kiefferbianchi18351/77}
+\voceottomana[next]{v}{T}{:GlB}{bib/redhouse1997/41}{al-}{prendere; acquistare}{bib/kiefferbianchi18351/92}
+\voceottomana[next]{n}{T}{^El}{bib/redhouse1997/332-335}{el}{mano}{bib/kiefferbianchi18351/82-83}
+\subvoceottomana{v}{T}{^Eld.H :EtB}{bib/redhouse1997/333}{elde ėt-}{ottenere, acquistare il possesso}{bib/redhouse1997/333}
+\subvoceottomana{v}{T}{^Eld.H qAlB}{bib/redhouse1997/334}{elde kal-}{essere lasciato (soldi o beni a qualcuno)}{bib/redhouse1997/334}
+\subvoceottomana{}{}{^Elind.H dur}{}{elinde dur}{è in suo potere, può farlo}{bib/kiefferbianchi18351/83}
+\voceottomana{n}{A}{ilti^gA}{}{iltica}{}{}
+\subvoceottomana{v}{AT}{ilti^gA :EtB}{bib/redhouse1997/531}{iltica ėt-}{fare ricorso, rifugiarsi}{bib/kiefferbianchi18351/86}
+\voceottomana{n}{T}{altUn}{bib/redhouse1997/53}{altın}{oro, moneta d'oro}{bib/kiefferbianchi18351/87}
+\vottvariante{}{altUn}{bib/kiefferbianchi18351/87}{altun}{}
+\voceottomana[prev]{}{}{am.hu.d}{}{}{}{}
+\voceottomana{n}{A}{amr}{bib/redhouse1997/338}{emir,emr}{affare, questione, faccenda}{bib/kiefferbianchi18351/98}
+\voceottomana[next:2]{n}{p}{umId}{bib/redhouse1997/1208}{ümid, ümit}{speranza}{bib/kiefferbianchi18351/101}
+\vottvariante{forse una parola diversa con lo stesso significato e comportamento?}{umI_d}{bib/kiefferbianchi18351/102}{ümiz}{bib/kiefferbianchi18351/102}
+\subvoceottomana{loc}{}{umId dur k.H}{}{ümid dürki}{si spera che}{bib/kiefferbianchi18351/101}
+\voceottomana{n}{A}{in.hA}{bib/redhouse1997/538}{inha}{invio, comunicazione (ufficiale) \verificare}{bib/redhouse1997/538}
+\voceottomana{int}{A}{in||-^sA'a||-al-lahu}{bib/redhouse1997/542}{inşallah, inşaallah}{sia fatta la volontà di Dio}{bib/kiefferbianchi18351/111}
+\vottvariante{}{{\setverb in||-^s'BA||-al-lahu}}{}{İnşallah}{}
+\voceottomana{v}{T}{:WzB}{bib/redhouse1997/1212}{üz-}{afferrare, rompere a forza di tirare, strappare}{bib/kiefferbianchi18351/131}
+\subvoceottomana{v}{T}{:WzinB}{}{üzün-}{desiderare con passione, farsi prendere (?), essere strappato (?)}{bib/kiefferbianchi18351/131}
+\voceottomana{n}{A}{awlU}{}{ulu}{perspicace, dotato}{bib/kiefferbianchi18351/142}
+\vottvariante{}{awl.Y}{}{uli}{bib/kiefferbianchi18351/143}
+\voceottomana{n}{A}{ihtimAm}{}{ihtimam}{cura, attenzione, sollecitudine}{bib/kiefferbianchi18351/148}
+\voceottomana{n}{A}{ayAlat}{}{eyalet}{principato; prefettura, governo di una provincia}{bib/kiefferbianchi18351/151-152}
+\subvoceottomana{}{}{ayAlat wilAyat iznikmId ^A^n^A tafwI.d .Qlund.Y}{}{eyaleti vilaieti iznikmid aŋa tefviz olundı}{gli fu conferito il governo della provincia di Nicomedia \verificare[trascrizione]}{bib/kiefferbianchi18351/151}
+\subvoceottomana{v}{AT}{ayAlat :EtB}{}{eyalet et-}{governare una provincia}{bib/kiefferbianchi18351/152}
+\voceottomana{}{}{ayd}{}{eid}{potenza, forza, durata}{}
+\voceottomana{avv}{P}{aydir}{}{eider, ider}{sempre, qui, allora}{bib/kiefferbianchi18351/154}
+\subvoceottomana{}{}{aydirs.H}{}{eiderse}{ovunque?? \verificare}{}
+\voceottomana{v}{}{iydinB}{}{edin-}{ottenere, procurarsi, acquisire}{}
+\voceottomana{n}{A}{:cy.sAl}{}{isal, ėsal}{invio?}{}
+\subvoceottomana{v}{AT}{:cy.sAl :EtB}{}{isal ėt-}{inviare}{bib/kiefferbianchi18351/157}
+\voceottomana{agg}{T}{^Ey.U}{}{eyu}{buono, bello, bene}{bib/kiefferbianchi18351/163}
+\voceottomana{n}{A}{bAb}{}{bab}{porta, corte, affare, oggetto, materia \verificare[(2 esempi da copiare)]}{bib/kiefferbianchi18351/164}
+\voceottomana{v}{P}{bAd}{}{bad}{imperativo: sia, fiat}{bib/kiefferbianchi18351/167}
+\voceottomana{n}{M}{b^Ar^c:H}{}{barça}{nave da guerra, grande galera}{sec/sec:barca}
+\voceottomana{agg}{A}{bAq_Y}{}{baki}{permanente, stabile, eterno, restante}{bib/kiefferbianchi18351/180}
+\subvoceottomana{loc}{A}{bAq_Y wa-al-ssalAm}{}{baki vesselam}{per il resto, saluti (formula di chiusura di una lettera)}{bib/kiefferbianchi18351/180}
+\voceottomana{}{}{bAl}{}{bal}{cuore, stato,  condizione, cura, sollecitudine (v. dizionario)}{}
+\voceottomana{avv}{}{bi-al-a_hlAqyy}{}{bi-l-ahlâkı}{con  etica,  morale, virtù, buone qualità, condotta}{}
+\voceottomana{avv}{A}{bi-al-ttamAm}{}{bittamam}{completamente \verificare[ordine]}{bib/kiefferbianchi18351/182}
+\vottvariante{nel testo}{bi-al-tamAm}{}{bittamam}{}
+\voceottomana{n}{G?}{b^Ayl.Os}{}{baylos}{Bailo}{bib/kiefferbianchi18351/186}
+\vottvariante{}{b^Aly.Os}{}{balyos}{bib/kiefferbianchi18351/184}
+\voceottomana{n}{A}{bi_dl}{}{bezl}{regalo, presente, dono, liberalità, impiego di qualcosa \verificare[copiare 1o esempio (3 in effetti)]}{bib/kiefferbianchi18351/196-197}
+\voceottomana{agg}{A}{barI}{}{beri}{esente, libero + ablativo}{bib/kiefferbianchi18351/208}
+\voceottomana[prev:2]{n}{A}{barIyaT}{}{beriya}{vassallo; popolo, creatura; cittadino libero dello stato musulmano?}{bib/kiefferbianchi18351/209}
+\vottvariante{plurale}{barAyA}{}{beraya}{bib/kiefferbianchi18351/199}
+\subvoceottomana{}{}{ra`AyA wa  barAyA}{}{reaya u beraya}{vassalli e sudditi}{bib/kiefferbianchi18351/199}
+\voceottomana[next:2]{avv}{A}{ba`d}{}{ba'd}{dopo (regge quello che segue)}{bib/kiefferbianchi18351/217}
+\voceottomana{n}{T}{beg}{}{beg, bey}{principe, signore, governatore di distretto; filgli di paşa; capitani; stranieri di considerazione; qualcosa meno di paşa, una sola coda di cavallo}{bib/kiefferbianchi18351/220}
+\voceottomana{v}{T}{bilB}{}{bil-}{conoscere, comprendere, sapere; guardare, stimare}{bib/kiefferbianchi18351/226-227}
+\vottvariante{}{bIlB}{}{bil-}{bib/kiefferbianchi18351/226-227}
+\voceottomana[next]{n}{A}{bay`i}{}{beyi}{acquisto, vendita, compravendita (termine legale)}{bib/kiefferbianchi18351/262}
+\subvoceottomana{v}{AT}{bay`i :EtB}{}{beyi ėt-}{vendere}{bib/kiefferbianchi18351/262}
+\subvoceottomana{}{}{bay`i wa ^sirA}{}{beyi u şira}{vendita e acquisto, traffico, negozio}{bib/kiefferbianchi18351/262}
+\voceottomana{avv:agg}{P}{pur}{}{pür}{molto; pieno, abbondante, numeroso}{bib/kiefferbianchi18351/197}
+\voceottomana{n}{P}{penb.H}{}{penbe}{cotone}{bib/kiefferbianchi18351/230}
+\voceottomana{agg}{P}{tAbAn}{}{taban}{luminoso, risplendente; meglio (sostantivo)}{bib/kiefferbianchi18351/269}
+\voceottomana[next]{n}{A}{ta.hrIr}{}{tahrir}{scritto, composizione}{bib/kiefferbianchi18351/283-284}
+\subvoceottomana{}{}{ta.hrIr :EtB}{}{tahrir ėt-}{scrivere, registrare}{bib/kiefferbianchi18351/283-284}
+\voceottomana{n}{A}{ta.hrIf}{}{tahrif}{che   cambia,   corrompe,  distorsione, falsificazione; anagramma, inverso}{bib/kiefferbianchi18351/284}
+\subvoceottomana{}{}{ta.hrIfdan}{}{tahriftan}{al contrario?}{}
+\voceottomana{n}{A}{ta.h.sIl}{}{tahsıl}{acquisto,     acquisizione,  collazione, produzione, soluzione (di un rebus); (educazione; raccolta di tasse, risoluzione di un enigma)}{bib/kiefferbianchi18351/284-285}
+\subvoceottomana{}{}{ta.h.sIl iytB}{}{tahsıl et-}{raccogliere, guadagnare, manifestare}{bib/kiefferbianchi18351/284-285}
+\voceottomana[next]{n}{A}{tar.gIb}{}{tergib}{}{}
+\subvoceottomana{v}{AT}{tar.gIb :EtB}{}{tergib et-}{desiderare ardentemente, far desiderare}{bib/kiefferbianchi18351/293}
+\voceottomana[next]{n}{A}{taslIm}{}{teslim}{}{}
+\subvoceottomana{v}{AT}{taslIm :EtB}{}{teslim ėt-}{salutare; rendere, consegnare, rimettere, confidare}{bib/kiefferbianchi18351/298}
+\subvoceottomana{v}{AT}{taslIm .QlB}{}{teslim ol-}{arrendersi, morire}{bib/kiefferbianchi18351/298}
+\voceottomana[next]{}{A}{ta.twIl}{}{tatvil}{}{}
+\subvoceottomana{v}{AT}{ta.twIl :EtB}{}{tatvil ėt-}{estendere in lunghezza, prolungare}{bib/kiefferbianchi18351/305}
+\voceottomana[prev]{agg}{A}{ta`AlY}{}{taala}{l'Altissimo (Dio)}{bib/kiefferbianchi18351/306}
+\subvoceottomana{loc}{A}{.haqq ta`AlY}{}{haqq taala}{Dio Altissimo}{bib/kiefferbianchi18351/306}
+\voceottomana[next]{n}{A}{ta`yiyin}{}{ta'yin}{designazione}{bib/kiefferbianchi18351/310}
+\subvoceottomana{v}{AT}{ta`yiyin :EtB}{}{ta'yin ėt-}{costituire, determinare, nominare, designare}{bib/kiefferbianchi18351/310}
+\voceottomana{}{}{tifhIm}{}{tefhim}{informazione,   comunicazione  (qualcosa che causa la comprensione) \verificare[trascrizione]}{}
+\subvoceottomana{}{}{tifhIm :EtB}{}{tefhim et}{comunicare qualcosa a qualcuno}{}
+\voceottomana{agg}{A}{tayassur}{}{teyessür}{l'essere facile, il diventare compiuto}{bib/kiefferbianchi18351/345}
+\subvoceottomana{}{}{mA tayassur}{}{mateyessür}{ciò che è facile, compiuto}{}
+\voceottomana{}{}{_taman}{}{semen}{prezzo, valore}{}
+\voceottomana{n}{A}{^gAnib}{}{canib}{lato, direzione, parte (in una transazione); + possessivo: da parte di quello che segue}{bib/kiefferbianchi18351/360}
+\voceottomana{agg}{P}{^gAygIr}{}{caygir}{che occorre, stabilito, posto, che occupa, tiene, penetra}{bib/kiefferbianchi18351/363}
+\voceottomana[next:3]{n}{A}{^gam`}{}{cem}{riunione, assemblea, consiglio, raccolta (v. tahsil)}{bib/kiefferbianchi18351/391}
+\subvoceottomana{v}{AT}{^gam` :EtB}{}{cem ėt-}{riunire, accumulare, accoppiare}{bib/kiefferbianchi18351/391}
+\voceottomana[next]{n}{A}{^ganAb}{}{cenap}{maestà, sua maestà; titolo che si dà a Dio, ai principi e in generale ai propri superiori; è un titolo per sovrani stranieri, contrapposto a \spzrl{.ha.drat}, hazret, che invece va per il Padisha}{bib/kiefferbianchi18351/392}
+\subvoceottomana{loc}{}{^ganAb-i ^sarIfi^niz}{}{cenabi şerifiniz}{vostra eccellenza}{bib/kiefferbianchi18351/392}
+\voceottomana{n}{A}{^gUd}{}{cud}{liberalità, benevolenza, benfacenza}{bib/kiefferbianchi18351/400}
+\voceottomana[prev]{agg}{P}{^gUy}{}{cuy}{che vuole, che desidera}{bib/kiefferbianchi18351/405}
+\subvoceottomana{}{}{^gUy nik}{}{cuy nik}{che vuole il bene di qualcuno}{bib/kiefferbianchi18351/405}
+\voceottomana{n}{T}{^c^A:vu^s}{}{çavuş}{çavuş}{bib/kiefferbianchi18351/361}
+\voceottomana{n}{P}{^cu:vAl}{}{çuval}{sacco}{bib/kiefferbianchi18351/398}
+\voceottomana{}{}{^cUn}{}{çun (çün)}{come, quando, poiché, a causa}{}
+\voceottomana[next:3]{n}{A}{.hAl}{}{hal}{stato, situazione \verificare[aggiungere prev:1]}{bib/kiefferbianchi18351/413-414}
+\voceottomana{avv}{A}{.hAlA}{}{hâlâ}{attuamente, adesso, al tempo presente}{bib/kiefferbianchi18351/414}
+\voceottomana{}{}{.hibr}{}{hibr}{sapiente, insegnante}{}
+\vottvariante{plurale}{.hubUr}{}{hubur}{}
+\voceottomana{}{}{.hubUr}{}{hubur}{felicità, confort}{}
+\voceottomana{}{}{.harIy}{}{hari}{adatto}{}
+\vottvariante{superlativo}{:c.hray}{}{ehray}{}
+\voceottomana{n}{A}{.husn}{}{hüsn}{bellezza, grazia, eleganza}{bib/kiefferbianchi18351/424-425}
+\voceottomana{n}{A}{.hasin.H}{}{hasene}{buon  lavoro,   buono,  piacevole}{bib/kiefferbianchi18351/425}
+\voceottomana[next]{n}{A}{.ha^sr}{}{haşr}{riunione, giorno del Giudizio \verificare[giorno del Giudizio]}{bib/kiefferbianchi18351/425}
+\subvoceottomana{loc}{AT}{.ha^sr:H d:ak}{}{haşre dek}{until Doomsday \verificare}{}
+\voceottomana{n}{A}{.hu.sUl}{}{husul}{acquisizione; risultato}{bib/kiefferbianchi18351/426}
+\voceottomana[next]{n}{A}{.hu.dUr}{}{huzur}{presenza,   cospetto,  abitante,  calmo, fermo, pace, pace della mente}{bib/kiefferbianchi18351/428}
+\subvoceottomana{}{}{.hu.dUru^nuzd.H}{}{huzurunuzde}{alla vostra presenza}{bib/kiefferbianchi18351/428}
+\subvoceottomana[next]{}{}{.hu.dUr-i}{}{huzur-i}{alla presenza di (quello che segue)}{bib/kiefferbianchi18351/428}
+\voceottomana{n}{A}{.haqq}{}{hak}{diritto, legge, verità, remunerazione; Dio; a favore, verso}{bib/kiefferbianchi18351/429-430}
+\subvoceottomana{}{}{.haqqind:H}{}{hakkında}{riguardo a}{bib/kiefferbianchi18351/429-430}
+\voceottomana{n}{A}{.hukUmat}{}{hükûmet}{governo, amministrazione, giurisdizione, potere}{bib/kiefferbianchi18351/433}
+\voceottomana{n}{A}{.himAyat}{}{himayet}{protezione, difesa, supporto}{bib/kiefferbianchi18351/436-437}
+\vottvariante{}{.himAy.H}{}{himaye}{}
+\voceottomana[next]{n}{A}{_hA.tir}{}{hatır}{cuore, spirito, memoria, pensiero, idea; disposizione di spirito, riguardo}{bib/kiefferbianchi18351/448}
+\subvoceottomana{}{}{_hA.tiri^niz .J^c:Un}{}{hatiriniz içün}{per amore per voi}{bib/kiefferbianchi18351/448}
+\voceottomana{agg}{A}{_hAli.s}{}{halis}{puro, vero, sincero, fidato}{bib/kiefferbianchi18351/450}
+\voceottomana{n}{A}{_habir}{}{haber}{novità, messaggio, informazione, racconto, storia}{bib/kiefferbianchi18351/454}
+\subvoceottomana{v}{AT}{_habir :EtB}{}{haber ėt-}{annunciare, dare avviso}{bib/kiefferbianchi18351/454}
+\subvoceottomana{v}{AT}{_habir :v.ErB}{}{haber vėr-}{annunciare, dare avviso}{bib/kiefferbianchi18351/454}
+\subvoceottomana{v}{AT}{_habir :GlB}{}{haber al-}{essere informati}{bib/kiefferbianchi18351/454}
+\voceottomana{n}{A}{_hidmat}{}{hidmet}{servizio,  utilità,  lavoro, funzione, occupazione, impiego}{bib/kiefferbianchi18351/458}
+\vottvariante{}{_hi_dmat}{}{hizmet \textchi idmet}{bib/bib:kiefferbianchi18351/454}
+\subvoceottomana{}{}{_hidmat bAqI}{}{hizmet baqi}{il servizio resta, ossia «sarò riconoscente per il servizio che mi verrà reso»}{bib/kiefferbianchi18351/458}
+\voceottomana{}{}{_ha.slit _hi.salat}{}{haslet hisal}{virtù, merito}{}
+\voceottomana{n}{A}{_hu.sU.s}{}{husus}{particolarità, affare; con un infinito significa affinché, al fine di}{bib/kiefferbianchi18351/475-476}
+\subvoceottomana{}{}{b.U _hu.sU.sd:H}{}{bu hususda}{in questo affare}{bib/kiefferbianchi18351/475-476}
+\voceottomana{agg}{A}{_hafIy}{}{hafı}{segreto, privato}{bib/kiefferbianchi18351/480}
+\vottvariante{}{_hafI}{}{hafı}{}
+\voceottomana{agg:n}{A}{_hulq}{}{hulk}{naturale, carattere}{bib/kiefferbianchi18351/483}
+\subvoceottomana{}{}{ey.U _hulq}{}{eiu hulk}{bene naturale}{bib/kiefferbianchi18351/483}
+\voceottomana{n}{A}{_hulU.s}{}{hulus}{sincerità, devozione, purezza di cuore}{bib/kiefferbianchi18351/485}
+\voceottomana{agg}{P}{_h_wAh}{}{hah}{colui che desidera; desiderio, volontà}{bib/kiefferbianchi18351/490}
+\subvoceottomana{n}{PT}{_h_wAhliq}{}{hahlık}{volonta, disposizione d'animo}{bib/kiefferbianchi18351/490}
+\voceottomana{}{}{_hUd}{}{hod}{stesso, reciproco (avverbio); stesso, sé stesso, proprio}{}
+\voceottomana{}{}{_hUd}{}{hod}{(congiunzione) ma, ora, quanto a}{}
+\subvoceottomana{}{}{ban _hUd}{}{ben hod}{me stesso, quanto a me}{}
+\subvoceottomana{}{}{_hUd bIn}{}{hod bin}{che non vede che sé stesso, egoista}{}
+\subvoceottomana{}{}{_hUd b_hUd}{}{hod behod}{sua sponte, senza essere autorizzato}{}
+\voceottomana{}{}{_hayir}{}{hayır}{bene, buono, prosperità, profitto}{}
+\voceottomana{}{}{da'ImA}{}{daima}{sempre}{}
+\voceottomana{}{}{da_h.I}{}{dahi}{anche}{}
+\vottvariante{}{dA_hI}{}{dahi}{}
+\vottvariante{}{dA_h.I}{}{dahi}{}
+\voceottomana{}{}{dara^gah}{}{derece}{grado, rango, passo, step}{}
+\voceottomana{}{}{dira_h^sAn}{}{dirahşan}{chiaro, brillante, lampeggiante}{}
+\subvoceottomana{}{}{dira_h^sAn awlB}{}{dirahşan ol-}{illuminare, lampeggiare, brillare}{}
+\voceottomana{}{}{darUnI}{}{deruni}{interno, spirituale}{}
+\voceottomana{}{}{dirI.g}{}{diriğ}{rifiuto, repulsione; mancanza, omissione, dimenticanza}{}
+\subvoceottomana{}{}{dirI.g iytB}{}{diriğ et-}{rifiutare}{}
+\subvoceottomana{}{}{dirI.g itB}{}{diriğ it-}{rifiutare, mancare}{}
+\subvoceottomana{}{}{.husni na.zar^nzY dirI.g bIwr mAm^nz ma'amUldir}{}{husni nazariŋizi dirig buyurmamaŋiz me'emuldir}{speriamo che non smettiate di tenerci nelle vostre grazie}{}
+\voceottomana{}{}{du`A}{}{dua}{preghiera}{}
+\voceottomana{}{}{daftar}{}{defter}{registro,  inventario,  quaderno,  anche nel senso di pubblico registro}{}
+\voceottomana{}{}{diqqat}{}{dikkat}{particolare cura, attenzione}{}
+\voceottomana{}{}{daqIqah}{}{dakika}{minuto, momento, piccolo punto}{}
+\voceottomana{}{}{di^nlU}{}{deŋlü}{particella che marca la quantità di una cosa}{}
+\subvoceottomana{}{}{nah di^nlU?}{}{ne deŋlü?}{quanto?}{}
+\subvoceottomana{}{}{aw di^nlU}{}{aw deŋlü}{tanto (quella quantità)}{}
+\voceottomana{}{}{dil}{}{dil}{lingua, linguaggio, dialetto}{}
+\voceottomana{}{}{dUst}{}{dost}{amico}{}
+\voceottomana{}{}{dU^sin}{}{düşen}{che arriva, che capita, eventuale}{}
+\subvoceottomana{}{}{dU^sin umur^nzdah}{}{düşen umurüŋüzde}{nei vostri eventuali affari, negli affari che vi capiteranno}{}
+\voceottomana{}{}{dawlat}{}{devlet}{stato, governo}{}
+\subvoceottomana{}{}{dawlatlah}{}{devletle}{Buona fortuna! (detto all'ospite che parte)}{}
+\subvoceottomana{}{}{\mancantef}{}{devletmedar}{centro di grandezza, grande}{}
+\voceottomana{}{}{diyU}{}{deyü}{arcaico per diye}{}
+\voceottomana{}{}{_dAt}{}{zat}{persona, essenza, sostanza; epiteto per varie cose (v. dizionario)}{}
+\voceottomana{}{}{_dikir}{}{zikir}{menzione, ricordo, commemorazione, preghiera}{}
+\voceottomana{n}{A}{rA.hilah}{}{rahile}{cose che  viaggiano insieme, carovana, successione di onoreficienze}{}
+\vottvariante{plurale}{rawA.hil}{}{ravahil}{}
+\voceottomana{}{}{rA.dI}{}{razı}{soddisfatto, contento, che approva, compiaciuto}{}
+\voceottomana{}{}{ri^gA'}{}{rica}{richiesta}{}
+\voceottomana{}{}{ra`AyA}{}{reaya}{non    musulmani   (cristiani)   sudditi dell'Impero Ottomano}{}
+\voceottomana{}{}{ra`Iyat}{}{raiyet}{persona  sotto il governo  di qualcuno, suddito}{}
+\voceottomana{}{}{rig}{}{reg}{vaso sanguigno, vena, arteria, tendine, muscolo, punto vitale, punto più importante}{}
+\voceottomana{}{}{rUz}{}{ruz}{giorno, dì}{}
+\voceottomana{}{}{rU^sin}{}{ruşen}{illuminato, chiaro, manifesto}{}
+\voceottomana{}{}{riyb}{}{reyb}{dubbio, sospetto, evento dubbioso}{}
+\voceottomana{}{}{ziyAn}{}{ziyan}{perdita, danno, ingiuria}{}
+\voceottomana{}{}{sAbiqA}{}{sabıka (sabıkan)}{precedentemente}{}
+\subvoceottomana{}{}{sAbiqA .halab pA^sAsY awlAn ma.hmUd pA^sA}{}{sabiqa haleb paşası olan mahmud paşa}{Mahmud Paşa che era stato in precedenza governatore di Aleppo}{}
+\voceottomana{}{}{sAyah}{}{saye}{ombra, protezione, favore}{}
+\voceottomana{}{}{sipAri^s}{}{sipariş}{ordine, commissione}{}
+\voceottomana{}{}{sapab}{}{sepeb}{causa, motivo, cosa necessaria}{}
+\vottvariante{plurale}{ispAb}{}{espeb}{}
+\voceottomana{}{}{sutUdaT}{}{sütude}{lodabile}{}
+\subvoceottomana{}{}{sutUdaT am_hu.d}{}{sütude emhuz}{di lodabile purezza}{}
+\voceottomana{}{}{siz}{}{siz}{senza (+ablativo o gerundio in -E)}{}
+\voceottomana{}{}{sa`Adat}{}{saadet}{felicità, prosperità}{}
+\voceottomana{}{}{sa`AdatlU}{}{saadetlû}{prosperoso, felice, fortunato (anche come titolo)}{}
+\voceottomana{}{}{sa`Y}{}{sa'i}{disegno, intenzione, sforzo, diligenza}{}
+\voceottomana{}{}{sikkaT}{}{sikke}{moneta}{}
+\voceottomana{}{}{saman}{}{semen}{prezzo, valore}{}
+\voceottomana{}{}{sin}{}{sin}{periodo, età}{}
+\voceottomana{}{}{sI.gUrtah}{}{sigorta}{assicurazione}{}
+\voceottomana{}{}{^sarIf}{}{şerif}{nobile, principe}{}
+\voceottomana{}{}{^sukr}{}{şükr}{ringraziamento, gratitudine; come inciso, che Dio lo ringrazi}{}
+\vottvariante{plurale}{^sukUr}{}{şükur}{}
+\voceottomana{}{}{.sAdiq}{}{sadık}{vero, sincero, onesto}{}
+\subvoceottomana{}{}{.sAdiq \mancantef}{}{sadık-al-fuadlarına}{onesto di cuore = dal cuore onesto}{}
+\voceottomana{}{}{.sadAqat}{}{sadakat}{lealtà, fiducia, amicizia}{}
+\voceottomana{}{}{.sin.gUryah}{}{senguriye}{prezzo dell'assicurazione [se(n)gur-iye]}{}
+\voceottomana{}{}{.tawiyat}{}{taviyet}{proposta,    intenzione,    pensiero, disposizione, caratter}{}
+\voceottomana{}{}{.zAhir}{}{zahir}{esterno,   parte   esteriore,  apparente, visibile, apparenza, chiaro, manifesto}{}
+\voceottomana{}{}{.zill}{}{zill}{ombra, protezione}{}
+\subvoceottomana{}{}{.zill mamdUd}{}{zill memdud}{ombra che si stende, che si prolunga}{}
+\voceottomana{}{}{.zuhUr}{}{zuhur}{diventare  manifesto, evidente, visibile; apparenza}{}
+\voceottomana{}{}{`AdY}{}{âdi}{abituale,  usuale,   ordinario,  di  tutti  i giorni, feriale}{}
+\voceottomana{}{}{`ArI}{}{ari}{libero (+ablativo), esente, franco, puro}{}
+\voceottomana{}{}{`AlimpinAh}{}{alempenah}{Rifugio dell'Universo (titolo del Sultano)}{}
+\voceottomana{}{}{`AlI}{}{'ali}{alto, elevato, parte superiore}{}
+\voceottomana{}{}{`adAlat}{}{adalet}{giustizia (nel senso di ministero della giustizia)}{}
+\voceottomana{}{}{`add}{}{ad}{numero, enumerazione, conto}{}
+\subvoceottomana{}{}{`add iytB}{}{ad et-}{contare}{}
+\voceottomana{}{}{`ara.d}{}{araz}{sintomo, accidente, evento fortuito}{}
+\voceottomana{}{}{`alAmat}{}{alamet}{segno}{}
+\voceottomana{}{}{`aliyh}{}{aleyh}{(il) contro (al dativo e locativo)}{}
+\voceottomana{}{}{`inAyat}{}{inayet}{grazia, favore}{}
+\subvoceottomana{}{}{`inAyat  :EtB}{}{inayet et-}{fare come un  favore, come un atto di grazia}{}
+\subvoceottomana{}{}{`inAyatdah \mancantef}{}{inayette bulun-}{fare un favore}{}
+\voceottomana{}{}{`ahid}{}{ahit}{ingiunzione,   solenne  richiesta,  decreto imperiale, patto, trattato, periodo, epoca, regno}{}
+\voceottomana{}{}{.gara.d}{}{garaz}{rancore,    risentimento,   pregiudizio;  ostile, pregiudizievole}{}
+\voceottomana{}{}{.gayb}{}{gayb}{assenza, invisibilità, segreto, assente, invisibile}{}
+\voceottomana{}{}{firAmU^s}{}{feramûş}{dimenticanza}{}
+\voceottomana{}{}{far.t}{}{fart}{eccesso, esagerazione}{}
+\subvoceottomana{}{}{far.t  \mancantef}{}{fartı  muhabbet}{eccesso di  amore, dating love}{}
+\voceottomana{}{}{fuwAd}{}{fuad}{cuore}{}
+\voceottomana{}{}{fawt}{}{fevt}{perdita irreparabile, morte}{}
+\subvoceottomana{}{}{fawt :EtB}{}{fevt et-}{perdere, rimetterci, causare una perdita}{}
+\voceottomana{}{}{qAfilah}{}{kafile}{cose che  si succedono in  fila,  carovana, successione  di  onoreficienze}{}
+\vottvariante{plurale}{qawAfil}{}{kavafil}{}
+\voceottomana{}{}{qAlinB}{}{kalın-}{restare, fermarsi, passare la notte}{}
+\voceottomana{}{}{qA'il}{}{kail}{che acconsente, che è d'accordo, parlante}{}
+\subvoceottomana{}{}{qA'il\mancantef}{}{kail olmak}{acconsentire, essere d'accordo}{}
+\voceottomana{}{}{qab.d}{}{kabz}{l'atto di prendere possesso}{}
+\voceottomana{}{}{qab.dah}{}{kabza}{manico,  elsa,  un  pezzo,  uno  singolo (spada), possesso, spessore di quattro dita}{}
+\voceottomana{}{}{qudrat}{}{kudret}{potere, forza, capacità, natura}{}
+\voceottomana{}{}{qi.ta`ah}{}{kıt'a}{continente,   distaccamento,  stazione, strofa, pezzo, taglia, formato}{}
+\voceottomana{}{}{qilB}{}{kıl-}{rendere   (restituire),   far  diventare (ausiliare)}{}
+\voceottomana{}{}{qalimY}{}{kalemî}{che  riguarda penne,  matite,  ecc., che riguarda un ufficio, che lavora o vende penne}{}
+\voceottomana{}{}{qan.tAr}{}{kantar}{cantaro, unità di peso di circa 50 kg}{}
+\voceottomana{}{}{qUt}{}{kut}{cibo; fortezza; fortuna, buona fortuna, prosperità, felicità}{}
+\voceottomana{}{}{qiyAs}{}{kıyas}{confronto, congettura, regola, opinione}{}
+\voceottomana{}{}{kAfY}{}{kâfi}{sufficiente, abbastanza}{}
+\voceottomana{}{}{karIm}{}{kerim}{nobile, generoso, onorevole, sacro, buono}{}
+\voceottomana{}{}{kamAl}{}{kemal}{perfezione, maturità, qualità morale, valore, prezzo}{}
+\voceottomana{}{}{g:alB}{}{g:al-}{arrivare}{}
+\voceottomana{}{}{gumAn}{}{güman}{dubbio, incertezza}{}
+\voceottomana{}{}{ginah}{}{gine}{di nuovo, nientemeno}{}
+\voceottomana{}{}{gUz}{}{göz}{occhio}{}
+\voceottomana{}{}{gUndarB}{}{gönder-}{inviare}{}
+\voceottomana{}{}{g.IdB}{}{git-}{andare}{}
+\voceottomana{}{}{lAyiq}{}{lâyık}{appropriato}{}
+\vottvariante{superlativo}{alyaq}{bib/redhouse1997/337}{elyak}{bib/redhouse1997/337}
+\subvoceottomana{}{}{lAyiq awlmaq}{}{lâyık olmak}{meritare, convenire}{}
+\voceottomana{}{}{ludrah}{}{lodra}{lodra (unità di misura)}{}
+\voceottomana{}{}{lu.tuf}{}{lûtuf (lûtf)}{piacere, favore}{}
+\subvoceottomana{}{}{lu.tufnAmah}{}{lûtufname}{graziosa lettera}{}
+\subvoceottomana{}{}{lu.tuf etmek}{}{lûtuf etmek}{fare un piacere, favore}{}
+\subvoceottomana{}{}{lu.tuf \mancantef}{}{lûtuf görmek}{ricevere un piacere, favore}{}
+\voceottomana{}{}{lakin}{}{lakin}{ma, comunque, still, yet}{}
+\voceottomana{}{}{law.h}{}{levh}{superficie per scrivere, tavoletta}{}
+\voceottomana{}{}{mA'mUl}{}{memul}{speranza}{}
+\voceottomana{}{}{mAdAm}{}{madam}{mentre, since, as}{}
+\subvoceottomana{}{}{mAdAmkah (madAmkah)}{}{madamki (mademki)}{mentre, since, as}{}
+\voceottomana{}{}{mA`adA}{}{maada}{eccetto, resto, in aggiunta a}{}
+\voceottomana{}{}{mibzUl}{}{mebzul}{abbondante, ampio, straordinario}{}
+\voceottomana{}{}{mutiwi^g^gih}{}{müteveccih}{che si gira verso qualcuno o qualcosa, favorevolmente disposto verso (+ dativo)}{}
+\voceottomana{}{}{mu^girrid}{}{mücerred}{astratto,    incorporeo,   isolato, singolo, nudo, semplice, puro, semplicemente, positivamente; solamente, unicamente}{}
+\voceottomana{}{}{mi.hAl}{}{mıhal}{azione di tramare un intrigo, potenza, violenza, inimicizia, perdita, rovina, contesa, disputa}{}
+\voceottomana{}{}{mu.hibb}{}{muhib}{amico affezionato}{}
+\subvoceottomana{}{}{mu.hibbAnah}{}{muhibbane}{amichevolmente}{}
+\voceottomana{}{}{mu.habbat}{}{muhabbet}{amore}{}
+\subvoceottomana{}{}{mu.habbat aytB}{}{muhabbet et-}{conversare amichevolmente}{}
+\voceottomana{}{}{ma.hal ma.hAl}{}{mahal mahal}{posto, luogo, occasione, ragione}{}
+\voceottomana{}{}{mu_h.d am_hu.d}{}{muhz emhuz}{puro}{}
+\voceottomana{}{}{mu_halli.s}{}{muhallis}{that saves, redeems; savior deliverer}{}
+\voceottomana{}{}{madAr}{}{medar}{punto attorno al quale gira una questione, baricentro, mezzo, aiuto, orbita}{}
+\voceottomana{}{}{murA^ga`at}{}{müracaat}{referenza,  ricorso, applicazione}{}
+\subvoceottomana{}{}{murA^ga`at etmek}{}{müracaat etmek}{rivolgersi}{}
+\voceottomana{}{}{murAd}{}{murad}{desiderio, intenzione}{}
+\voceottomana{}{}{murA`At}{}{müraat}{riguardo, rispetto, considerazione}{}
+\voceottomana{}{}{martabah}{}{mertebe}{grado, ordine, posizione, rango}{}
+\subvoceottomana{}{}{martabah-dan martabah-ya}{}{mertebeden mertebeye}{per gradi, di livello in livello}{}
+\subvoceottomana{}{}{tA bU martabah kah}{}{ta bu mertebe ki}{al punto che, a tal punto che}{}
+\subvoceottomana{}{}{kamAl martabah}{}{kemal mertebe}{perfettamente, al più alto grado}{}
+\subvoceottomana{}{}{qAdir awldUnimiz martabah}{}{qadyr olu\textgamma ümüz mertebe}{tutto quello che possiamo}{}
+\voceottomana{}{}{mar^gU}{}{mercu}{richiesto, aspettato}{}
+\voceottomana{}{}{murd}{}{murd}{morto}{}
+\voceottomana{}{}{muruwat}{}{mürüvvet}{generosità}{}
+\subvoceottomana{}{}{muruwat \mancantef}{}{mürüvvetmeab}{pieno di generosità}{}
+\voceottomana{}{}{marI.d mar.dY}{}{mariz merza}{malato}{}
+\voceottomana{}{}{mizbUr}{}{mezbur}{summenzionato, scritto, registrato}{}
+\voceottomana{}{}{muzdUr}{}{müzdur muzdver}{salariato, operaio, mercenario}{}
+\voceottomana{}{}{mizId}{}{mezid}{crescita,      abbondanza,      cresciuto, aumentato, abbondante}{}
+\voceottomana{}{}{mustaqillah^a}{}{müstakillen}{indipendentemente, assolutamente, velocemente, solely}{}
+\voceottomana{}{}{mustaqIm}{}{müstakim}{diretto, onesto}{}
+\voceottomana{}{}{mu^sAruN ilayhi}{}{müşarünileyh}{the aformentioned (usato per alti ufficiali e celebrità)}{}
+\voceottomana{}{}{mu`timid}{}{mu'temed}{qualcuno di cui ci si fida, confidente}{}
+\subvoceottomana{}{}{mu`timid `alyah}{}{mu'temedun 'aleyh}{stesso significato di mu'temed}{}
+\voceottomana{}{}{ma`nA}{}{ma'na}{significato,  senso, espressione, ragione, motivo}{}
+\voceottomana{}{}{ma`hid}{}{ma'hed}{posto di rifugio, punto di incontro}{}
+\voceottomana{}{}{muqAbalah}{}{mukabele}{lo stare  di fronte a  un altro, il confrontarsi, l'essere reciproco, ritorno, opposizione, confronto}{}
+\voceottomana{}{}{miqdAr}{}{mikdar  (miktar)}{quantità,  ammontare,  misura, porzione, parte, dose, grando, rango, valore}{}
+\voceottomana{}{}{maqdUr}{}{makdur}{tutto  quello che  è possibile  fare per qualcuno}{}
+\voceottomana{}{}{muqarrar}{}{mukarrer}{deciso, certo, stabilito, fissato}{}
+\voceottomana{}{}{muqarrir}{}{mukarrir}{narratore,  lettore, chi stabilisce, fissa, decide}{}
+\voceottomana{}{}{multamas}{}{mültemes}{richiesto come un favore, protetto}{}
+\voceottomana{}{}{multamis}{}{mültemis}{che richiede come un favore}{}
+\voceottomana{}{}{munta.zar}{}{muntazar}{chi  aspetta aspettosamente, pronto e aspettante}{}
+\voceottomana{}{}{munta.zir}{}{muntazir}{atteso, aspettato}{}
+\voceottomana{}{}{mU^gib}{}{mucib}{causa, motivo, ragione, richiesta, conseguenza necessaria}{}
+\subvoceottomana{}{}{mU^gibin^gah}{}{mucibince}{come richiesto in accordanza con (quello che precede); conformemente a}{}
+\voceottomana{}{}{mUddat}{}{meveddet}{amore,amicizia}{}
+\voceottomana{}{}{mahmA amkan}{}{mehmaemken}{il più lontano possibile}{}
+\voceottomana{}{}{mIr}{}{mîr}{comandante, capitano}{}
+\subvoceottomana{}{}{mIri mIrAn}{}{mîri mîran}{governatore di una provincia}{}
+\subvoceottomana{}{}{mIri mIrler}{}{mîri mîrler}{governatore di una provincia}{}
+\voceottomana{}{}{muyassar}{}{müyesser}{favorevole, baciato dalla fortuna (la cosa)}{}
+\voceottomana{}{}{muyassir}{}{müyessir}{che facilita le cose, che rende possibile il successo (l'agente)}{}
+\voceottomana{}{}{nAfi`}{}{nafi}{utile, proficuo, benefico}{}
+\vottvariante{superlativo}{anfa`}{bib/redhouse1997/342}{enfa}{bib/redhouse1997/342}
+\voceottomana{}{}{nAm}{}{nam}{nome, fama, onore}{}
+\voceottomana{}{}{na.sb}{}{nasp}{nomina, promozione}{}
+\voceottomana{}{}{na.zar}{}{nazar}{sguardo, visione, attenzione, riguardo}{}
+\voceottomana{}{}{nafs}{}{nefis}{stesso, anima; centro città, capoluogo di regione quando la regione si chiama come la città capoluogo}{}
+\voceottomana{}{}{naqid}{}{nakd  (nakid)}{cash,   contanti,  moneta  pronta, corrente}{}
+\voceottomana{n}{A}{naw`}{}{nevi}{specifico,  che compete  a una specie o varietà}{}
+\vottvariante{plurale}{anwA`}{bib/redhouse1997/344}{enva}{bib/kiefferbianchi18351/116}
+\subvoceottomana{}{}{anwA`i rank}{}{bib/redhouse1997/344,954}{ogni sorta di colore}{bib/kiefferbianchi18351/116}
+\voceottomana{}{}{nihAn}{}{nihan}{segreto, concealed, interno}{}
+\voceottomana{}{}{nihAyat}{}{nihayet}{fine, estremità, estremo, conclusione, estremamente, molto}{}
+\voceottomana{}{}{niyat}{}{niyet}{soluzione, intenzione, proposito}{}
+\subvoceottomana{}{}{niyat \mancantef}{}{niyet etmek}{risolvere, to intend}{}
+\voceottomana{}{}{nI^gah nI^cah}{}{nice niçe}{come? in che modo?}{}
+\voceottomana{}{}{nI^cah}{}{niçe}{quanti? qualcuno, molti}{}
+\voceottomana{}{}{nIk}{}{nik}{buono, eccellente, fortunato; bene, fortuna}{}
+\voceottomana{}{}{wi_tAq}{}{visak}{legatura,  rilegatura,  tie,  a  pledging one's faith, l'entrare in una confederazione}{}
+\subvoceottomana{}{}{wi_tAqat}{}{vesakat}{fermezza, fermo, forte, affidabilità}{}
+\voceottomana{}{}{wi_tIq}{}{vesik}{fermo, forte, fidato, sicuro}{}
+\subvoceottomana{}{}{wi_tIqah}{}{vesika}{documento, carta d'identità, carta annonaria}{}
+\voceottomana{}{}{wa^gh}{}{vech}{faccia,    superficie,   lato,   direzione, strada, maniera, causa, senso}{}
+\voceottomana{}{}{wara_tah}{}{verese}{erede}{}
+\voceottomana{}{}{wufUr}{}{vüfur}{abbondante, pieno, moltitudine}{}
+\voceottomana{}{}{wakIl}{}{vekil}{agente, rappresentante, procuratore, commissario incaricato della gestione di qualcuno, delegato; la legge distingue tra vekil şei/müseccel e vakil mutlaq}{}
+\subvoceottomana{}{}{wakIl ^sa`i}{}{vekil şei}{procuratore con un potere limitato}{}
+\subvoceottomana{}{}{wakIl musa^g^gal}{}{vekil müseccel}{procuratore con un potere limitato}{}
+\subvoceottomana{}{}{wakIl mu.tlaq}{}{vekil mutlaq}{procuratore che può agire di sua volontà, plenipotenziario}{}
+\subvoceottomana{}{}{tu^g^gAr wakIl}{}{tuccar vekili}{fattore, commis de marchand, deputé du commerce}{}
+\subvoceottomana{}{}{wakIl _har^g}{}{vekil harc}{maître d'hotel; ad Algeri, intendente di marina, di grande considerazione nella reggenza}{}
+\subvoceottomana{}{}{bA^s wakIl}{}{baş vekili}{primo ministro nelle corti europee}{}
+\voceottomana{}{}{wilAyat}{}{vilâyet}{provincia}{}
+\voceottomana{}{}{wayAhUd}{}{veyahut}{o}{}
+\voceottomana{}{}{wIr}{}{wir}{guardia, cura, conservazione}{}
+\voceottomana{v}{}{wIrB}{}{ver-}{dare}{}
+\voceottomana{}{}{her}{}{her}{ogni, ognuno}{}
+\subvoceottomana{}{}{her-n:H k^H her-nk^H}{}{herneki}{qualunque che, ogni cosa che \verificare}{}
+\voceottomana{}{}{himAn}{}{hemen}{istantaneamente,   giusto   ora,   adesso, quasi, circa, solo}{}
+\voceottomana{}{}{himmat}{}{himmet}{zelo,   sforzo,   influenza,   auspicio, grazia, favore, aiuto}{}
+\voceottomana{}{}{yAn}{}{yan}{lato, fianco, profilo}{}
+\subvoceottomana{}{}{yAn wIrB}{}{yan ver}{mettersi da parte}{}
+\subvoceottomana{}{}{yAnindah}{}{yaninde}{da lui}{}
+\subvoceottomana{}{}{yAnimdah kah}{}{yanimdeki}{colui che è da me}{}
+\subvoceottomana{}{}{awyAnah bU yAnah yalB}{}{oyana bu yana yel-}{correre qua e là}{}
+\voceottomana{}{}{yad}{}{yed}{mano}{}
+\voceottomana{}{}{yar}{}{yer}{terra}{}
+\voceottomana{}{}{yarAB}{}{yara-}{essere servizievole, utile, adatto}{}
+\voceottomana{}{}{yanA^sB}{}{yanaş-}{avvicinare,     viaggiare    vicino (nave), accedere, acconsentire, inclinare (per qualcosa)}{}
+\subvoceottomana{}{}{yanA^sdirB}{}{yanaştır-}{far avvicinare}{}
+\voceottomana{}{}{yinah}{}{yine}{ancora, di nuovo, ma ancora, inoltre}{}
+\voceottomana{}{}{yU}{}{yiv}{scanalutura, solco, taglio, strappo, orlo, bordo}{}
+\voceottomana{}{}{yahUd}{}{yahud}{ebreo}{}
+\voceottomana{}{}{\mancantef}{}{hayılcevi}{che soffre di ardente amore (???)}{}
+\voceottomana{}{}{\mancantef}{}{hayılhah}{(+ dativo) che desidera il bene di qualcuno}{}
+\voceottomana{}{}{\mancantef}{}{her vechle}{in ogni modo}{}
+\vocearaba{bi}{\mancantef}{\mancantef}{con}{}
+\vocearaba{_hayr}{\mancantef}{\mancantef}{bene}{}
+\vocearaba{firqaT}{faraqa}{\mancantef}{parte, porzine, setta, fede, confessione}{}
+\vocearaba{'ifti_hAr}{fa_hara}{gloriarsi, essere orgoglioso}{orgoglio, gloria}{}
+\vocearaba{'amIr 'umarA'}{'amara}{ordinare, comandare}{principe}{}
+\vocearaba{`a.zAm}{`a.zama}{essere, diventare grande}{grande, potente, importante, magnifico}{}
+\vocearaba{millaT}{malla}{essere stanco, annoiato}{comunità religiosa}{}
+\vocearaba{masI.hIyaT}{masa.ha}{pulire, spolverare}{Cristianità}{}
+\vocearaba{`umdaT}{`amada}{supportare}{parte principale, capo}{}
+\vocearaba{`IsUY}{`IsY}{Jesus}{Cristiano}{}
+\vocearaba{kabIr kubarA'}{kabara}{essere, diventare grande}{grande, grandissimo}{}
+\vocearaba{fi_hAm}{fa_huma}{essere grande, magnifico, splendido}{grandioso, splendente}{}
+\vocearaba{.tAyfaT}{.tAfa}{camminare insieme}{\RL{(.tA'ifaT)} comunità, parte, banda}{}
+\vocearaba{mu.sli.h}{.sa.la.ha}{essere buono, pio, utile, devoto}{peacemaker}{}
+\vocearaba{mu.sAli.h}{.sa.la.ha}{essere buono, pio, utile, devoto}{peacemaker}{}
+\vocearaba{na.srAnIyaT}{na.s.sara}{convertire alla Cristianità}{Cristianità}{}
+\vocearaba{al-^gamAhIr}{^gamhara}{assemblare, riunire}{\RL{(^gamAhir)} il popolo}{}
+\vocearaba{_dayl    'a_dyAl}{_dayyala}{estendere,    aggiungere   alla fine}{fine, coda, parte estrema}{}
+\vocearaba{sA.hib}{sa.haba}{to    withdraw,    to    trail   on    the ground}{drawer  (of  a bill  of  exchange)  \RL{sA.hib 'a_dyAl}  che estende fino alla fine = pieno di}{}
+\vocearaba{.hi^smaT}{.ha^sama}{intimorire}{modestia, decoro, decenza}{}
+\vocearaba{waqAr}{waqara}{rompere, fratturare, rimanere}{dignità, sobrietà}{}
+\vocearaba{.sA.hib}{.sa.hiba}{diventare    amico,    compagno}{signore, padrone; compagno, socio}{}
+\vocearaba{dalIl    dalA'il}{dalla}{mostrare,   indicare}{indicazione, segno, prova, guida}{}
+\vocearaba{^gidd}{^gadda}{essere serio,  importante, nuovo, un recente sviluppo}{serietà, onestà (earnestness), diligenza}{}
+\vocearaba{'i`tibAr}{`abara}{passare, trasportare}{rispetto, stima, onore}{}
+\vocearaba{_hatama}{_hatama}{sigillare, finire, completare}{}{}
+\vocearaba{`AqibaT    `awAqib}{`aqaba}{seguire,    succedere,   venire dopo}{fine, effetto, conseguenza}{}
+\voceottomana{va}{T}{:EtB}{}{ėt-}{fare}{}
+\vottvariante{}{_EtB}{}{ėt-}{}
+\voceottomana{va}{}{.QlB}{}{ol-}{essere, diventare}{}
+\voceottomana{va}{T}{.JB}{}{i-}{essere (difettivo)}{}
+\voceottomana[prev]{va}{T}{^EyleB}{}{eyle-}{fare}{bib/kiefferbianchi18351/160}
+\voceottomana{va}{T}{b.UlB}{}{bul}{trovare, scoprire, inventare}{bib/kiefferbianchi18351/247}
+\voceottomana{va}{T}{buy.UrB}{}{buyur-}{ordinare, ordinare  di fare,  decretare, dare mandato per iscritto; ordinare in senso cortese; al posto di ėt- quando ci si rivolge ai superiori o si chiede un favore; pregare di}{bib/kiefferbianchi18351/266}
+\subvoceottomana{v}{T}{buy.UrulB}{}{buyurul-}{essere ordinato, essere  ordinato che  sia fatto, essere governato}{}
+\voceottomana{va}{}{dur}{}{dur}{copula (è)}{}
+\voceottomana{aggn}{A}{awwal}{bib/redhouse1997/355}{evvel}{primo, iniziale}{bib/kiefferbianchi18351/139}
+\subvoceottomana{aggn}{AT}{awwalk.Y}{bib/redhouse1997/355}{evvelki}{precedente, penultimo}{bib/redhouse1997/355}
+\voceottomana[next]{pron}{A}{mA}{}{ma}{ciò che è + quello che segue}{bib/kiefferbianchi18352/726}
+\voceottomana{pron}{}{.Ql}{}{ol}{forma arcaica di o}{}
+\vottvariante{ablativo}{andan}{}{andan}{}
+\voceottomana{pron}{}{biz}{}{biz}{noi}{}
+\voceottomana{pron}{T}{b.U}{}{bu}{questo}{}
+\subvoceottomana{}{}{bUndan aqdam}{}{bundan akdem}{prima, prima di questo}{}
+\voceottomana{pron}{T?}{kend:U}{}{kendü}{stesso (kendi)}{}
+\voceottomana{pron}{T?}{kimesn.H}{}{kimesne}{come kimse: qualcuno, alcuno}{}
+\voceottomana{num}{T}{bir}{}{bir}{uno}{}
+\voceottomana{num}{T}{b.I^n}{}{bin}{mille}{}
+\voceottomana{num}{T}{yed.I}{}{yedi}{sette}{}
+\voceottomana{num}{T}{:W^c}{}{üç}{tre}{}
+\voceottomana{num}{T}{seks^En}{}{seksen}{ottanta}{}
+\voceottomana{num}{T}{be^s}{}{beş}{cinque}{}
+\voceottomana{num}{T}{.Qn}{}{on}{dieci}{}
+\voceottomana{num}{T}{.toq.Uz}{}{dokuz}{nove}{}
+\voceottomana{cong}{TP}{eker}{bib/redhouse1997/328}{eğer}{se}{bib/kiefferbianchi18351/78}
+\vottvariante{}{eger}{}{eğer}{bib/redhouse1997/328}
+\subvoceottomana{}{}{eker bu eker o}{}{eğer bu eğer o}{sia questo sia quello}{bib/kiefferbianchi18351/78}
+\voceottomana{cong}{AT}{ammA}{bib/redhouse1997/55}{ama, amma}{ma}{bib/kiefferbianchi18351/95}
+\voceottomana{cong}{P}{k^H}{}{ki}{che}{}
+\voceottomana{np}{}{pAdi^sAah}{}{Padişah}{Padishah, Sultano dell'impero Ottomano}{}
+\voceottomana{np}{P}{:CsitAn.H}{bib/redhouse1997}{asitane}{soglia,   porta, corte; Istanbul; nel testo compare una  volta   seguito  da  \RL{sa`Adat}   e  una  volta   seguito  da \RL{dawlat}}{bib/kiefferbianchi18351/31}
+\subvoceottomana{np}{P}{:CsitAn^h sa`Adat||a^syAn.H}{bib/redhouse1997}{Asitane-i  Saadetaşiyane}{la  Porta della         Felicità,        la         residenza        imperiale (v. Mantran)}{bib/kiefferbianchi18351/31}
+\subvoceottomana{np}{P}{:CsitAn^h      sa`Adat}{bib/redhouse1997}{Asitane-i Saadet}{stesso significato}{bib/kiefferbianchi18351/31}
+\voceottomana{np}{I}{y^Aqom.O||by^Az.I}{}{Giacomo Biasii}{Giacomo Biasii}{}
+\voceottomana{np}{I}{q^Abil.O}{}{Capello}{Capello}{}
+\voceottomana{np}{I}{m^Arq.O||d:H^Ald.I}{}{Marco d'Aldi}{Marco d'Aldi}{}
+\voceottomana{np}{}{qubris}{}{Kıbrıs}{Cipro}{}
+\voceottomana{np}{}{:vened.Ik}{}{Venedik}{Venezia}{}
+\voceottomana{np}{I}{^cinq.U||s^A:v.I}{}{Cinque Savii}{Cinque Savii}{}
+\voceottomana{np}{I}{d.O^z}{}{doj}{doge}{}
+\voceottomana{np}{}{^ga`afir}{}{Cafer}{Cafer}{}
+\voceottomana{np}{}{^Ab.Ud.Int.I}{}{Abudinti}{Abudenti}{}
+\voceottomana{np}{}{m.Us^A||ma^g^A.Od}{}{Musa Macaod}{Mosè Mazaod}{}
+\voceottomana[prev]{post}{T}{:Wzer}{bib/redhouse1997/1212}{üzer}{sopra, contro}{bib/kiefferbianchi18351/129}
+\subvoceottomana[prev]{post}{T}{:Wzer.H}{bib/redhouse1997/1212}{üzere}{sopra, secondo, contro, a condizione che (con forme nominali dei verbi)}{bib/kiefferbianchi18351/129}
+\voceottomana{post}{T}{.J^c:Un}{}{içün}{per}{}
+\voceottomana{post}{T}{.Jl.H}{}{ile}{con}{}
+\voceottomana{post}{T}{birl.H}{}{birle}{con}{bib/kiefferbianchi18351/205}
+\voceottomana{post}{A}{binA'^a}{}{binaen}{conformemente a, secondo, in conseguenza di + dativo}{bib/kiefferbianchi18351/229}

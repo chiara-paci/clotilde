@@ -1,0 +1,12 @@
+{% load i18n %}
+{% if object_list %}
+  <table class="index">
+  {% for l in object_list %}
+  <tr>
+    <td class="icon"><a href="{{ l.get_absolute_url }}"><img src="{{ ICON_CORPUS }}"/></a></td>
+    <td><a href="{{ l.get_absolute_url }}">{{ l }}</a></td>
+    <td class="info right">{{ l.language }}</td>
+    </tr>
+  {% endfor %}
+  </table>
+{% endif %}

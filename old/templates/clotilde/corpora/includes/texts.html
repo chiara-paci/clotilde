@@ -1,0 +1,16 @@
+{% load i18n %}
+{% if object_list %}
+  <table class="index">
+  <tr><th colspan="2">&nbsp;</th><th>author</th><th>length</th><th colspan="2">date</th></tr>
+  {% for l in object_list %}
+  <tr>
+    <td class="icon"><a href="{{ l.get_absolute_url }}"><img src="{{ ICON_TEXT }}"/></a></td>
+    <td><a href="{{ l.get_absolute_url }}">{{ l }}</a></td>
+    <td class="info center">{{ l.author }}</td>
+    <td class="info center">{{ l.length }}</td>
+    <td class="info right">{{ l.pub_date|date:"j b Y" }}</td>
+    <td class="info center">{{ l.pub_date|time:"H:i" }}</td>
+    </tr>
+  {% endfor %}
+  </table>
+{% endif %}

@@ -1,0 +1,19 @@
+<table class="morphrule">
+<tr><td><a href="" class="mrstatusview mractionedit"><img src="{{ ICON_MINI_EDIT }}"/></a>
+<a href="" class="mrstatusedit mractionadd"><img src="{{ ICON_MINI_ADD }}"/></a>
+<a href="" class="mrstatusedit mractionsave"><img src="{{ ICON_MINI_SAVE }}"/></a></td></tr>
+{% for r in rules_list %}
+  <tr class="rule">
+    <td class="regexp" id="{{ r.id }}">
+      <span class="pattern">{{ r.regexp.pattern }}</span> &#8614; <span class="replacement">{{ r.regexp.replacement }}</span>
+      {% if r.dict_entry %}<img src="{{ ICON_DICT_ENTRY }}" class="mrstatusview"/>{% else %}{% endif %}
+      <a href="" id="{{ r.id }}" class="mrstatusedit mractiondelete"><img src="{{ ICON_MINI_DELETE }}"/></a>
+    </td>
+  </tr>
+{% empty %}
+  <tr class="rule">
+    <td class="regexp"><span class="mrempty">&nbsp;</span></td>
+    <td></td>
+  </tr>
+{% endfor %}
+</table>

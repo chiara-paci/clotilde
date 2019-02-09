@@ -1,0 +1,549 @@
+body {
+    font: 0.8em 'FreeSans', Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background-color: #{{ COLOR_LIGTH }};
+    width: 100%;    
+}
+
+a:link,a:visited,a:hover,a:active { 
+    text-decoration: none;
+    color: #{{ COLORS.prim.dark.1 }};
+}
+
+.rotate {
+    -webkit-transform: rotate(-90deg); 
+    -moz-transform: rotate(-90deg);
+    display: block;
+}
+
+.note {
+    color: #{{ COLORS.prim.dark.1 }};
+    font-style: italic;
+    font-size: 80%;
+}
+
+.bottom {
+    vertical-align: bottom;
+}
+
+.top {
+    vertical-align: top;
+}
+
+.bordertop {
+    border-top: 1px solid #{{ TEXT_FG }};
+}
+
+.borderbottom {
+    border-bottom: 1px solid #{{ TEXT_FG }};
+}
+
+.borderright {
+    border-right: 1px solid #{{ TEXT_FG }};
+}
+
+.borderleft {
+    border-left: 1px solid #{{ TEXT_FG }};
+}
+
+.bordervert {
+    border-right: 1px solid #{{ TEXT_FG }};
+    border-left: 1px solid #{{ TEXT_FG }};
+}
+
+.borderall {
+    border-right: 1px solid #{{ TEXT_FG }};
+    border-left: 1px solid #{{ TEXT_FG }};
+    border-top: 1px solid #{{ TEXT_FG }};
+    border-bottom: 1px solid #{{ TEXT_FG }};
+}
+
+.borderbottomright {
+    border-right: 1px solid #{{ TEXT_FG }};
+    border-bottom: 1px solid #{{ TEXT_FG }};
+}
+
+.shadow {
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td,th.column {
+    padding: 10px;
+    padding-bottom: 5px;
+}
+
+th {
+    background-color: #{{ COLORS.prim.light.1 }};
+    color: #{{ COLORS.prim.dark.1 }};
+}
+
+img {
+    border: 0px;
+}
+
+#header {
+    position: absolute;
+    height: 100px;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: #{{ COLORS.prim.light.1 }};
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+/* Menu Header */
+
+#headermenu {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin-left: 10%;
+    width: 80%;
+    height: 30px;
+    line-height: 30px;
+    padding-bottom: 0;
+}
+
+
+#headermenu ul#ulheadermenu {
+    list-style: none;
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+#headermenu ul#ulheadermenu ul {
+    position:absolute;
+    left:0;
+    margin:0;
+    padding:0;
+    list-style:none;
+    width: 100%;
+    display: none;
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+#headermenu li.item {
+    width: 100%;
+}
+
+#headermenu li.menu {
+    display: block;
+    position: relative;
+    width: 13%;
+}
+
+#headermenu li {
+    z-index: 500;
+    background-color: #{{ COLORS.prim.dark.1 }};
+    color: #{{ COLORS.prim.light.1 }};
+    float: left;
+    margin-right: 1.5%;
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+}
+
+#headermenu li.last {
+    margin: 0;
+}
+
+#headermenu li:hover, #headermenu li:active {
+    background-color: #{{ COLORS.prim.light.0 }};
+    color: #{{ COLORS.prim.dark.1 }};
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+
+}
+
+#headermenu a {
+    display: block;
+    color: #{{ COLORS.prim.light.1 }};
+}
+
+#headermenu li.menu:hover li a {
+    color: #{{ COLORS.prim.light.1 }};
+}
+
+#headermenu li.menu:hover a,
+#headermenu li.menu:hover li a:hover,
+#headermenu li.menu:hover li a:active {
+    color: #{{ COLORS.prim.dark.1 }};
+}
+
+/* End Menu Header */
+
+
+#headertitle {
+    background-color: #{{ COLORS.prim.light.0 }};
+    color: #{{ COLORS.prim.light.0 }};
+    text-shadow: 1px 1px 8px #{{ COLOR_SHADOW }};
+    letter-spacing: 6px;
+    width: 80%;
+    margin-left: 10%;
+    height: 40px;
+    text-align: center;
+    padding: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font: 2em 'Comic Sans MS', serif;
+}
+
+#content {
+    position: absolute;
+    top: 100px;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    margin-top: 2%;
+}
+
+#largecontent {    
+    position: absolute;
+    top: 20;
+    left: 0;
+    background-color: #{{ TEXT_BG }};
+    width: 80%;
+    margin-left: 10%;
+    min-height: 300px;
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+#right {
+    position: absolute;
+    top: 20px;
+    right: 0;
+    width: 24%;
+    margin-right: 10%;
+    min-height: 300px;
+    background-color: #{{ COLORS.prim.light.1 }};
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+#left {    
+    position: absolute;
+    top: 20px;
+    left: 0;
+    background-color: #{{ TEXT_BG }};
+    width: 54%;
+    margin-left: 10%;
+    min-height: 300px;
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+h1{font-size:150%;}
+h2{font-size:120%;}
+h3{font-size:110%;}
+h4{font-size:100%;}
+h5{font-size:100%;}
+h6{font-size:100%;}
+
+img {
+    vertical-align: middle;
+}
+
+h1 {
+    background-color: #{{ COLORS.prim.light.1 }};
+    color: #{{ COLORS.prim.dark.1 }};
+    padding-left: 1em;
+}
+
+h2 {
+    border-bottom: 1px solid #{{ COLORS.prim.dark.1 }};
+    color: #{{ COLORS.prim.dark.1 }};
+    padding-left: 1em;
+}
+
+h3 {
+    border-bottom: 1px solid #{{ COLORS.prim.light.1 }};
+    color: #{{ COLORS.prim.dark.1 }};
+    padding-left: 1em;
+}
+
+table.index {
+    width: 100%;
+}
+
+table.index th {
+    color: #{{ COLORS.prim.dark.1 }};
+}
+
+table.index td, table.index th {
+    border-bottom: 1px solid #{{ COLORS.prim.dark.1 }};
+}
+
+.icon {
+    width: 32px;
+}
+
+.iconlittle {
+    width: 16px;
+}
+
+#largecontent p {
+    padding: 0.5em;
+    font-size: 80%;
+    padding-left: 50%;
+    text-align: justify;
+}
+
+#largecontent p.subtitle, p.subtitle {
+    font-size: 80%;
+    text-align: right;
+    padding: 0;
+    margin: 0;
+    padding-right: 1em;
+}
+
+#largecontent table {
+    margin: 1em;
+}
+
+.tiny {
+    font-size: 0.7em;
+}
+
+.left {
+    text-align: left;
+}
+
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
+
+.info, table.index th {
+    font-size: 80%;
+}
+
+div.text {
+    margin-left: 1em;
+    margin-right: 1em;
+    margin-bottom: 1em;
+    text-align: justify;
+}
+
+#right ul {
+    list-style: none;
+    margin: 0;
+    padding: 1em;
+    font-size: 80%;
+}
+
+#right li {
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};    
+    padding: 0.5em;
+}
+
+#right li:hover {
+    background-color: #{{ COLORS.prim.dark.1 }};
+    color: #{{ COLORS.prim.light.0 }};
+}
+
+#right a:hover, #right a:active {
+    color: #{{ COLORS.prim.light.1 }};
+}
+
+/** helper **/
+
+table.helper td {
+    vertical-align: top;
+}
+
+table.helper {
+    width: 90%;
+    border-collapse: separate;
+    border-spacing: 1em 1em;
+}
+
+table.helper table th {
+    border-top: 5em solid {{ TEXT_BG }};
+    padding: 5px;
+    padding-bottom: 5px;
+    text-align: left;
+}
+
+table.helper th.actions {
+    font-size: 40%;
+    font-weight: normal;
+    padding: 0;
+    padding-left: 3px;
+}
+
+table.helper th.actions a {
+    display: block;
+    position: relative;
+    padding: 0;
+    background-color: #{{ COLORS.prim.dark.1 }};
+    color: #{{ COLORS.prim.light.1 }};
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+} 
+
+table.helper .menu {
+    display: inline;
+    color: #{{ COLORS.prim.dark.1 }};
+    background-color: #{{ COLORS.prim.light.1 }};
+}
+
+table.helper .menu:hover,
+table.helper .menu:active,
+table.helper th.actions a:hover,
+table.helper th.actions a:active {
+    color: #{{ COLORS.prim.dark.1 }};
+    background-color: #{{ COLORS.prim.light.1 }};
+}
+
+table.helper ul {
+    position: absolute;
+    padding: 0;
+    margin:0;
+    z-index: 500;
+    list-style:none;
+    display: none;
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+table.helper li {
+    padding: 0;
+    margin: 0;
+}
+
+table.inflection {
+    border: 1em solid #{{ TEXT_BG }};
+    border-collapse: separate;
+    border-spacing: 0px;
+}
+
+table.inflection th.hdr {
+    width: 12em;
+}
+
+table.inflection td.spc {
+    min-width: 1em;
+}
+
+table.inflection table {
+    margin: 0;
+    padding: 0;
+    border-collapse: separate;
+    border-spacing: 5px 0px;
+    border: 0px;
+}
+
+table.inflection th, table.inflection td, table.inflection tr {
+    margin: 0;
+    padding: 0;
+}
+
+table.inflection input[type=text].mrule {
+    width: 10em;
+}
+
+table.inflection input[type=text] {
+    width: 15em;
+    font-size: 1em;
+    color: #{{ TEXT_FG }};
+    background-color: #{{ TEXT_BG_DARK }};
+}
+
+table.inflection input[type=text]:focus {
+    background-color: #{{ TEXT_BG }};
+}
+
+td.button {
+    text-align: center;
+    vertical-align: bottom;
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+td.button a {
+    display: block;
+}
+
+td.button:hover,
+td.button a:hover,
+td.button:active,
+td.button a:active {
+    background-color: #{{ COLORS.prim.light.0 }};
+    color: #{{ COLORS.prim.dark.1 }};
+}
+
+td.button:active,
+td.button a:active {
+    box-shadow: inset 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: inset 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: inset 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: inset 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+ul.hmenu {
+    list-style: none;
+    display: block;
+    margin: 0;
+    padding: 0;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+ul.hmenu li {
+    display: block;
+    float: left;
+    margin-right: 1.5%;
+}
+
+li.hmenu:hover, li.hmenu:active, .hmenu a:hover, .hmenu a:active {
+    background-color: #{{ COLORS.prim.light.0 }};
+    color: #{{ COLORS.prim.dark.1 }};
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}
+
+.hmenu a {
+    padding: 2pt;
+    margin: 0;
+    box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -o-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -moz-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+    -webkit-box-shadow: 1px 1px 3px #{{ COLOR_SHADOW }};
+}

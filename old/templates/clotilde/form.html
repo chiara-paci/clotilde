@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - {{ form_title }}{% endblock %}
+
+{% block content %}
+
+<h1>{% block formtitle %}{{ form_title }}{% endblock %}</h1>
+
+{% block preform %}{% endblock %}
+
+{% if form_is_multipart %}
+<form enctype="multipart/form-data" method="post" action="{% block mactionurl %}{% endblock %}">
+{% else %}
+<form method="post" action="{% block actionurl %}{% endblock %}">
+{% endif %}
+{% csrf_token %}
+{% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+{% block customhidden %}{% endblock %}
+
+<center><table class="form">
+  {% if form.non_field_errors %}
+  <tr><th>&nbsp;</th><td class="error" colspan="{% block cspanerror %}1{% endblock %}">{{ form.non_field_errors }}</td></tr>
+  {% endif %}
+	  
+  {% block formfields %}{{ form.as_table }}{% endblock %}
+  <tr><td colspan="{% block cspanend %}2{% endblock %}" class="button">
+      {% block buttons %}
+      <input type="submit" value="{% block actionlabel %}Submit{% endblock %}" name="submit" />
+      <input type="reset"  value="{% trans 'Clean' %}" />
+      {% block addbutton %}
+      {# <input type="submit" value="Cancel" name="submit" /> #}
+      {% endblock %}
+      {% endblock %}
+  </td></tr>
+</table></center>
+
+</form>
+{% block postform %}{% endblock %}
+
+{% endblock %}

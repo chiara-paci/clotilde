@@ -1,0 +1,111 @@
+#! /bin/bash
+
+BASE=/home/chiara
+#BASE=/newbooks/miei
+
+TEXINPUTS=$BASE/spinoza:$TEXINPUTS
+TEXINPUTS=/usr/local/share/texmf:$TEXINPUTS
+#TEXINPUTS=$TEXINPUTS:/home/chiara/src/latex/datatool:/home/chiara/src/latex/xfor
+BSTINPUTS=$BASE/spinoza:$BSTINPUTS
+BIBINPUTS=$BASE/spinoza:$BIBINPUTS
+
+MFINPUTS=$BASE/spinoza/fonts/mfdef:$MFINPUTS
+
+export MFINPUTS TEXINPUTS BIBINPUTS BSTINPUTS
+
+set -e
+
+function help {
+    echo "$0 { -s <num> | -a <num> | -A | -b <num> } <prefix> "
+    echo "-s: solo slide"
+    echo "-a: solo article"
+    echo "-b: solo biblio"
+    echo "-A: tutto (-s 2 -a 2 -b 2 -s 2 -a 2) (default)"
+}
+
+function esegui {
+    cmd="$1"
+    t=$2
+    n=0
+    echo $t
+    while [ $n -lt $t ]
+    do
+	$cmd
+	let n=$n+1
+    done
+}
+
+function slide {
+    p=$1
+    pdflatex $p.slide.tex
+}
+
+function article {
+    p=$1
+    pdflatex $p.article.tex
+}
+
+function biblio {
+    p=$1
+    for i in $( ls $p.*.bbl | sed 's/.bbl//g' )
+    do
+	bibtex $i
+    done
+}
+
+while getopts "As:a:b:h" opzione
+do
+    case $opzione in
+	h) help;exit;;
+	s) fslide=yes;nslide=$OPTARG;;
+	a) farticle=yes;narticle=$OPTARG;;
+	b) fbiblio=yes;nbiblio=$OPTARG;;
+	A) fslide=due;farticle=due;fbiblio=yes;nslide=2;nbiblio=1;narticle=2;;
+    esac
+done
+
+prefix="${!OPTIND}"
+
+if [ ! "$prefix" ]
+then
+    echo "Manca prefisso"
+    help
+    exit
+fi
+
+if [ ! "$fslide$farticle$fbiblio" ]
+then
+    fslide=yes
+    farticle=yes
+    fbiblio=yes
+    nslide=2
+    nbiblio=1
+    narticle=2
+fi
+
+set -x
+if [ "$fslide" ]
+then
+    esegui "slide $prefix" $nslide
+fi
+
+if [ "$farticle" ]
+then
+    esegui "article $prefix" $narticle
+fi
+
+if [ "$fbiblio" ]
+then
+    esegui "biblio $prefix" $nbiblio
+fi
+
+if [ "$fslide" == "due" ]
+then
+    esegui "slide $prefix" $nslide
+fi
+
+if [ "$farticle" == "due" ]
+then
+    esegui "article $prefix" $narticle
+fi
+

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - Helper Italiano{% endblock %}
+
+{% block content %}
+
+<div id="largecontent">
+<h1>Helper Italiano</h1>
+
+<center>
+<table class="helper">
+  <tr>
+    <td width="37%">
+      <table width="100%">
+	<tr class="borderbottom">
+	  <th colspan="2">Dizionario Corpus</th>
+	</tr>
+	{% for c in corpora %}
+	<tr class="borderbottom"><td class="iconlittle left">
+	    <a href="./corpus/dizionario/{{ c.id }}/"><img src="{{ ICON_MINI_CORPUS }}"/></a></td>
+	  <td><a href="./corpus/dizionario/{{ c.id }}/">{{ c }}</a></td></tr>
+	{% endfor %}
+      </table>
+    </td>
+    <td  width="37%">
+      <table width="100%">
+	{% for title,lab,plist,actions in paradigma_cnjs %}
+	<tr class="borderbottom">
+	  <th class="actions"><div class="menu"><img src="{{ ICON_HELP_IT_PARADIGMA_ADD }}"/>
+	      <ul>{% for t,a in actions %}<li><a href="./{{ lab }}/{{ a }}/">{{ t }}</a></li>{% endfor %}</ul></div>
+	  </th>
+	  <th>{{ title }}</th>
+	</tr>
+	{% for p in plist %}
+	<tr class="borderbottom"><td class="iconlittle left"><a href="./{{ lab }}/{{ p.id }}/"><img src="{{ ICON_HELP_IT_PARADIGMA }}"/></a></td>
+	  <td><a href="./{{ lab }}/{{ p.id }}">{{ p }}</a></td></tr>
+	{% endfor %}
+	{% endfor %}
+	<tr><td>&nbsp;<td></tr>
+	{% for title,lab,plist,actions in paradigma_dcls %}
+	{% if forloop.first %}{% else %}<tr><td>&nbsp;<td></tr>{% endif %}
+	<tr class="borderbottom">
+	  <th class="actions"><div class="menu"><img src="{{ ICON_HELP_IT_PARADIGMA_ADD }}"/>
+	      <ul>{% for t,a in actions %}<li><a href="./{{ lab }}/{{ a }}/">{{ t }}</a></li>{% endfor %}</ul></div>
+	  </th>
+	  <th>{{ title }}</th>
+	</tr>
+	{% for p in plist %}
+	<tr class="borderbottom"><td class="iconlittle left"><a href="./{{ lab }}/{{ p.id }}/"><img src="{{ ICON_HELP_IT_PARADIGMA }}"/></a></td>
+	  <td><a href="./{{ lab }}/{{ p.id }}">{{ p }}</a></td></tr>
+	{% endfor %}
+	{% endfor %}
+      </table>
+    </td>
+    <td width="20%" class="tiny">
+      <table>
+	{% for title,plist in paradigma_invs %}
+	{% if forloop.first %}{% else %}<tr><td>&nbsp;<td></tr>{% endif %}
+	<tr class="borderbottom"><th colspan="2">{{ title }}</th></tr>
+	{% for p in plist %}
+	<tr class="borderbottom"><td class="iconlittle left"><img src="{{ ICON_HELP_IT_PARADIGMA }}"/></td>
+	  <td>{{ p }}</td></tr>
+	{% endfor %}
+	{% endfor %}
+      </table>
+    </td>
+  </tr>
+</table>
+</center>
+
+</div>
+
+{% endblock %}

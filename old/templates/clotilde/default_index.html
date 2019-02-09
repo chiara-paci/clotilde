@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - {{ application }}{% endblock %}
+
+{% block content %}
+
+<div id="largecontent">
+<h1>{{ application }}</h1>
+
+{% for obj in objects %}
+<h2>{{ obj.title }}</h2>
+{% with obj.mylist as object_list %}
+{% include obj.template %}
+{% endwith %}
+{% endfor %}
+</div>
+{% endblock %}

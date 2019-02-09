@@ -1,0 +1,59 @@
+\begin{scriptsize}
+\begin{tikzpicture}
+  [x=5mm,y=5mm,node distance=0,
+    %>=triangle 45,
+    stgrid/.style={draw=#1!10,},
+    agrid/.style={stgrid=black},
+    bgrid/.style={stgrid=cyan},
+    anchortab/.style={circle,draw},
+    tab/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!20,
+    },
+    tabtop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1,
+    },
+    tabsoft/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!5,
+    },
+    tabsofttop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1!25,
+    },
+    multirel/.style={tab=gray},
+    multireltop/.style={tabtop=gray},
+    alpha/.style={tab=green},
+    alphatop/.style={tabtop=green},
+    morph/.style={tab=blue},
+    morphtop/.style={tabtop=blue},
+    syntax/.style={tab=yellow},
+    syntaxtop/.style={tabtop=yellow},
+    lexicon/.style={tab=red},
+    lexicontop/.style={tabtop=red},
+  ]
+
+  \begin{dbtabella}{alpha}{0}{3}{8}{1}{\alphapref}{tokenregexpset}
+    \tablerow{name}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{0}{-8}{8}{2}{\alphapref}{tokenregexp}
+    \tablerow{name}{varchar(1024)}
+    \tablerow{regexp}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{2}{-1}{9}{4}{\alphapref}{tokenregexpsetthrough}
+    \tablerow{order}{integer}
+    \tablerow{disabled}{boolean}
+    \tablelink[left]{token regexp set}{tokenregexpset}
+    \tablelink[left]{token regexp}{tokenregexp}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{-15}{5}{9}{3}{\alphapref}{language}
+    \tablerow{name}{varchar(1024)}
+    \tablelink{token regexp set}{tokenregexpset}
+    \tablelink{period sep}{tokenregexp}
+  \end{dbtabella}
+\end{tikzpicture}
+\end{scriptsize}

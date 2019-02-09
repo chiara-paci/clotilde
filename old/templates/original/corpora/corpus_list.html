@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - {{ application }} {{ object.title }}{% endblock %}
+
+{% block centercontent %}
+
+<h1>Corpus</h1>
+
+<ul>
+{% for c in corpus_list %}
+<li><a href="{{ c.get_absolute_url }}">{{ c }}</a> ({{ c.language }})</li>
+{% endfor %}
+</ul>
+
+
+{% endblock %}

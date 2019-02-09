@@ -1,0 +1,16 @@
+  <th class="borderbottomright">singolare</th>
+  <td class="borderbottomright">
+    <table id="singolaremaschile">
+      {% for t,flag in example.singolaremaschile %}
+      <tr><td>{% if flag %}<b>{{ t }}</b>{% else %}{{ t }}{% endif %}</td></tr>
+      {% endfor %}
+    </table>
+  </td>
+  <td class="borderbottomright">
+    <table id="singolarefemminile">
+      {% for t,flag in example.singolarefemminile %}
+      <tr><td>{% if flag %}<b>{{ t }}</b>{% else %}{{ t }}{% endif %}</td></tr>
+      {% endfor %}
+    </table>
+  </td>
+

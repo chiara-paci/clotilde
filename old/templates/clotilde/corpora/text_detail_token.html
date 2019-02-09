@@ -1,0 +1,55 @@
+{% extends "corpora/text_detail_parsed.html" %}
+{% load i18n %}
+
+{% block script %}
+{% include "corpora/includes/scripts/text_detail_token.js" %}
+{% endblock script %}
+
+{% block css %}
+<style>
+{% for name,label,fg,bg in style_list %}
+.{{ label }} {
+    color: {{ fg }};
+    background-color: {{ bg }};
+}
+{% endfor %}
+
+.not-found {
+    color: #ffffff;
+    background-color: #900000;
+}
+</style>
+{% endblock %} 
+
+{% block legend %}
+<table>
+{% for name,label,fg,bg in style_list %}
+<tr class="{{ label }}">
+  <td class="hmenu"><a href="" id="hide{{ label }}">hide</a></td>
+  <td>{{ name }}</td> 
+</tr>
+{% endfor %}
+<tr class="not-found">
+  <td class="hmenu"><a href="" id="hidenotfound">hide</a></td>
+  <td>not matched (alpha level)</td> 
+</tr>
+</table>
+{% endblock %}
+
+
+{% block outputview %}
+
+<div class="text">
+<ul class="hmenu">
+<li><a href="" id="showall">show all</a></li>
+<li><a href="" id="showtoken">show valid token</a></li>
+<li><a href="" id="shownottoken">show invalid token</a></li>
+</ul>
+
+<br/>
+
+<table>
+{% include rowtemplate %}
+</table>
+</div>
+{% endblock %}

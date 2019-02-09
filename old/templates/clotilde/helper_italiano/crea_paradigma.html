@@ -1,0 +1,12 @@
+{% extends "form.html" %}
+{% load i18n %}
+
+{% block actionlabel %}Crea{% endblock %}
+
+{% block formfields %}
+{{ formset.management_form }}
+<tr><th>oid</th><th>pattern</th><th>&nbsp;</th><th>replacement</th><th>dict_entry</th></tr>
+{% for form in formset.forms %}
+<tr><td>{{ form.oid }}</td><td>{{ form.pattern }}</td><td>&#8614;</td><td>{{ form.replacement }}</td><td>{{ form.dict_entry }}</td></tr>
+{% endfor %}
+{% endblock %}

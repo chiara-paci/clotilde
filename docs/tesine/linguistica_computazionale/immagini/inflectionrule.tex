@@ -1,0 +1,68 @@
+\begin{scriptsize}
+\begin{tikzpicture}
+  [x=5mm,y=5mm,node distance=0,
+    %>=triangle 45,
+    stgrid/.style={draw=#1!10,},
+    agrid/.style={stgrid=black},
+    bgrid/.style={stgrid=cyan},
+    anchortab/.style={circle,draw},
+    tab/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!20,
+    },
+    tabtop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1,
+    },
+    tabsoft/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!5,
+    },
+    tabsofttop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1!25,
+    },
+    multirel/.style={tab=gray},
+    multireltop/.style={tabtop=gray},
+    alpha/.style={tab=green},
+    alphatop/.style={tabtop=green},
+    morph/.style={tab=blue},
+    morphtop/.style={tabtop=blue},
+    syntax/.style={tab=yellow},
+    syntaxtop/.style={tabtop=yellow},
+    lexicon/.style={tab=red},
+    lexicontop/.style={tabtop=red},
+  ]
+
+  \begin{dbtabella}{morph}{15}{14}{9}{2}{morphology}{regexpreplacement}
+    \tablerow{pattern}{varchar(1024)}
+    \tablerow{replacement}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{15}{18}{7}{1}{\alphapref}{description}
+    \tablerow{name}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{15}{6}{8}{1}{\alphapref}{partofspeech}
+    \tablerow{name}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{3}{20}{9}{3}{morphology}{inflection}
+    \tablerow{dict entry}{boolean}
+    \tablelink{description}{description}
+    \tablelink{regsub}{regexpreplacement}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{3}{8}{9}{3}{morphology}{paradigma}
+    \tablerow{name}{varchar(1024)}
+    \tablelink{part of speech}{partofspeech}
+    \tablerow{language}{f.k. language}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{5}{13}{8}{2}{\alphapref}{}
+    \tablelink[left]{inflection}{inflection}
+    \tablelink[left]{paradigma}{paradigma}
+  \end{dbtabella}
+
+\end{tikzpicture}
+\end{scriptsize}

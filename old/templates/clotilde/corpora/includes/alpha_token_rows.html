@@ -1,0 +1,8 @@
+{% for lab,type,tok in token_list %}
+{% if lab == "not-found" %}
+  <tr class="{{ lab }} nottoken">
+{% else %}
+  <tr class="{{ lab }} token">
+{% endif %}
+    <td class="{{ lab }}">{{ tok|safe }}</td><td class="{{ lab }}">{{ type }}</td></tr>
+{% endfor %}

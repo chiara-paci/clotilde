@@ -1,0 +1,58 @@
+#! /bin/bash
+
+BASE=/home/chiara
+
+TEXINPUTS=$BASE/spinoza:$TEXINPUTS
+BSTINPUTS=$BSTINPUTS:$BASE/spinoza
+BIBINPUTS=$BIBINPUTS:$BASE/spinoza
+export MFINPUTS TEXINPUTS BIBINPUTS BSTINPUTS
+
+THOME=$BASE/tesi/archivio
+MAIN=main
+
+set -e
+
+function help {
+    echo "$0 { -A | -t <num> | -b <num> } "
+    echo "A: tutto"
+}
+
+function esegui {
+    cmd="$1"
+    t=$2
+    n=0
+    echo $t
+    while [ $n -lt $t ]
+    do
+	$cmd
+	let n=$n+1
+    done
+}
+
+function biblio {
+    p=$1
+    for i in $( ls $p*.bbl | sed 's/.bbl//g' )
+    do
+	bibtex $i
+    done
+}
+
+while getopts "As:a:b:h" opzione
+do
+    case $opzione in
+	h) help;exit;;
+	s) fslide=yes;nslide=$OPTARG;;
+	a) farticle=yes;narticle=$OPTARG;;
+	b) fbiblio=yes;nbiblio=$OPTARG;;
+	A) fslide=due;farticle=due;fbiblio=yes;nslide=2;nbiblio=1;narticle=2;;
+    esac
+done
+
+prefix=main
+
+OPWD=$(pwd)
+
+cd $THOME
+pdflatex $MAIN
+
+cd $OPWD

@@ -1,0 +1,117 @@
+\newcommand\drawover[2]{
+  \draw[lineback] ($0.75*#1+0.25*#2$) to ($0.75*#2+0.25*#1$);
+  \draw[grid] #1 to #2;
+}
+
+\newcommand\drawcontrasto[4]{
+  \draw[<->] #1 to #2;
+  \draw #1 -- node[fill=white,sloped]{\tiny #3} ($0.5*#1+0.5*#2$);
+  \draw ($0.5*#1+0.5*#2$) -- node[fill=white,sloped]{\tiny #4} #2;
+}
+
+\begin{tikzpicture}
+  [x=5em,y=3.2em,node distance=3,
+    >=triangle 45,
+    lineback/.style={-,draw=white,line width=4pt},
+    linearm/.style={line width=1pt,draw=#1},
+    linedue/.style={linearm=red},
+    linequattro/.style={linearm=blue},
+    lineee/.style={linearm=green},
+    grid/.style={-,draw=black!20},
+    vocale/.style={circle,%drop shadow,
+      text height=1.5ex, text depth=.25ex,
+      thick,draw=#1!50!black!50,
+      top color=white, 
+      bottom color=#1!10},
+    vocale/.default=black,
+    vocaledue/.style={vocale=green},
+    %sistemagen/.style={sistema,draw=black!50,
+    %  top color=white, bottom color=black!50}
+  ]
+  \node[vocale] (e) {e};
+  \node[vocale] (oo) at ($(e)+(2,1.5)$) {ö};
+
+  \node[vocale] (a) [right=of e] {a};
+  \node[vocale] (i) [above=of e] {i};
+  \node[vocale] (ii) [above=of a] {ı};
+
+  \node[vocale] (o)  [right=of oo] {o};
+  \node[vocale] (uu) [above=of oo] {ü};
+  \node[vocale] (u)  [above=of o] {u};
+  \node[vocale] (schwa) at ($0.5*(uu)+0.5*(a)$) {ə};
+  \node[vocale] (ae) at ($0.5*(e)+0.5*(a)-(0,1)$) {ä};
+
+  \draw[grid] (uu) to (u);
+  \draw[grid] (uu) to (oo);
+  \draw[grid] (o) to (oo);
+  \draw[grid] (o) to (u);
+
+  \draw[grid] (i) to (uu);
+  \draw[grid] (ii) to (u);
+  \draw[grid] (a) to (o);
+  \draw[grid] (e) to (oo);
+  \draw[grid] (e) to (a);
+  \draw[grid] (e) to (i);
+
+  \draw[grid] (a) to (ae);
+  \draw[grid] (e) to (ae);
+
+  \drawcontrasto{(oo)}{(uu)}{bassa}{alta};
+  \drawcontrasto{(o)}{(u)}{bassa}{alta};
+  \drawcontrasto{(oo)}{(o)}{\anteriore}{\posteriore};
+  \drawcontrasto{(uu)}{(u)}{\anteriore}{\posteriore};
+  \drawcontrasto{(e)}{(oo)}{non labiale}{labiale};
+
+  \draw[grid] (oo) to (schwa);
+  \draw[grid] (ii) to (schwa);
+  \draw[grid] (uu) to (schwa);
+  \draw[grid] (a) to (schwa);
+  \draw[grid] (i) to (schwa);
+  \draw[grid] (o) to (schwa);
+  \draw[grid] (u) to (schwa);
+  \draw[grid] (e) to (schwa);
+
+
+  \drawover{(i)}{(ii)};
+  \drawover{(a)}{(ii)};
+
+  \drawcontrasto{(e)}{(a)}{\anteriore}{\posteriore};
+  \drawcontrasto{(i)}{(ii)}{\anteriore}{\posteriore};
+
+  \drawcontrasto{(e)}{(i)}{bassa}{alta};
+  \drawcontrasto{(a)}{(ii)}{bassa}{alta};
+
+  \drawcontrasto{(i)}{(uu)}{non labiale}{labiale};
+  \drawcontrasto{(a)}{(o)}{non labiale}{labiale};
+  \drawcontrasto{(ii)}{(u)}{non labiale}{labiale};
+
+  \node[vocale] (ee) at ($0.5*(e)+0.5*(i)$) {ė};
+
+  \draw[linedue] ($0.5*(u)+0.5*(uu)$) ellipse (2.5 and 0.5);
+  \draw[linedue] ($0.5*(i)+0.5*(ii)$) ellipse (2.5 and 0.5);
+  \draw[linedue] ($0.5*(a)+0.5*(e)$) ellipse (2.5 and 0.5);
+
+  \node at ($(uu)+(-1,0.5)$) {\color{red}\{w\}};
+  \node at ($(i)+(-1,0.5)$) {\color{red}\{i\}};
+  \node at ($(e)+(-1,0.5)$) {\color{red}\{a\}};
+  \node at ($(i)+(0.2,1)$) {\color{blue}\{x\}};
+
+  \draw[linequattro] ($(uu)+(-0.4,0)$) 
+  .. controls ($(uu)+(-0.4,0.4)$) and ($(uu)+(0,0.4)$) 
+  .. ($(uu)+(0.4,0.2)$)
+  .. controls ($(uu)+(0.8,0)$) and ($(u)+(-0.8,0)$) 
+  .. ($(u)+(-0.4,0.2)$) 
+  .. controls ($(u)+(0,0.4)$) and ($(u)+(0.4,0.4)$) 
+  .. ($(u)+(0.3,-0.2)$) 
+  .. controls ($(u)+(0,-0.8)$) and ($(ii)+(0.4,0.4)$) 
+  .. ($(ii)+(0.4,0)$) 
+  .. controls ($(ii)+(0.4,-0.4)$) and ($(ii)+(0,-0.4)$) 
+  .. ($(ii)+(-0.4,-0.2)$)
+  .. controls ($(ii)+(-0.8,0)$) and ($(i)+(+0.8,0)$) 
+  .. ($(i)+(0.4,-0.2)$)
+  .. controls ($(i)+(0,-0.4)$) and ($(i)+(-0.4,-0.4)$) 
+  .. ($(i)+(-0.3,0.2)$) 
+  .. controls ($(i)+(0,0.8)$) and ($(uu)+(-0.4,-0.4)$) 
+  .. ($(uu)+(-0.4,0)$) 
+  ;
+\end{tikzpicture}

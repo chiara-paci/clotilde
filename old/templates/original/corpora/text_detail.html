@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load santa_clara_editor %}
+{% block title %} - {{ application }} {{ text }}{% endblock %}
+
+{% block centercontent %}
+
+<h1>{{ text }}</h1>
+
+<p class="subtitle">{{ text.author }}, {{ text.pub_date|date:"j b Y" }} {{ text.pub_date|time:"H:i" }}, {{ text.length }} characters</p>
+<div class="text">
+{% block output %}
+{{ text.text_br|santa_clara_lang }}
+{% endblock %}
+</div>
+{% endblock %}
+
+{% block applicationmenu %}
+<ul>
+  <li><a href="{{ text.get_absolute_url }}/"><i class="icon-circle{% if not phase_text %}-blank{% endif %}"></i> Text</a></li>
+  <li><a href="{{ text.get_absolute_url }}/alpha_parser/"><i class="icon-circle{% if not phase_alpha_p %}-blank{% endif %}"></i> Alpha parser</a></li>
+  <li><a href="{{ text.get_absolute_url }}/alpha_token/"><i class="icon-circle{% if not phase_alpha_t %}-blank{% endif %}"></i> Alpha token list</a></li>
+  <li><a href="{{ text.get_absolute_url }}/morphological_parser/"><i class="icon-circle{% if not phase_morph_p %}-blank{% endif %}"></i> Morphological parser</a></li>
+  <li><a href="{{ text.get_absolute_url }}/morphological_token/"><i class="icon-circle{% if not phase_morph_t %}-blank{% endif %}"></i> Morphological token list</a></li>
+  <li><a href="{{ text.get_absolute_url }}/syntax_parser/"><i class="icon-circle{% if not phase_syntax_p %}-blank{% endif %}"></i> Syntax parser</a></li>
+</ul>
+{% endblock %}

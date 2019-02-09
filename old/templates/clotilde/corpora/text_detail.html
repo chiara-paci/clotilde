@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load contents_extra %}
+{% block title %} - {{ application }} {{ text }}{% endblock %}
+
+{% block centercontent %}
+
+<h1>{{ text }}</h1>
+
+<!--
+<p class="subtitle">{{ text.author }}, {{ text.pub_date|date:"j b Y" }} {{ text.pub_date|time:"H:i" }}, {{ text.length }} characters</p>
+-->
+
+{% block output %}
+<div class="text">{{ text.text_br|santa_clara_lang }}</div>
+{% endblock %}
+
+{% endblock %}
+
+{% block applicationmenu %}
+<ul>
+  <li><a href="{{ text.get_absolute_url }}/"><img src="{{ ICON_ACTION }}"/> Text</a></li>
+  <li><a href="{{ text.get_absolute_url }}/alpha_parser.html"><img src="{{ ICON_ACTION }}"/> Alpha parser</a></li>
+  <li><a href="{{ text.get_absolute_url }}/alpha_token.html"><img src="{{ ICON_ACTION }}"/> Alpha token list</a></li>
+  <li><a href="{{ text.get_absolute_url }}/morphological_parser.html"><img src="{{ ICON_ACTION }}"/> Morphological parser</a></li>
+  <li><a href="{{ text.get_absolute_url }}/morphological_token.html"><img src="{{ ICON_ACTION }}"/> Morphological token list</a></li>
+  <li><a href="{{ text.get_absolute_url }}/syntax_parser.html"><img src="{{ ICON_ACTION }}"/> Syntax parser</a></li>
+</ul>
+{% endblock %}

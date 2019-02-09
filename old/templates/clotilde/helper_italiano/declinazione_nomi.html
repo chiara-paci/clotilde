@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - Helper Italiano{% endblock %}
+
+{% block script %}
+{% include "helper_italiano/includes/scripts/declinazione_nomi.js" %}
+{% endblock %}
+
+{% block content %}
+
+<div id="largecontent">
+<h1>{{ par }}</h1>
+
+<center>
+<table class="shadow inflection">
+<tr>
+  <td colspan="4">&nbsp;</td>
+  <td class="button" rowspan=2 id="refresh"><img src="{{ ICON_RECYCLE }}"/></td>
+  <td colspan="3" class="right bottom"><span class="note">stem</span></td>
+</tr>
+<tr>
+  <td colspan="4">&nbsp;</td>
+  <td colspan="3" class="right top"><input type="text" id="stem" value="{{ stem }}"/></td>
+</tr>
+<tr><td colspan="7">&nbsp</td></tr>
+<tr>
+  <td class="borderbottomright">&nbsp</td><th class="hdr borderbottomright">maschile</th><th class="hdr borderbottomright">femminile</th>
+  <td rowspan="3" class="spc">&nbsp</td>
+  <td class="borderbottomright">&nbsp</td><th class="hdr borderbottomright">maschile</th><th class="hdr borderbottomright">femminile</th>
+</tr>
+<tr><th class="borderbottomright">singolare</th>
+
+{% with "helper_italiano/includes/example_declinazione_nome_singolare.html" as incl_singolare %}
+{% with "helper_italiano/includes/example_declinazione_nome_plurale.html" as incl_plurale %}
+{% include "helper_italiano/includes/declinazione_gender_number.html" %}
+{% endwith %}{% endwith %}
+
+</table>
+
+
+</center>
+</div>
+
+{% endblock %}

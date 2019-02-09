@@ -1,0 +1,1481 @@
+\documentclass[twoside,stylearticle,11pt,filologia,it,article,bibsection]{spinoza}
+
+\def\titolo{Progetto di un'applicazione per la raccolta di
+  informazioni linguistiche da documenti storici d'archivio:
+  discussione generale e database morfologico.}
+\def\marktitolo{Progetto di un'applicazione per la raccolta di
+  informazioni} \def\autore{Chiara Paci} \def\markautore{Chiara Paci}
+\def\parttitolo{\titolo} \def\spzbibdirectory{}
+
+\let\bibstampa\btPrintCited
+%\let\bibstampa\btPrintAll
+
+\pdfinfo{
+/Title (\marktitolo)
+/Author (\autore)
+}
+
+\newcommand\cafer{Ca\Ayn{}fer}
+
+\newcommand\beylerbey{{\it beylerbeyi}}
+
+\newcommand\Pasha{Paşa}
+
+%%%% da trasferire in spz*
+
+\newcommand\spzradless[1]{#1\hspace{.2mm}{\scriptsize $\vdash$}}
+\newcommand\spzradtema[1]{#1-}
+
+\newcommand\spzmcompder{\rightrightarrows}
+\newcommand\spzmsussume{\sqsupseteq}
+\newcommand\spzmsussunto{\sqsubseteq}
+\newcommand\spzmunify{\cup}
+\newcommand\spzmregsub{\star}
+\newcommand\spzmconcat{\sum}
+\newcommand\spzmbnf{→}
+
+\newcommand\spzcompder{$\spzmcompder$}
+\newcommand\spzsussume{$\spzmsussume$}
+\newcommand\spzsussunto{$\spzmsussunto$}
+\newcommand\spzunify{$\spzmunify$}
+\newcommand\spzregsub{$\spzmregsub$}
+\newcommand\spzconcat{$\spzmconcat$}
+\newcommand\spzbnf{→}
+
+\newenvironment{lingmeq}{\begin{lingeq}\[}{\]\end{lingeq}}
+
+\usepackage{enumitem}
+\setlist{nolistsep}
+
+%% rivedere gli spazi pre o post lingeq
+
+\begin{document}
+
+\input{immagini/common}
+
+\mktitolo{\autore}{\titolo}
+
+I documenti d'archivio, di solito considerati per il valore storico,
+rappresentano dal punto di vista linguistico una finestra sulla lingua
+comune non letteraria dei secoli passati, anche se non strettamente
+colloquiale: si tratta per lo più di testi commerciali o diplomatici
+formalmente corretti e scritti da persone colte.
+
+Lo strumento che si vuole realizzare servirà ad agevolare la raccolta
+dei fatti linguistici da questi documenti, in modo da minimizzare gli
+errori e i passi ripetitivi. 
+
+Si è ritenuto più utile concentrarsi sul come strutturare i dati da
+raccogliere piuttosto che sulla logica dell'applicazione per l'analisi
+dei testi o la reportistica (\vedi \sezione{sec:scopo}), in quanto la
+seconda è molto più facile da modificare e adattare una volta definita
+la base dati. Ma è ovvio che la definizione della base dati non può
+del tutto prescindere da come questi dati verranno poi
+utilizzati.
+
+Questo lavoro, che è solo una fase iniziale del progetto, comprende
+l'analisi preliminare e la realizzazione del modulo per le regole
+morfologiche (\vedi \sezione{sec:struttura}).\footnote{Un
+  prototipo del programma, a cui si riferiscono gli esempi, è stato
+  realizzato col framework Django 2.2 \spzcite{django}. Il motore di
+  database usato è PostgreSQL 8.4.11 \spzcite{postgresql} e il
+  linguaggio di programmazione è Python 2.6 \spzcite{python}. Il
+  framework Django è stato scelto perché, pur mantenendosi fedele alla
+  struttura di un database relazionale, si preoccupa di gestire i
+  passi ripetitivi (ad esempio la creazione di tabelle intermedie per
+  le relazioni molti a molti).}
+
+\section{Scopo e vincoli dell'applicazione}
+\label{sec:scopo}
+
+L'applicazione agisce in modo supervisionato:
+\begin{enumerate}
+\item l'utente definisce le regole base di parsing, stabilendo come
+  individuare le parole e cosa delimita i periodi;
+\item l'utente trascrive un documento come testo senza tag, a parte
+  quelli di formattazione (allineato a destra o sinistra,
+  sottolineato, ecc.); i tag di formattazione sono definiti dal
+  programma;
+\item l'utente imposta delle regole grammaticali e inserisce
+  informazioni sul lessico;
+\item il programma analizza il testo, riportando se e come le regole
+  vengono verificate dal testo;
+\item l'utente aggiusta le regole finché non sono conformi al testo,
+  dopodiché passa al documento successivo.
+\end{enumerate}
+
+Il programma finale dovrà essere in grado di:
+\begin{itemize}
+\item dato un insieme di documenti, individuare quali regole lo
+  riguardano (e solo quelle) e quali parti non corrispondono a nessuna
+  regola;
+\item data una regola o un vocabolo, rintracciare in quali documenti
+  vengono usati e riportare esempi di uso;
+\item stilare una grammatica e un dizionario di un insieme di documenti;
+\item raccogliere dati per più lingue.
+\end{itemize}
+
+I testi devono essere forniti in modo omogeneo e pulito al programma:
+rimane compito dell'utente sistemarli in modo che siano analizzabili,
+per esempio introducendo degli spazi o dei segni di interpunzione per
+quelle lingue che non li prevedono. L'utente è libero di scegliere
+cosa o come inserire, ma al minimo devono essere forniti al programma
+(\vedi \sezione{sec:parsing}):
+\begin{itemize}
+\item uno o più delimitatori di periodo;
+\item regole univoche su come separare le parole.
+\end{itemize}
+
+Regole grammaticali e lessico vengono desunte dai documenti, ma spesso
+sono integrate da uno studio collaterale su materiale di riferimento
+(dizionari, grammatiche, altri documenti, precedenti ricerche, ecc.):
+l'utente può quindi inserire più regole di quelle necessarie (per
+esempio, può introdurre l'intero paradigma di un verbo anche se nel
+documento compare una sola voce). In questo caso, nell'output finale
+il programma escluderà tutto quello che non trova riscontro nei
+documenti.
+
+\section{Considerazioni preliminari}
+\label{sec:struttura}
+
+\subsection{Schema generale dell'applicazione}
+
+In \figura{fig:schema} è riportato lo schema di tutta l'applicazione:
+la parte centrale rappresenta il database. L'applicazione ha dei
+moduli pressoché indipendenti per l'esecuzione dei vari compiti,
+ognuno dei quali utilizza il database in modo diverso.
+
+\myfig{Schema dell'applicazione.}{\input{immagini/schema.tex}}{fig:schema}
+
+\subsubsection{La base dati}
+
+La base dati è di tipo relazionale, ossia mantiene i dati in forma
+tabellare e definisce relazioni tra le tabelle.\footnote{Ogni riga di
+  una tabella è detta anche {\it record}, ogni colonna è detta anche
+  {\it campo} ed è di un tipo predefinito (intero, float, stringa,
+  boolean, ecc.). Ogni record contiene uno e un solo valore per ogni
+  campo.
+
+Esistono tre tipi di relazioni fra i dati di due tabelle A e B:
+\begin{itemize}
+\item {\it relazione uno a uno}, quando ad ogni record della tabella A
+  corrisponde uno e un solo record della tabella B: in questo caso, la
+  tabella B ha un campo che contiene l'identificativo di un record
+  della tabella A e questo campo ha il vincolo di essere
+  unico;
+\item {\it relazione uno a molti}, quando un record della tabella A
+  può corrispondere a più di un record della tabella B: in questo
+  caso, la tabella B ha un campo che contiene l'identificativo di un
+  record della tabella A, ma questo campo non ha il vincolo di essere
+  unico e il valore contenuto può essere ripetuto;
+\item {\it relazione molti a molti}, quando un record della tabella A
+  può corrispondere a più di un record della tabella B e viceversa: in
+  questo caso, esiste un ulteriore tabella C (detta {\it tabella di
+    relazione}) che ha due campi, uno che contiene l'identificativo di
+  un record della tabella A e un altro che contiene l'identificativo
+  di un record della tabella B; la tabella di relazione può contenere
+  anche dati aggiuntivi che contribuiscono a definire la relazione.
+\end{itemize}
+} 
+
+Le caratteristiche che hanno fatto scegliere un database relazionale,
+rispetto alle alternative, sono:
+\begin{itemize}
+\item la possibilità di definire relazioni tra i dati anche complesse
+  (si veda, per esempio, la definizione di descrizione in
+  \sezione{sec:descrdb});
+\item la possibilità di gestire in modo efficiente grandi quantità di
+  dati, grazie soprattutto a ottimizzazioni nei prodotti e tecniche
+  consolidate di definizione dei dati e programmazione: allo stato
+  attuale è possibile con un computer personale eseguire query su
+  tabelle con decine di milioni di record pressoché in tempo reale.
+\end{itemize}
+
+Questi vantaggi si pagano con una certa rigidità dei dati dovuta alla
+forma tabellare: un record avrà sempre quel numero e quel tipo di
+campi. A questo si può ovviare usando le relazioni e defininendo un
+oggetto con più di una tabella: il database risulta più complesso,
+però anche qui è possibile usare tecniche di programmazione e librerie
+che consentono di gestire la complessità.
+
+\subsubsection{Inserimento dei dati}
+
+In fase di inserimento sono previsti più moduli per agevolare l'utente
+nell'inserire i dati. Questi moduli sono tanto più necessari quanto
+più la rappresentazione dei dati è astratta. Per esempio, una forma
+verbale (poniamo la prima persona singolare dell'indicativo presente)
+potrebbe essere descritta da una struttura di questo tipo (\vedi
+\sezione{sec:descrizioni}):
+\begin{lingmeq}
+\left[\begin{array}{lll}
+\text{tempo} &=& \text{presente}\\
+\text{modo} &=& \text{indicativo}\\
+\text{persona} &=&\left[\begin{array}{lll}
+\text{persona} &=& \text{prima}\\
+\text{numero} &=& \text{singolare}\\
+\end{array}\right]
+\end{array}\right].
+\end{lingmeq}
+\noindent È chiaro che diventa tedioso dover inserire questa
+descrizione per ogni voce verbale che si definisce: serve quindi un
+modulo che consenta all'utente di inserire le varie forme di un
+paradigma verbale, preoccupandosi di completare le informazioni e
+inserirle nel database. Questi moduli non potranno essere generici, ma
+saranno specifici per una data lingua (o per un gruppo di lingue
+simili).
+
+Niente vieta, inoltre, di scrivere moduli in grado di importare dati
+da altre applicazioni o di generarli in modo automatico.
+
+\subsubsection{L'analisi}
+
+L'analisi si comporta come una successione di filtri: ogni passo
+riceve in input una sequenza di token e produce in output un'altra
+sequenza di token. Un token è un oggetto che associa porzioni di testo
+a informazioni specifiche del livello di analisi.
+
+Per esempio, la sequenza {\it la panchina del parco} viene suddivisa
+dal parser preliminare:
+\begin{lingeq}
+\begin{tabular}{ll}
+$p_1$=(`la',stringa), $p_2$=(` ',spazio), $p_3$=(`panchina',stringa), $p_4$=(` ',spazio),\\
+  $p_5$=(`del',stringa), $p_6$=(` ',spazio), $p_7$=(`parco',stringa) ,\\
+\end{tabular}
+\end{lingeq}
+\noindent dall'analizzatore morfologico (tralasciando i dettagli):
+\begin{lingeq}
+\begin{tabular}{ll}
+$m_1$=($p_1$,articolo), $m_2$=($p_2$,non-parola), $m_3$=($p_3$,nome),\\
+  $m_4$=($p_4$,non-parola), $m_5$=($p_5$,preposizione), $m_6$=($p_5$,articolo),\\
+  $m_7$=($p_6$,non-parola), $m_8$=($p_7$,nome),\\
+\end{tabular}
+\end{lingeq}
+\noindent e da quello sintattico (anche qui semplificato):\footnote{I
+  sintagmi sono indicati con le convenzioni definite in
+  \spzcite{cecchetto2002}.}
+\begin{lingeq}
+$s_1$=(($m_1$,$m_2$,$m_3$),NP), $s_2$=(($m_4$,$m_5$),PP), $s_3$=(($m_6$,$m_7$,$m_8$), NP).
+\end{lingeq}
+
+\subsubsection{Tabelle primarie e derivate}
+
+Le regole  grammaticali non vengono definite  per oggetti linguistici,
+ma per classi:  ad esempio, ci sarà una regola  che stabilisce che per
+tutti  i verbi  regolari  della prima  coniugazione  la prima  persona
+singolare del presente indicativo sarà  in `-o', ma non una regola che
+dica che per il verbo  `amare' questa voce sarà `amo'. Quindi l'utente
+inserirà da  una parte la regola per  le voci di un  verbo della prima
+coniugazione, dall'altra  il verbo `amare'  classificandolo come della
+prima coniugazione. L'associazione è  in questo caso implicita e retta
+dalle       descrizioni       dei       due       oggetti       (\vedi
+\sezione{sec:descrizioni}). Queste tabelle su cui agisce l'utente sono
+        {\it primarie}.
+
+L'applicazione (nello specifico il modulo di analisi morfologica) ha
+però bisogno di utilizzare una relazione esplicita, cioè ha bisogno di
+sapere che la voce `amo' corrisponde al verbo `amare' e alla regola
+`prima persona singolare presente indicativo'. È necessario quindi
+prevedere un passaggio in più tra l'inserimento dei dati e l'analisi,
+che si preoccupi di precalcolare le relazioni esplicite e salvarle in
+tabelle apposite (le tabelle {\it derivate}).
+
+\subsection{Descrizioni}
+
+\label{sec:descrizioni}
+
+Per classificare i vari oggetti linguistici si ricorre a {\it
+  descrizioni}, ad esempio:
+
+\begin{lingmeq}
+\label{leq:descesempio}
+\left[\begin{array}{lll}
+\text{modo}&=&\text{indicativo}\\
+\text{tempo}&=&t\\
+\text{persona}&=&\left[\begin{array}{lll}
+  \text{persona}&=&\text{prima}\\
+  \text{numero}&=&\text{singolare}\\
+\end{array}\right]\\
+\end{array}\right]
+\end{lingmeq}
+
+Si tratta di un insieme di coppie attributo/valore, dove un valore può
+essere una costante, una variabile (indicate in corsivo in
+\leqref{leq:descesempio}) o un'altra descrizione. Le operazioni
+possibili su una coppia di descrizioni sono la {\it sussunzione} e
+l'{\it unificazione} 
+\spzcitedue{11-15}{kay1992}{33-34}{fenstad1992}.
+
+Una descrizione $B$ {\it sussume} $A$ ($B \spzmsussume A$ o $A
+\spzmsussunto B$) quando:
+
+\begin{enumerate}
+\item $B$ ha tutti gli attributi definiti in $A$ (può averne
+  di più);
+\item se un attributo in $A$ e in $B$ ha come valore una variabile o
+  una costante, i due valori devono essere uguali;
+\item se un attributo in $A$ ha come valore una descrizione $A_1$, in
+   $B$ deve avere una descrizione $B_1$, e $A_1 \spzmsussunto B_1$.
+\end{enumerate}
+
+L'{\it unificazione} di $A$ e $B$ ($A\spzmunify B$) è la minima descrizione
+$C$ che sussume sia $A$ che $B$. In pratica, se $C=A\spzmunify B$, allora:
+\begin{enumerate}
+\item $C$ contiene tutti gli attributi di $A$ e $B$;
+\item per gli attributi che compaiono solo in $A$, il valore in $C$ è
+  quello in $A$;
+\item per gli attributi che compaiono solo in $B$, il valore in $C$ è
+  quello in $B$;
+\item per gli attributi che compaiono sia in $A$ che in $B$ e hanno
+  come valore una costante o una variabile, i due valori devono essere
+  uguali; se non lo sono l'unificazione {\it fallisce}, se lo sono il
+  valore in $C$ è lo stesso che in $A$ e $B$;
+\item per gli attributi che compaiono sia in $A$ che in $B$ e hanno
+  come valore una descrizione (rispettivamente $A_1$ e $B_1$), il
+  valore in $C$ è la descrizione $C_1=A_1\spzmunify B_1$; se l'unificazione
+  $A_1\spzmunify B_1$ fallisce, fallisce anche $A\spzmunify B$.
+\end{enumerate}
+
+Le descrizioni vengono utilizzate da tutte le componenti
+dell'applicazione: il lavoro dei moduli è pensato come un'insieme di
+operazioni sulle descrizioni degli oggetti.
+
+\subsection{Morfologia}
+
+I fenomeni morfologici da registrare sono \spzcite[136]{simone2008}:
+\begin{itemize}
+\item la {\it derivazione},
+\item la {\it flessione}, 
+\item la {\it composizione}.
+\end{itemize}
+
+Non sono considerate le parole complesse (ad esempio `mettere in moto'
+o i tempi composti dei verbi), rimandando all'analisi
+successiva. Ognuno di questi fenomeni corrisponde a un oggetto
+dell'applicazione (\vedi \sezione{sec:derivazione},
+\sezione{sec:flessione} e \sezione{sec:composizione}).
+
+Oltre a questi, vengono definiti altri quattro oggetti:
+\begin{itemize}
+\item {\it radice lessicale} di un termine (`\spzradless{amic}');
+\item {\it radice tematica}, una volta applicata una regola di
+  derivazione (`\spzradtema{amicizi}'); se la regola di derivazione è
+  nulla, la radice tematica è identica a quella lessicale (ma non è lo
+  stesso oggetto);
+\item {\it parola}: una radice tematica a cui è stata applicata una
+  regola di flessione (`amicizia', `amicizie'); ogni radice
+  tematica è rappresentata nel dizionario da una particolare parola,
+  detta {\it voce del dizionario};
+\item {\it parola composta}: un insieme di parole unite da una regola
+  di composizione (`di'+`la'=`della').
+\end{itemize}
+
+Di questi, è chiaro che radici tematiche, parole e parole composte
+sono oggetti derivati:
+\begin{lingmeq}
+\left.\begin{array}{rr}
+\left.\begin{array}{rr}
+  \left.\begin{array}{r}  \text{radici lessicali} \\\text{derivazione} \\ \end{array}\right\}
+  &\text{radici tematiche} \\
+  &\text{flessione} \\
+\end{array}\right\} &\text{parole}\\
+&\text{composizione}\\
+\end{array}\right\} \text{parole composte}
+\end{lingmeq}
+
+Sfruttando le caratteristiche dei database relazionali, è possibile
+ipotizzare un approccio esaustivo per quanto riguarda l'analisi
+morfologica. In base ai dati registrati (radici e regole) vengono
+calcolate tutte le possibili forme (parole e parole composte). 
+
+In fase di analisi, i token del testo, prodotti da un primo parsing
+(\vedi \sezione{sec:parsing}), vengono associati agli oggetti
+corrispodenti grazie a una semplice ricerca.
+
+Un token può venire associato a più di un oggetto (ad esempio, `la'
+verrà riconosciuto sia come articolo che come pronome): l'ambiguità,
+se è possibile farlo, verrà risolta nel passo successivo.
+
+\subsection{Sintassi}
+
+\label{sec:conssintassi}
+
+Se l'approccio esaustivo può andar bene nel caso della morfologia, non
+è pensabile utilizzarlo per quanto riguarda la sintassi, non solo
+perché il numero frasi possibili è molto maggiore del numero di
+parole: la generazione di frasi è ricorsiva e con un metodo esaustivo
+si arriverebbe a generare infinite frasi. È necessario quindi un
+metodo di parsing basato su regole.
+
+Per la descrizione delle regole è stata scelta la teoria
+X-barra,\footnote{Seguiamo per formalismi e definizioni, dove non
+  altrimenti specificato, \spzcite{cecchetto2002}.}  ossia le regole
+verranno rappresentate con oggetti ({\it sintagmi}) del
+tipo:\footnote{Usare una descrizione o un'altra, purché porti a una
+  grammatica context-free, è in effetti una questione di gusti
+  personali e tipo di ricerca. Niente vieta di aggiungere anche qui un
+  modulo per la conversione, per esempio, da una grammatica
+  definite-clause o di prevedere anche metodi ibridi di
+  specificazione.}
+\begin{lingeq}\label{eq:xbar}
+\begin{tikzpicture}[x=3mm,y=5mm,node distance=1]
+\node(xp) {XP};
+\node(xbar b) [below=of xp] {\=X};
+\node(xbar a) [below=of xbar b] {\=X};
+\node(xbar dot) [below=of xbar a] {$\vdots$};
+\node(xbar) [below=of xbar dot] {\=X};
+\node(spec) [left=of xbar b] {\it spec};
+\node(x) [below left=of xbar] {X};
+\node(compl) [below right=of xbar] {\it compl$_N$};
+\node(compl a) [below right=of xbar a] {\it compl$_2$};
+\node(compl b) [below right=of xbar b] {\it compl$_1$};
+\node(compl dot) [below=of compl a] {$\vdots$};
+\draw (xp) to (xbar b);
+\draw (xbar a) to (xbar b);
+\draw (spec) to (xp);
+\draw (x) to (xbar);
+\draw (compl) to (xbar);
+\draw (compl a) to (xbar a);
+\draw (compl b) to (xbar b);
+\end{tikzpicture}
+\end{lingeq}
+
+Quindi ogni sintagma (XP) avrà una testa (X), uno specificatore (spec)
+e uno o più complementi, che potranno essere attributi o
+aggiunti. Ognuno di questi oggetti dovrà avere una descrizione e la
+descrizione del sintagma sarà l'unificazione di tutte le
+descrizioni. Ognuno di loro potrà essere:
+\begin{itemize}
+\item vuoto;
+\item qualcosa di sottinteso (pro e PRO);
+\item una traccia di un movimento;
+\item una parte di token morfologico (la flessione nel caso del
+  sintagma della flessione IP, per esempio);
+\item una sequenza di token morfologici;
+\item un altro sintagma.
+\end{itemize}
+
+È necessario prevedere anche degli oggetti che descrivano i movimenti
+sintattici: in questo modo è possibile specificare quali casi e ruoli
+tematici vengono assegnati ai vari sintagmi, dato che questi vengono
+assegnati a livello di struttura profonda \spzcite[145]{cecchetto2002}.
+
+È chiaro che non è pensabile di svolgere quest'analisi senza includere
+nella descrizione anche informazioni che provengono dal modulo sul
+lessico \spzcite[115-117]{delmonte2008}: i due tipi di informazione
+possono restare distinti al momento dell'inserimento delle regole, ma
+non al momento dell'analisi. Cioè, l'utente può inserire una regola del tipo:
+
+\begin{lingeq}\label{eq:xbares}
+\begin{tikzpicture}[x=3mm,y=5mm,node distance=1]
+\node(vp) {VP(doppio oggetto)};
+\node(vbar dat) [below=of vp] {\=V};
+\node(vbar) [below=of vbar dat] {\=V};
+\node(spec) [left=of vbar dat] {NP};
+\node(v) [below left=of vbar] {{\it verbo ditransitivo}};
+\node(compl) [below right=of vbar] {NP};
+\node(pp) [right=of compl] {PP};
+\node(pbar) [below=of pp] {\=P};
+\node(p) [below left=of pbar] {{\it a}};
+\node(pcompl) [below right=of pbar] {NP};
+\draw(vp) to (vbar dat);
+\draw(vp) to (spec);
+\draw(vbar) to (vbar dat);
+\draw(vbar) to (v);
+\draw(vbar) to (compl);
+\draw(vbar dat) to (pp);
+\draw(pp) to (pbar);
+\draw(pbar) to (p);
+\draw(pbar) to (pcompl);
+\end{tikzpicture}
+\end{lingeq}
+\noindent e, separatamente, classificare `dare' e `assegnare' come
+verbi ditransitivi in due momenti distinti. Ma il programma, incontrando
+ad esempio `assegna', dovrà tenere conto non solo della sua
+descrizione morfologica (verbo, terza persona, ecc.), ma anche di
+quella lessicale (quindi, in questo caso, che si tratta di un verbo
+classificato come verbo ditransitivo).
+
+Il parser ipotizzato per l'analisi è un parser canonico LR
+\spzcite[215-247]{ahosethiullman1986}, in cui però viene introdotto il
+concetto di stack strutturato a grafo
+\spzcitedue{}{tomita1985}{}{tomita1987} per gestire grammatiche
+ambigue.\footnote{Questo parsing dovrà essere preceduto da una
+  conversione tra la descrizione data dall'utente e una grammatica in
+  forma normale, conversione che è comunque banale e tralasciamo qui.} 
+
+Una grammatica context-free $G=(V,\Sigma,P,S)$ è definita come
+\spzcite[26-27,165-166]{ahosethiullman1986}:
+\begin{enumerate}
+\item un insieme di simboli terminali o token, $\Sigma$; nel nostro
+  caso sarebbero le parole, ma è più conveniente utilizzare le classi
+  di equivalenza individuate dalle descrizioni; per questo, bisognerà
+  pianificare delle tabelle derivate opportune per velocizzare
+  l'associazione tra il token da analizzare e la corrispondente
+  descrizione usata come simbolo terminale;
+\item un insieme di simboli non-terminali, $V$, ognuno dei quali
+  rappresenta un diverso tipo di frase (più o meno coincide con
+  l'insieme dei sintagmi);
+\item un particolare simbolo non-terminale, $S$, che rappresenta
+  un'intera sentenza;
+\item un insieme di regole di produzione $P$ (più o meno coincide con
+  le regole grammaticali); le regole di produzione hanno un simbolo
+  non-terminale a sinistra e una sequenza di simboli terminali e
+  non-terminali a destra.
+\end{enumerate}
+
+\subsubsection{Parser LR}
+
+\myfig{Parser LR ed esempio di parsing table per la grammatica
+  indicata \spzcite[217-219]{ahosethiullman1986}. I simboli terminali sono indicati tra apici.}{
+  \input{immagini/parserlr.tex}
+\vspace{1em}
+\begin{scriptsize}
+\begin{tabular}[t]{ll@{\hspace{1cm}}r|cccccc|ccc}
+$p_1$ & E \spzbnf E + T &&\multicolumn{6}{c|}{\it action}
+&\multicolumn{3}{c}{\it goto}\\
+$p_2$ & E \spzbnf T &&\multicolumn{6}{c|}{(terminali)}
+&\multicolumn{3}{c}{(non term.)}\\
+$p_3$ & T \spzbnf T * F &{\it state} & a & + & * & ( & ) & \$ & E & T & F \\
+\cline{3-12} 
+$p_4$ & T \spzbnf F                  & 0  & $s_{5}$ &    &    & $s_{4}$ &     &           & $s_{1}$ & $s_{2}$ & $s_{3}$\\
+$p_5$ & F \spzbnf ( E )              & 1  &    & $s_{6}$ &    &    &     & {\bf acc} &    &    & \\
+$p_6$ & F \spzbnf a                  & 2  &    & $r_{2}$ & $s_{7}$ &    & $r_{2}$  & $r_{2}$        &    &    & \\
+      &                        & 3  &    & $r_{4}$ & $r_{4}$ &    & $r_{4}$  & $r_{4}$        &    &    & \\
+      & $\Sigma$=\{a,+,*,(,)\} & 4  & $s_{5}$ &    &    & $s_{4}$ &     &           & $s_{8}$ & $s_{2}$ & $s_{3}$\\
+      & $V$=\{E,T,F\}          & 5  &    & $r_{6}$ & $r_{6}$ &    & $r_{6}$  & $r_{6}$        &    &    & \\
+      & $S$=E                  & 6  & $s_{5}$ &    &    & $s_{4}$ &     &           &    & $s_{9}$ & $s_{3}$\\
+      &                        & 7  & $s_{5}$ &    &    & $s_{4}$ &     &           &    &    & $s_{10}$\\
+      &                        & 8  &    & $s_{6}$ &    &    & $s_{11}$ &           &    &    & \\
+      &                        & 9  &    & $r_{1}$ & $s_{7}$ &    & $r_{1}$  & $r_{1}$        &    &    & \\
+      &                        & 10 &    & $r_{3}$ & $r_{3}$ &    & $r_{3}$  & $r_{3}$        &    &    & \\
+      &                        & 11 &    & $r_{5}$ & $r_{5}$ &    & $r_{5}$  & $r_{5}$        &    &    & \\
+\end{tabular}
+\end{scriptsize}
+}{fig:parserlr}
+
+Un parser LR è un parser bottom-up shift-reduce nonbacktracking,
+schematizzato in \figura{fig:parserlr}, che utilizza una tabella ({\it
+  tabella di parsing}) per identificare le transizioni di stato, dati
+una coppia $(s_i,\sigma_j)$ di stati (righe) e simboli (colonne).
+
+Esistono diversi algoritmi che consentono di generare la tabella di
+parsing a partire dalla definizione della grammatica (per i quali si
+rimanda a \spzcite[221-247]{ahosethiullman1986}), che differiscono tra
+loro in base alla complessità e al numero di grammatiche in grado di
+tradurre. Le tabelle generate, anche se sono diverse per la stessa
+grammatica, hanno comunque la stessa struttura di
+\figura{fig:parserlr}. A fronte di una coppia $(s_i,\sigma_j)$ ci
+possono essere quattro azioni \spzcite[217-218]{ahosethiullman1986}:
+\begin{enumerate}
+\item {\it shift k ($s_k$)}: inserisce $s_i$ sullo stack, si posiziona
+  dopo $\sigma_j$ e passa allo stato $s_k$;
+\item {\it reduce n ($r_n$)}: dà in output la regola di produzione
+  $p_n=v_h\spzmbnf t_1\cdots t_M$, toglie dallo stack $M$ stati, esponendo lo
+  stato $s_l$; come stato, sceglie quello indicato da $(s_l,v_h)$
+  (area {\it goto}) e rimane prima di $\sigma_j$;
+\item {\it accept (acc)}: termina il parsing con successo;
+\item {\it error (cella vuota)}: segnala un errore.
+\end{enumerate}
+
+Quello che bisogna definire quindi sono degli oggetti per le {\it
+  azioni} e gli {\it stati}, e delle relazioni che associno i simboli
+(terminali e no, ossia le classi di equivalenza e i sintagmi) con gli
+stati e le azioni.
+
+\newpage
+
+\subsubsection{Parser LR con stack strutturato a grafo}
+
+\tabula{Esempio di tabella di parsing per una grammatica ambigua}{tab:glr}{
+\vspace{1em}
+\begin{scriptsize}
+\begin{tabular}[t]{r|cccccc|ccc}
+&\multicolumn{6}{c|}{\it action}
+&\multicolumn{3}{c}{\it goto}\\
+&\multicolumn{6}{c|}{(terminali)}
+&\multicolumn{3}{c}{(non term.)}\\
+{\it state} & a & b & c & d & e & \$ & X & Y & Z \\
+\hline
+0  & $s_{5}$ &    &    & $s_{4}$ &     &           & $s_{1}$ & $s_{2}$ & $s_{3}$\\
+1  &    & $s_{6}$ &    &    &     & {\bf acc} &    &    & \\
+2  &    & $r_{2}$ & {\bf $s_{7}$,$r_6$} &    & $r_{2}$  & $r_{2}$        &    &    & \\
+3  &    & $r_{4}$ & $r_{4}$ &    & $r_{4}$  & $r_{4}$        &    &    & \\
+4  & $s_{5}$ &    &    & $s_{4}$ &     &           & $s_{8}$ & $s_{2}$ & $s_{3}$\\
+5  &    & $r_{6}$ & $r_{6}$ &    & $r_{6}$  & $r_{6}$        &    &    & \\
+6  & $s_{5}$ &    &    & {\bf $s_{4}$,$r_3$} &     &           &    & $s_{9}$ & $s_{3}$\\
+7  & $s_{5}$ &    &    & $s_{4}$ &     &           &    &    & $s_{10}$\\
+8  &    & $s_{6}$ &    &    & $s_{11}$ &           &    &    & \\
+9  &    & $r_{1}$ & $s_{7}$ &    & $r_{1}$  & $r_{1}$        &    &    & \\
+10 &    & $r_{3}$ & $r_{3}$ &    & $r_{3}$  & $r_{3}$        &    &    & \\
+11 &    & $r_{5}$ & $r_{5}$ &    & $r_{5}$  & $r_{5}$        &    &    & \\
+\end{tabular}
+\end{scriptsize}
+}
+
+In \tabella{tab:glr} è riportato un esempio di tabella di parsing
+ottenuta da una grammatica ambigua. Come si vede nelle celle
+evidenziate, ci sono dei casi in cui una coppia stato-simbolo
+$(s_i,\sigma_j)$ corrisponde a più azioni possibili. In questo caso un
+parser LR standard fallirebbe.
+
+Esiste un altro tipo di algoritmo, che procede normalmente come un
+parser LR standard. Quando incontra una sequenza di azioni,
+l'esecuzione viene suddivisa in più rami, ognuno dei quali procede in
+parallelo finché non si raggiunge uno stato comune
+\spzcitedue{}{tomita1985}{}{tomita1987}. È più semplice vederlo con
+uno schema. L'algoritmo LR standard procede per passi successivi, con
+un'azione per ogni passo, ad esempio:
+\begin{lingeq}
+\label{leq:lrstandard}
+\begin{tikzpicture}[x=3mm,y=3mm,node distance=1]
+\node(s0) {$\cdots$};
+\node(s1) [right=of s0] {$s_{42}$};
+\node(s2) [right=of s1] {$r_7$};
+\node(s3) [right=of s2] {$s_{26}$};
+\node(s4) [right=of s3] {$s_{33}$};
+\node(s5) [right=of s4] {$r_{69}$};
+\node(s6) [right=of s5] {$\cdots$};
+\draw[->] (s0) to (s1);
+\draw[->] (s1) to (s2);
+\draw[->] (s2) to (s3);
+\draw[->] (s3) to (s4);
+\draw[->] (s4) to (s5);
+\draw[->] (s5) to (s6);
+\end{tikzpicture}
+\end{lingeq}
+\noindent mentre per il parser di Tomita l'esecuzione procede come
+segue:
+\begin{lingeq}
+\label{leq:tlr}
+\begin{tikzpicture}[x=3mm,y=3mm,node distance=1]
+\node(s0) {$\cdots$};
+\node(s1) [right=of s0] {$s_{42}$};
+\node(s2) [right=of s1] {$s_7$};
+\node(s3) [right=of s2] {$s_{26}$};
+\node(s4) [right=of s3] {$r_{33}$};
+\node(s5) [right=of s4] {$s_{69}$};
+\node(s6) [right=of s5] {$s_{36}$};
+\node(s7) [right=of s6] {$r_{74}$};
+\node(s8) [right=of s7] {$\cdots$};
+\node(s21) [below=of s2] {$r_{65}$};
+\node(s31) [right=of s21] {$s_{88}$};
+\node(s41) [right=of s31] {$s_{44}$};
+\node(s42) [below=of s41] {$s_{69}$};
+\node(s52) [right=of s42] {$r_{13}$};
+\node(s71) [below=of s7] {$r_7$};
+\node(s81) [right=of s71] {$\cdots$};
+
+\draw[->] (s0) to (s1);
+\draw[->] (s1) to (s2);
+\draw[->] (s2) to (s3);
+\draw[->] (s3) to (s4);
+\draw[->] (s4) to (s5);
+\draw[->] (s5) to (s6);
+\draw[->] (s6) to (s7);
+\draw[->] (s7) to (s8);
+
+\draw[->] (s21) to (s31);
+\draw[->] (s31) to (s41);
+\draw[->] (s42) to (s52);
+
+\draw[->] (s1) to (s21);
+\draw[->] (s31) to (s4);
+\draw[->] (s31) to (s42);
+\draw[->] (s41) to (s5);
+\draw[->] (s52) to (s6);
+\draw[->] (s6) to (s71);
+\end{tikzpicture}
+\end{lingeq}
+
+È chiaro quindi che con l'algoritmo indicato in \leqref{leq:tlr} è
+possibile analizzare anche sequenze del tipo di quelle in
+\tabella{tab:glr} e quindi permettere alla grammatica di essere
+ambigua e di rilevare quest'ambiguità.
+
+Per la strutturazione dei dati non cambia nulla: è sufficiente
+prevedere che ogni coppia $(s_i,\sigma_j)$ possa essere associata a
+più di un'azione.
+
+\subsection{Lessico}
+
+\input{statistiche.tex}
+\afterpage{\clearpage}
+
+Il lessico è forse la parte più importante del lavoro del filologo sui
+documenti d'archivio: sia perché l'evoluzione diacronica del
+linguaggio riguarda principalmente il lessico, sia perché è tramite il
+lessico che ci si riallaccia allo studio storico sui documenti. In
+questo senso, due sono le informazioni che è indispensabile
+registrare:\footnote{Strettamente parlando, questo tipo di
+  informazioni sarebbe necessario collezionarle anche per la
+  grammatica. Ne parliamo solo qui per semplicità, ma è una cosa da
+  tenere presente nei successivi sviluppi.}
+\begin{itemize}
+\item l'{\it etimologia} delle parole; (\vedi
+  \tabella{tab:esempiostatistiche} come esempio di analisi);
+\item le {\it note bibliografiche}, sia di attestazione dei termini,
+  che di altre ricerche.
+\end{itemize}
+
+Visto che uno degli scopi è quello di generare un dizionario dei
+termini di un insieme di documenti (\vedi \tabella{tab:esdiz}), è
+opportuno registrare il significato (così come lo si trova nei normali
+vocabolari) e altre annotazioni a discrezione dell'utente
+(traslitterazioni, pronuncia, ecc.).
+
+Oltre a questo, è necessario associare a ogni termine le informazioni
+utili per l'analisi sintattica, sotto forma di caratteristiche
+(transitivo, ditransitivo, collettivo, astratto, ecc.) e di tipo di
+attributi richiesti. 
+
+Infine, dal punto di vista più strettamente semantico, i temini
+andrebbero categorizzati. Qui si possono usare vari modelli, che
+possono associare caratteristiche a un certo termine oppure includere
+il termine in un insieme \spzcite[28-33]{delmonte2008}. 
+
+Si possono identificare due categorie di oggetti per ogni termine: uno
+che riguarda la {\it forma} dell'oggetto (etimologia e altre
+caratteristiche decise dall'utente) e uno che riguarda il {\it
+  significato} (caratteristiche sintattiche, categorizzazione, ecc.).
+
+In entrambi i casi, i dati possono essere strutturati in più modi, per
+esempio:
+\begin{itemize}
+\item tramite descrizioni (in modo analogo a quanto fatto nella parte
+  morfologica);
+\item tramite associazioni dirette tra due termini (nel caso di
+  un'antinomia per esempio);
+\item tramite inclusione di termini in insiemi di termini collegati
+  (sul modello di FrameNet).
+\end{itemize}
+
+L'organizzazione di questi dati dipende molto dal tipo di ricerca: è
+quindi opportuno dare all'utente più metodi di lavoro possibili. È
+necessario però prevedere delle tabelle derivate dove le diverse
+classificazioni vengano tradotte in una forma consona all'analisi
+sintattica (\vedi \sezione{sec:conssintassi}).
+
+\tabula{Esempio di voci del dizionario generato dal database lessicale
+  del documento \spzcite{dt1099}, dove vengono registrate informazioni
+  morfologiche, traslitterazioni, etimologie, significato e note
+  bibliografiche divise in pronuncia e riferimenti
+  generali. Abbreviazioni: n.=nome, a.=arabo.}  {tab:esdiz}{\vspace{-1em}\begin{glossario}{}
+\item[\spzrl{istifsAr},] {\sf istifsar},\ n.\ a.:\ inchiesta, azione di fare domande; informazione.
+\begin{subvocedue}
+\item[Pron.:] \spzcite{redhouse1997}, \spzcite[192]{meninski1680d1}
+\item[Rif.:] \spzcite[35]{kiefferbianchi18351}
+\end{subvocedue}
+\item[\spzrl{i.zhAr},] {\sf äzher},\ n.\ a.:\ manifestazione, esposizione, testimonianza.
+\begin{subvocedue}
+\item[Pron.:] \spzcite{redhouse1997}, \spzcite[275]{meninski1680d1}
+\item[Rif.:] \spzcite[56]{kiefferbianchi18351}
+\end{subvocedue}
+\end{glossario}}
+
+\section{Tabelle di base}
+\label{sec:tabbase}
+
+\subsection{Parsing preliminare}
+\label{sec:parsing}
+
+Come abbiamo visto in \sezione{sec:struttura}, è necessario definire
+come suddividere il testo in modo che ogni token ottenuto rappresenti
+una parola (nel senso comune del termine). Il metodo scelto prevede
+l'uso di espressioni regolari, ognuna delle quali individua un tipo di
+token, come scelto dall'utente.
+
+\myfig[t]{Tabelle di base: definizione di lingua e espressioni
+  regolari per il parsing iniziale. Le frecce indicano una foreign
+  key (f.k.). In grigio le tabelle di relazione per le relazioni
+  molti a molti.}{\input{immagini/alpha.tex}}{fig:alpha}
+
+In \figura{fig:alpha} sono rappresentate le tabelle necessarie. Una
+lingua è definita da un insieme di espressioni regolari. Di queste,
+una viene scelta per definire i delimitatori di periodo: è necessario
+imporre un vincolo, in modo che il delimitatore di periodo sia tra i
+token previsti per la lingua.\footnote{Il modo in cui imporre questo
+  vincolo dipende dal motore di database e dall'applicazione. In
+  Django è sufficiente definire un controllo aggiuntivo in fase di
+  salvataggio dei dati. Volendo, con PostgreSQL si può definire un
+  trigger, ossia un controllo che viene eseguito al momento
+  dell'inserimento dei dati. Altri motori possono usare altri
+  meccanismi.} Il delimitatore di periodo individua quei token che
+fanno fermare l'analizzatore sintattico (una funzione equivalente a
+quella del simbolo \$ in \figura{fig:parserlr}).
+
+\tabula[p]{Esempio di espressioni regolari per il parsing
+  dell'italiano, in grassetto quella possibile come separatore di
+  periodi. Nella tabella in basso l'output risultante con un brano di
+  esempio. Le notazioni {\tt (?={\it x})}, {\tt (?!{\it x})}, {\tt
+    (?<={\it x})} e {\tt (?<!{\it x})} sono estensioni di Python
+  (individuano il testo adiacente, rispettivamente come seguito, non
+  seguito, preceduto, non preceduto da {\it x}). }{tab:alpha}{
+\noindent\begin{scriptsize}
+\begin{tabular}{l>{\tt}l>{\it}p{3cm}}
+space            & [ ] & spazio da solo\\
+dialog mark      & [\textquotedbl «»“”]\\
+hyphen           & [—-] & tipi diversi di trattino\\
+ellipses         & …|[.]\{2,\} & tre puntini (unico carattere) o più di due punti consecutivi\\
+numbers          & [0-9]+\\
+brackets         & [()\{\}\textbackslash [\textbackslash ]]\\
+apostrophe alone & (?<![a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ])[\textquotesingle ’]&apostrofo non preceduto da altri caratteri\\
+alpha            & [a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ]+[\textquotesingle ’]?&caratteri alfabetici eventualmente seguiti da apostrofo\\
+others           & [\^{}()\{\}\textbackslash [\textbackslash ]a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ ?,;:!….\textquotesingle ’\textbackslash t\textbackslash n\textbackslash r0-9\textquotedbl«»“”—-]&caratteri che non sono quelli dell'elenco\\
+tab              & [\textbackslash t]\\
+new line         & [\textbackslash n\textbackslash r]\\
+{\bf period}     & (?<![.])[.](?![.])|[?;:!]&punto isolato o altri segni di interpunzione forte\\
+punctuation mark & [,]\\
+\end{tabular}
+\vspace{1em}
+
+\begin{tabular}[h]{|*{10}{l|}}
+\hline
+Un& &raggio& &di& &sole& &filtrò& \\
+{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}\\
+\hline
+con& &decisione& &dalla& &finestra&,& &invase\\
+{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it p. mark}&{\it space}&{\it alpha}\\
+\hline
+ &la& &camera& &783& &dell’&hotel& \\
+{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it numbers}&{\it space}&{\it alpha}&{\it alpha}&{\it space}\\
+\hline
+e& &si& &andò& &a& &schiantare&,\\
+{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it p. mark}\\
+\hline
+ &dritto& &dritto&,& &sul& &suo& \\
+{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it p. mark}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}\\
+\hline
+occhio& &sinistro&.& &“&Oh& &no&,\\
+{\it alpha}&{\it space}&{\it alpha}&{\it period}&{\it space}&{\it d. mark}&{\it alpha}&{\it space}&{\it alpha}&{\it p. mark}\\
+\hline
+”& &pensò& &Roberto& &deciso& &a& \\
+{\it d. mark}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}\\
+\hline
+non& &arrendersi&,& &“&sono& &stanco&,\\
+{\it alpha}&{\it space}&{\it alpha}&{\it p. mark}&{\it space}&{\it d. mark}&{\it alpha}&{\it space}&{\it alpha}&{\it p. mark}\\
+\hline
+ &voglio& &dormire& &ancora&.&”\\
+{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it space}&{\it alpha}&{\it period}&{\it d. mark}\\
+\hline
+\end{tabular}
+\end{scriptsize}
+}
+
+\afterpage{\clearpage}
+
+In \tabella{tab:alpha} è riportato un esempio di come possono essere
+definite delle regole di parsing per un testo in italiano corrente. Le
+espressioni regolari sono un formalismo molto potente, che consentono
+di suddividere un brano con un'unica operazione e una precisione
+definibile a piacere. Nella versione più semplice, l'applicazione
+concatena tutte le espressioni regolari definite dall'utente, aggiunge
+quelle per i tag di formattazione e utilizza l'espressione risultante
+per suddividere il testo. Quindi confronta i token ottenuti con
+l'elenco delle espressioni regolari per etichettarli.\footnote{Il
+  metodo reale di parsing e la descrizione dell'espressione regolare
+  dipendono dal linguaggio di programmazione scelto. Qui e in seguito
+  si userà quanto stabilito dalla libreria {\it re} di Python
+  \spzcitedue{}{pythonre}{}{kuchling2012}. Per una trattazione più
+  generale si veda \spzcite{cinderella1979}.}
+
+Quindi per esempio, definite le espressioni regolari:
+
+\begin{lingtab}{l>{\tt}l}
+\label{leq:itregexp}
+alpha & [a-z]+\\
+space & [ ]\\
+numbers & [0-9]+\\
+\end{lingtab}
+\noindent l'espressione regolare risultante diventa:
+\begin{lingeq}
+{\tt ([a-z]+|[ ]|[0-9]+) }
+\end{lingeq}
+\noindent e utilizzando una funzione di split per espressioni regolari, la frase
+{\it oggi ho letto 3 libri} viene suddivisa in 
+\begin{lingeq}
+{\tt [ `oggi' , ` ' , `ho' , ' ' , `letto' , ` ' , `3' , ` ' , `libri' ]}. 
+\end{lingeq}
+
+A questo punto un successivo confronto indivduerà `3' come un token di
+tipo {\it numbers}, `oggi', `ho', `letto' e `libri' come token di tipo
+{\it alpha} e gli altri come token di tipo {\it space}.
+
+Da notare che con le espressioni regolari definite in
+\leqref{leq:itregexp}, la frase {\it oggi, come di consuento, ho letto
+  3 libri}, produce un token aggiuntivo, `,', che verrà marcato come
+       {\it sconosciuto} in quanto non previsto da nessuna
+       regola.\footnote{La funzione di split, qui considerata come
+         esempio di metodo di parsing, suddivide una stringa basandosi
+         su un'espressione regolare data come delimitatore.  Ossia,
+         data l'espressione regolare {\tt a+}, suddivide la stringa
+         {\it defaabaghj} in {\tt ['def','b','ghj']}. Se si usano le
+         parentesi, ossia {\tt (a+)}, ritorna anche le occorrenze
+         della stringa, ossia: {\tt ['def','aa','b','a','ghj']}, che è
+         il risultato che ci interessa \spzcite{pythonre}. } L'utente
+       dovrà quindi inserire una nuova espressione regolare, per esempio:
+\begin{lingtab}{l>{\tt}l}
+punctuation & [.:;,?!]\\
+\end{lingtab}
+\noindent che consente al programma di individuare il tipo giusto per il token `,'.
+
+\subsection{Descrizioni}
+
+\label{sec:descrdb}
+
+\myfig[t]{Tabelle di base: descrizioni. Le frecce indicano una foreign
+  key (f.k.). In grigio le tabelle di relazione per le relazioni molti
+  a molti. Una descrizione è una collezione di coppie attributo/valore
+  o attributo/descrizione: quindi viene rappresentata come una tabella
+  ({\it description}) con due relazioni molti a molti, rispettivamente
+  con una tabella che unisce attributi e valori ({\it entry}) e una
+  tabella che unisce attributi e descrizioni ({\it subdescription}). I
+  valori (tabella {\it value}) possono essere costanti (campo {\it
+    variable} posto a `false') o variabili (campo {\it variable} posto
+  a `true'). All'interno di una descrizione possono apparire anche
+  come negati (campo {\it negate} della tabella {\it
+    entry}).}{\input{immagini/description.tex}}{fig:description}
+
+La rappresentazione di una descrizione (\vedi
+\sezione{sec:descrizioni}) nel database è riportata in
+\figura{fig:description}. Una descrizione è una collezione di coppie
+attributo/valore o attributo/descrizione: quindi viene rappresentata
+come una tabella ({\it description}) con due relazioni molti a molti,
+rispettivamente con una tabella che unisce attributi e valori ({\it
+  entry}) e una tabella che unisce attributi e descrizioni ({\it
+  subdescription}). I valori (tabella {\it value}) possono essere
+costanti (campo {\it variable} posto a `false') o variabili (campo
+{\it variable} posto a `true'). All'interno di una descrizione possono
+apparire anche come negati (campo {\it negate} della tabella {\it
+  entry}).
+
+\section{Tabelle morfologiche}
+
+\label{sec:temimorph}
+
+Anche in questo caso, come meccanismo base abbiamo usato le
+espressioni regolari, elencate nella tabella delle sostituzioni (\vedi
+\figura{fig:regexpreplacement}).\label{page:regexpreplacement} Ogni
+sostituzione è definita da due campi, un'espressione regolare ({\it
+  pattern}) e la stringa che definisce la sostituzione ({\it
+  replacement}).
+
+\myfig{Morfologia: sostituzioni basate su espressioni
+  regolari. A lato degli esempi.}{\input{immagini/regexpreplacement.tex}
+\noindent\begin{scriptsize}
+\begin{tabular}[b]{*{2}{>{\tt}l}lll}
+\multicolumn{1}{l}{\it pattern}&
+\multicolumn{1}{l}{\it replacement}\\
+(.*) & \textbackslash 1iamo & (am) & (am)iamo & amiamo\\
+(.*)([bcdfglmnpqrstvz]) &\textbackslash 1\textbackslash 2\textbackslash 2ia
+& (sa)(p) & (sa)(p)(p)ia  & sappia\\
+\end{tabular}
+\end{scriptsize}
+}{fig:regexpreplacement}
+
+Una radice tematica è l'unione di una radice lessicale e di una regola
+di derivazione, mentre una parola è l'unione di una radice tematica
+con una regola di flessione (per la composizione vedi
+\sezione{sec:composizione}). Per rappresentarle sono sufficienti tre
+tabelle, quella delle radici lessicali ({\it root}), quella delle
+regole di derivazione ({\it derivation}) e quella delle regole di
+flessione ({\it inflection}): le tabelle delle radici tematiche ({\it
+  stem}) e delle parole ({\it word}) possono essere calcolate in base
+alle caratteristiche delle altre tre. Per questioni di prestazione, è
+prevista anche una tabella di cache ({\it wordcache}), che è quella
+usata dalla componente di analisi dei testi.
+
+\myfig{Morfologia: relazioni tra radici lessicali ({\it root}), radici
+  tematiche ({\it stem}) e parole ({\it word}). In colore più chiaro
+  le tabelle calcolate.}{\input{immagini/words.tex}}{fig:words}
+
+Una tabella a parte è quella delle non-parole ({\it notword}), ossia
+un elenco di token che non devono essere analizzati
+morfologicamente. Questa tabella comprende spazi, tabulazioni, a capo,
+punteggiatura, ecc. (\vedi \figura{fig:notword}).
+
+\myfig[t]{Morfologia: non-parole. A lato degli esempi.}{\begin{scriptsize}
+\begin{tabular}[b]{l>{\tt}l}
+spazio & \\
+punto & . \\
+punto interrogativo & ?\\
+virgola & ,\\
+new line & \textbackslash n\\
+\end{tabular}
+\end{scriptsize} \input{immagini/notword.tex}}{fig:notword}
+
+\subsection{Derivazione}
+
+\label{sec:derivazione}
+
+\myfig{Morfologia: radici.}{\input{immagini/root.tex}}{fig:root}
+
+Perché una regola di derivazione $d$ e una radice lessicale $r$
+possano dar vita a una radice tematica $s$ devono essere compatibili,
+ossia dev'essere possibile applicare $d$ a $r$. Le caratteristiche che
+definiscono la compatibilità sono state divise in tre parti: la
+categoria (verbale, nominale, ecc.), il tema e la descrizione della
+radice.
+
+La categoria di $r$, $r.{pos}$, è definita dal campo {\it part of
+  speech} e dev'essere uguale al campo {\it root part of speech} di
+$d$, $d.{rpos}$:
+\begin{lingmeq}
+r.{pos} = d.{rpos}\,.
+\end{lingmeq}
+
+Entrambi sono un collegamento alla tabella {\it partofspeech}, dove
+l'utente definisce le parti del discorso che gli interessano.
+
+Il tema è una versione semplificata di descrizione, dove gli attributi
+possono essere associati solo a valori costanti e rappresentano tipi
+di derivazioni possibili (\vedi \figura{fig:root}). Perché il tema di
+$r$, $r.tema$, sia compatibile con quello di $d$, $d.tema$, bisogna
+che:
+\begin{lingmeq}
+d.tema\spzmsussunto r.tema\,. 
+\end{lingmeq}
+
+Ad esempio, il tema della radice lessicale `\spzradless{bell}'
+può essere descritto come:
+\begin{lingmeq}
+\left[\begin{array}{lll}
+\text{base}&=&\text{-o}\\
+\text{nome di qualità}&=&\text{-ezza}\\
+\end{array}\right]
+\end{lingmeq}
+\noindent mentre quello di `\spzradless{amic}':
+\begin{lingmeq}
+\left[\begin{array}{lll}
+\text{base}&=&\text{-o}\\
+\text{nome di qualità}&=&\text{-izia}\\
+\end{array}\right]
+\end{lingmeq}
+
+La regola di derivazione che ricava le radici tematiche
+`\spzradtema{bell}' e `\spzradtema{amic}', avrà come tema:
+\begin{lingmeq}
+\left[\begin{array}{lll}
+\text{base}&=&\text{-o}\\
+\end{array}\right]
+\end{lingmeq}
+\noindent mentre quella che ricava `\spzradtema{bellezz}' avrà:
+\begin{lingmeq}
+\left[\begin{array}{lll}
+\text{nome di qualità}&=&\text{-ezza}\\
+\end{array}\right]
+\end{lingmeq}
+\noindent e quella che ricava `\spzradtema{amicizi}':
+\begin{lingmeq}
+\left[\begin{array}{lll}
+\text{nome di qualità}&=&\text{-izia}\\
+\end{array}\right]
+\end{lingmeq}
+
+Infine è necessario che la descrizione di $r$, $r.desc$, sussuma
+quella richiesta per la radice da $d$, $d.{rdesc}$ (campo {\it root
+  description}):
+\begin{lingmeq}
+d.{rdesc}\spzmsussunto r.desc\,. 
+\end{lingmeq}
+
+Ad esempio, se la radice lessicale `\spzradless{poet}' ha i seguenti parametri:
+\begin{lingmeq}
+\left\{\begin{array}{lll}
+\text{categoria} & = & \text{nome} \\
+\text{tema} & = &
+\left[\begin{array}{lll}
+\text{base}&=&\text{-a}\\
+\text{femminile}&=&\text{-essa}\\
+\end{array}\right]\\
+\text{descrizione} & = &
+\left[\begin{array}{lll}
+\text{genere}&=&\text{maschile}\\
+\end{array}\right]\\
+\end{array}\right\}
+\end{lingmeq}
+\noindent è compatibile con i seguenti parametri di una
+derivazione che genera nomi maschili in -a:
+\begin{lingmeq}
+\left\{\begin{array}{lll}
+\text{categoria della radice} & = & \text{nome} \\
+\text{tema} & = &
+\left[\begin{array}{lll}
+\text{base}&=&\text{-a}\\
+\end{array}\right]\\
+\text{descrizione della radice} & = &
+\left[\begin{array}{lll}
+\text{genere}&=&\text{maschile}\\
+\end{array}\right]\\
+\end{array}\right\}
+\end{lingmeq}
+\noindent o con i seguenti parametri di una
+derivazione che genera nomi femminili in -essa:
+\begin{lingmeq}
+\left\{\begin{array}{lll}
+\text{categoria della radice} & = & \text{nome} \\
+\text{tema} & = &
+\left[\begin{array}{lll}
+\text{femminile}&=&\text{-essa}\\
+\end{array}\right]\\
+\text{descrizione della radice} & = & [] \\
+\end{array}\right\}
+\end{lingmeq}
+
+\myfig{Morfologia: derivazione.}{\input{immagini/derivation.tex}}{fig:derivation}
+
+Oltre ai parametri necessari a selezionare le radici, una regola di
+derivazione contiene anche:
+\begin{itemize}
+\item una sostituzione basata su un'espressione regolare $d.{regsub}$
+  ({\it regsub}) che indica come modificare la radice lessicale per
+  ottenere quella tematica (\vedi \pagina{page:regexpreplacement} e
+  \figura{fig:regexpreplacement});
+\item una descrizione $d.desc$ ({\it description});
+\item un paradigma $d.paradigma$ ({\it paradigma}), che contiene le regole di
+  flessione che si applicano alla radice tematica risultante (\vedi
+  \sezione{sec:flessione}).
+\end{itemize}
+
+La componente che genera la tabella delle radici tematiche ({\it
+  stem}) fa un prodotto cartesiano tra le radici e le derivazioni,
+registrando solo quelle compatibili. Una radice tematica è
+rappresentata solo da un collegamento a una radice lessicale e a una
+regola di derivazione. Le sue proprietà discendono da quella della
+derivazione, in particolare:
+\begin{itemize}
+\item la descrizione è l'unificazione tra quella della radice e quella della derivazione;
+\item il paradigma è quello della derivazione;
+\item la parte del discorso è quella del paradigma;
+\item la forma è il risultato dell'applicazione della sostituzione
+  della derivazione (campo {\it regsub} della tabella {\it
+    derivation}) alla radice lessicale (campo {\it root} della tabella
+  {\it root}).
+\end{itemize}
+
+Riassumendo, date la radice lessicale $r$:
+\begin{lingmeq}
+r=\left\{\begin{array}{lr}
+r.{root} & \text{(radice)}\\
+r.{pos} & \text{(categoria)}\\
+r.tema & \text{(tema)}\\
+r.desc & \text{(descrizione)}\\
+\end{array}\right.
+\end{lingmeq}
+\noindent e la regola di derivazione $d$:
+\begin{lingmeq}
+d=\left\{\begin{array}{lr}
+d.{rpos} & \text{(categoria della radice)}\\
+d.tema & \text{(tema)}\\
+d.{rdesc} & \text{(descrizione della radice)}\\
+d.desc & \text{(descrizione)}\\
+d.{regsub} & \text{(sostituzione)}\\
+d.paradigma & \text{(paradigma)}\\
+\end{array}\right.,
+\end{lingmeq}
+\noindent $d$ è applicabile a $r$ se e solo se:
+\begin{lingmeq}
+\begin{array}{rcl}
+d.{rpos}&=&r.{pos}\\
+d.tema&\spzmsussunto&r.tema\\
+d.{rdesc}&\spzmsussunto&r.desc\\
+\end{array}
+\end{lingmeq}
+\noindent e il risultato è:
+\begin{lingmeq}
+r \stackrel{d}{\spzlessder} s = \left\{
+\begin{array}{lll}
+s.stem &=& d.regsub \spzmregsub r.root\\
+s.tema &=& r.tema \\
+s.desc &=& r.desc \spzmunify d.desc \\
+s.paradigma &=& d.paradigma \\
+s.pos &=& d.paradigma.pos \\
+\end{array}
+\right.
+\end{lingmeq}
+
+\subsection{Flessione}
+
+\label{sec:flessione}
+
+\myfig{Morfologia: flessione.}{\input{immagini/inflectionrule.tex}}{fig:inflectionrule}
+
+Una volta associato, tramite una derivazione, un paradigma a una
+radice tematica, per ottenere le parole è sufficiente applicare tutte
+le regole di flessione contenute nel paradigma (\vedi
+\figura{fig:inflectionrule}), ossia, registrare nella tabella {\it
+  word} i riferimenti alle radici tematiche e alle regole di
+flessione.
+
+Una regola di flessione $i$ contiene:
+\begin{itemize}
+\item una sostituzione basata su un'espressione regolare $i.{regsub}$
+  ({\it regsub}) che indica come modificare la radice tematica per
+  ottenere una parola (\vedi \pagina{page:regexpreplacement} e
+  \figura{fig:regexpreplacement});
+\item una descrizione $i.desc$ ({\it description});
+\item un campo booleano $i.vocediz$ ({\it dict entry}), che indica se la
+  parola risultante è una voce del dizionario per la sua radice
+  tematica.
+\end{itemize}
+
+Le proprietà di una parola discendono sia da quelle della radice
+tematica, che da quelle della regola di flessione, in particolare:
+\begin{itemize}
+\item la descrizione è un'unione delle due descrizioni;
+\item la parte del discorso è quella della radice tematica;
+\item la forma è il risultato dell'applicazione della sostituzione
+  della flessione (campo {\it regsub} della tabella {\it inflection})
+  alla radice tematica.
+\end{itemize}
+
+Quindi, date la radice tematica $s$:
+\begin{lingmeq}
+s=\left\{\begin{array}{lr}
+s.{stem} & \text{(radice)}\\
+s.desc & \text{(descrizione)}\\
+s.{pos} & \text{(parte del discorso)}\\
+s.paradigma & \text{(paradigma)}\\
+s.tema & \text{(tema)}\\
+\end{array}\right.
+\end{lingmeq}
+\noindent e la regola di flessione $i$:
+\begin{lingmeq}
+i=\left\{\begin{array}{lr}
+i.desc & \text{(descrizione)}\\
+i.{regsub} & \text{(sostituzione)}\\
+i.vocediz & \text{(è voce del dizionario?)}\\
+\end{array}\right.,
+\end{lingmeq}
+\noindent $i$ è applicabile a $s$ se e solo se:
+\begin{lingmeq}
+i \in s.paradigma
+\end{lingmeq}
+\noindent e il risultato è:
+\begin{lingmeq}
+s \stackrel{i}{\spzder} w = \left\{
+\begin{array}{lll}
+w.word &=& i.regsub \spzmregsub s.stem\\
+w.desc &=& s.desc \spzmunify i.desc \\
+w.vocediz &=& s.vocediz \\
+w.tema &=& s.tema \\
+w.pos &=& s.pos \\
+\end{array}
+\right.
+\end{lingmeq}
+
+La componente che aggiorna le parole si preoccupa anche di
+precalcolarle (tramite derivazione e flessione) e di inserirle nella
+tabella di cache ({\it wordcache}), assieme a un riferimento uno a uno
+verso la tabella delle parole ({\it word}).
+
+\subsection{Composizione}
+
+\label{sec:composizione}
+
+La composizione è una situazione particolare: ad ogni parola composta,
+che appare come un singolo token nell'analisi morfologica,
+corrispondono più parole, che vengono passate al livello successivo
+come fossero parole distinte. Ossia, mentre la parola `casa' al
+termine dell'analisi morfologica darà il singolo token `casa', la
+parola composta `del' produrrà due token, `di' e `il'.
+
+Una parola composta $c$ si ottiene applicando una composizione $f$ a
+una sequenza parole $(w_1,..,w_n)$, specificate in un certo ordine
+(\vedi \figura{fig:fusedwords}):
+\begin{lingmeq}
+(w_1,\cdots,w_N) \stackrel{f}{\spzmcompder} c.
+\end{lingmeq}
+
+\myfig[t]{Morfologia: relazione tra parole ({\it word}) e parole composte
+  ({\it fusedword}). In colore più chiaro le tabelle calcolate e in
+  grigio le tabelle di relazione per relazioni molti a molti (in
+  questo caso
+  calcolate).}{\input{immagini/fusedwords.tex}}{fig:fusedwords}
+
+Una composizione è formata da più regole di composizione $f_n$, ognuna
+delle quali si applica alla corrispondente parola $w_n$ (\vedi
+\figura{fig:fusion}):
+\begin{lingmeq}
+\left(
+\begin{array}{ccc}
+w_1 & \stackrel{f_1}{\spzmcompder} & c_1\\
+w_2 & \stackrel{f_2}{\spzmcompder} & c_2\\
+\vdots &\vdots &\vdots \\
+w_N & \stackrel{f_N}{\spzmcompder} & c_N \\
+\end{array}\right).
+\end{lingmeq}
+\noindent La parola composta è ottenuta poi per concatenazione:
+\begin{lingmeq}
+c=\spzmconcat_{n=1}^{N}c_n.
+\end{lingmeq}
+
+\myfig{Morfologia: composizione. In grigio le tabelle di relazione per
+  relazioni molti a molti.}{\input{immagini/fusion.tex}}{fig:fusion}
+
+La compatibilità tra una parola $w_n$ e una regola $f_n$ è del tutto
+analoga a quella tra una radice lessicale e una derivazione.
+
+Quindi, data una lista di parole $(w_1,\cdots,w_N)$, in cui ogni
+$w_n$ è:
+\begin{lingmeq}
+w_n=\left\{\begin{array}{lr}
+w_n.{word} & \text{(parola)}\\
+w_n.desc & \text{(descrizione)}\\
+w_n.{pos} & \text{(parte del discorso)}\\
+w_n.vocediz & \text{(è voce del dizionario?)}\\
+w_n.tema & \text{(tema)}\\
+\end{array}\right.
+\end{lingmeq}
+\noindent e una composizione $f=(f_1,\cdots,f_M)$, in cui ogni $f_n$ è:
+\begin{lingmeq}
+f_n=\left\{\begin{array}{lr}
+f_n.{regsub} & \text{(sostituzione)}\\
+f_n.desc & \text{(descrizione)}\\
+f_n.tema & \text{(tema)}\\
+f_n.pos & \text{(parte del discorso)}\\
+\end{array}\right.,
+\end{lingmeq}
+\noindent $f$ è applicabile a $(w_1,\cdots,w_N)$ se e solo se $N=M$ e per ogni $n$:
+\begin{lingmeq}
+\begin{array}{rcl}
+f_n.{pos}&=&w_n.{pos}\\
+f_n.tema&\spzmsussunto&w_n.tema\\
+f_n.{desc}&\spzmsussunto&w_n.desc\\
+\end{array}
+\end{lingmeq}
+\noindent e il risultato è:
+\begin{lingmeq}
+(w_1,\cdots,w_N) \stackrel{f}{\spzmcompder} c = \left\{
+\begin{array}{lll}
+c.comp &=& \displaystyle\spzmconcat_{n=1}^{N} f_n.regsub \spzmregsub w_n.word\\
+c.words &=& (w_1,\cdots,w_N) \\
+c.desc &=& (w_1.desc,\cdots,w_N.desc) \\
+c.pos &=& (w_1.pos,\cdots,w_N.pos) \\
+\end{array}
+\right.
+\end{lingmeq}
+
+\subsection{Il parsing morfologico}
+
+Il parsing, di cui un esempio di output è in \tabella{tab:esmorph},
+viene eseguito ricercando ogni token prodotto dal parsing preliminare
+(\vedi \sezione{sec:parsing}) nelle tabelle:
+\begin{enumerate}
+\item delle non-parole ({\it notword});
+\item delle parole ({\it wordcache});
+\item delle parole composte ({\it fusedwordcache}).
+\end{enumerate}
+
+A parte nel caso delle non-parole, in cui esiste una sola tabella, e
+ogni oggetto produce un solo token, l'analisi viene eseguita risalendo
+le relazioni che partono dagli oggetti di cache (\vedi
+\figura{fig:words} e \figura{fig:fusedwords}), in modo da ricostruire
+i parametri delle parole da analizzare come visto nelle sezioni
+precedenti.
+
+Per ogni token $p$, può succedere che:
+\begin{enumerate}
+\item $p$ non sia trovato in nessuna tabella: verrà segnalato
+  all'utente la mancanza di regole per quella parola;
+\item $p$ corrisponda a un solo record della tabella {\it wordcache}
+  (il caso di `panchina' in \tabella{tab:esmorph}): produrrà un token;
+\item $p$ corrisponda a più record, tutti dalla tabella {\it
+  wordcache} (il caso di `la' in \tabella{tab:esmorph}): produrrà un
+  solo token, ma ci saranno due possibili risultati di analisi
+  (segnalando quindi un'ambiguità che dovrà essere risolta nei
+  passaggi successivi);
+\item $p$ corrisponda a un solo record della tabella {\it
+  fusedwordcache} (il caso di `della' in \tabella{tab:esmorph}):
+  produrrà più token, ma un solo risultato;
+\item $p$ corrisponda a più record, almeno uno dei quali della tabella
+  {\it fusedwordcache} (il caso di `dell\textquotesingle' in
+  \tabella{tab:esmorph}): produrrà più token e più risultati.
+\end{enumerate}
+
+\tabula[p]{Esempio di analisi morfologica della frase {\it la panchina
+    della fermata dell'autobus}. Gli articoli determinativi sono
+  rappresentati come forme flesse della radice `\spzradtema{il}', con
+  regole di sostituzione banali (ad esempio, per il femminile `la' la
+  regola è: pattern={\tt (.*)}, replacement={\tt la}). Da notare che
+  non interpreta correttamente `fermata': questo perché nella
+  grammatica definita esiste la derivazione che genera il verbo
+  `\spzradtema{ferm}' a partire dalla radice lessicale
+  `\spzradless{ferm}', ma non quella che genera il nome
+  `\spzradtema{fermat}' dalla stessa radice.}{tab:esmorph}{
+\begin{scriptsize}\begin{tabular}{>{\it}l|l|ll|l|lll|}
+{\it parola} & \multicolumn{3}{l|}{\it parte del discorso} & {\it radice tematica} & \multicolumn{3}{l|}{\it descrizione} \\
+\hline
+la &\multicolumn{3}{l|}{articolo} & \spzradtema{il} &	definitezza&=&definito\\
+      &\multicolumn{3}{l|}{}&&numero&=&singolare\\
+      &\multicolumn{3}{l|}{}&&genere&=&femminile \\
+\cline{2-8}
+   &\multicolumn{3}{l|}{pronome}  & \spzradtema{lei} & 	categoria&=&personale\\
+      &\multicolumn{3}{l|}{}&&persona&=&III\\
+      &\multicolumn{3}{l|}{}&&genere&=&femminile\\
+      &\multicolumn{3}{l|}{}&&numero&=&singolare \\
+      &\multicolumn{3}{l|}{}&&caso&=&accusativo (debole)\\
+\hline
+ &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\
+\hline
+panchina& \multicolumn{3}{l|}{nome}& \spzradtema{panchin} &	genere&=&femminile \\
+&\multicolumn{3}{l|}{}&&numero&=&singolare\\
+\hline
+ &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\
+\hline
+della&composta&preposizione&di&\spzradtema{di} &&&\\
+\cline{3-8}
+&&articolo&la&\spzradtema{il}& definitezza&=&definito\\
+      &&&&& numero&=&singolare\\
+      &&&&& genere&=&femminile \\
+\hline
+ &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\
+\hline
+fermata &\multicolumn{3}{l|}{verbo}&	ferm- &genere&=&femminile\\
+      &\multicolumn{3}{l|}{}&&numero&=&singolare\\
+      &\multicolumn{3}{l|}{}&&deverbale&=&aggettivo verbale\\
+      &\multicolumn{3}{l|}{}&&tempo&=&passato\\
+      &\multicolumn{3}{l|}{}&&modo&=&participio\\
+\hline
+ &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\
+\hline
+dell'&composta&preposizione&di&\spzradtema{di} &&&\\
+\cline{3-8}
+&&articolo&l'&\spzradtema{il}& definitezza&=&definito\\
+      &&&&& numero&=&singolare\\
+      &&&&& genere&=&maschile \\
+\cline{2-8}
+&composta &preposizione&di&\spzradtema{di}&&&\\
+\cline{3-8}
+&&articolo&l'&\spzradtema{il}& definitezza&=&definito\\
+      &&&&& numero&=&singolare\\
+      &&&&& genere&=&femminile \\
+\hline
+ &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\
+\hline
+autobus &\multicolumn{3}{l|}{nome}&autobus-&genere&=&maschile\\
+      &\multicolumn{3}{l|}{}&&numero&=&singolare\\
+\cline{2-8}
+      &\multicolumn{3}{l|}{nome}&autobus-&genere&=&maschile\\
+      &\multicolumn{3}{l|}{}&&numero&=&plurale\\
+\hline
+\end{tabular}\end{scriptsize}}
+
+\afterpage\clearpage
+
+%%%%%%%%%%%%%
+
+\input{convenzioni.tex}
+
+\nocite{longo2012}
+\nocite{chomsky1965}
+\nocite{chomsky2002}
+\nocite{albano1997}
+
+\startbiblio
+
+\spzbibsection{Biblio}{dbrelazionale}{bib:dbrelazionale}
+
+\tableofcontents
+
+
+\end{document}

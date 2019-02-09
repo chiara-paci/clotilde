@@ -1,0 +1,42 @@
+.center {
+    text-align: center;
+}
+
+.left {
+    text-align: left;
+}
+
+.right {
+    text-align: right;
+}
+
+.justify {
+    text-align: justify;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.overline {
+    text-decoration: overline;
+}
+
+.linethrough {
+    text-decoration: line-through;
+}
+
+.smallcaps {
+    font-variant:small-caps;
+} 
+
+pre.code, pre.terminal {
+    width: 96%;
+    margin-left: 2%;
+    padding: 0.5em;
+}
+
+pre.terminal {
+    background-color: black;
+    foreground-color: white;
+}

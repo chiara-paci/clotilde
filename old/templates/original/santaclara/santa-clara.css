@@ -1,0 +1,77 @@
+{% load css_tags %}
+
+/**** Santa Clara Language ****/
+
+pre.code, pre.terminal {
+    {% box_shadow SHADOW_CONTENT %}
+    padding: 1em;
+    {% border_radius "3px" %}
+    margin: 0;
+    margin-left: 1em;
+    margin-bottom: .5em;
+    margin-top: .5em;
+}
+
+pre.code {
+    background-color: {{ COLOR_CODE_BACK }};
+    border: 1px solid {{ COLOR_CODE_FORE }};
+}
+
+pre.terminal {
+    background-color: {{ COLOR_TERMINAL_BACK }};
+    color: {{ COLOR_TERMINAL_FORE }};
+}
+
+.quotediv, .citediv {
+    {% box_shadow SHADOW_CONTENT %}
+    {% border_radius "3px" %}
+    background-color: {{ COLOR_QUOTE_BACK }};
+    border: 1px solid {{ COLOR_QUOTE_FORE }};
+    padding: 0;
+    margin-left: 1em;
+    margin-bottom: .2em;
+    margin-top: .2em;
+}
+
+.quoteheader, .citefooter {
+    color: {{ COLOR_QUOTE_HEADER_FORE }};
+    background-color: {{ COLOR_QUOTE_HEADER_BACK }};
+    border-bottom: 1px solid {{ COLOR_QUOTE_HEADER_FORE }};
+    margin: 0;
+    {% border_radius "3px" %}
+    font-size: 90%;
+    padding-left: .5em;
+    padding-right: .5em;
+}
+
+.quotetext,.citetext {
+    padding: 0;
+    margin: 0;
+    padding-left: 1em;
+    padding-right: .5em;
+}
+
+.citefooter a,
+.quoteheader a {
+    color: {{ COLOR_QUOTE_HEADER_FORE }};
+    text-decoration: none;
+    padding: .1em;
+    {% border_radius ".3em" %}
+}
+
+.citefooter a:active, .citefooter a:hover,
+.quoteheader a:active, .quoteheader a:hover {
+    color: {{ COLOR_ICON_ACTIVE_FORE }};
+    background-color: {{ COLOR_ICON_ACTIVE_BACK }};
+}
+
+.vspace {
+    padding: 0;
+    margin: 0;
+}
+
+.hspace {
+    padding: 0;
+    margin: 0;
+    display: inline;
+}

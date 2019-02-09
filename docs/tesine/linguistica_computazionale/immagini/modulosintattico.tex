@@ -1,0 +1,18 @@
+\begin{scriptsize}
+\begin{tikzpicture}
+  [x=5mm,y=5mm,node distance=1,
+    dati/.style={rounded corners,draw},
+    azione/.style={draw,
+      top color=white, 
+      bottom color=gray!20,
+    },
+]
+
+  \node[dati] (xbar) {regole \=X};
+  \node[azione] (conv) [right=of xbar] {conversione};
+  \node[dati] (cfg) [right=of conv] {grammatica context-free con ambiguità};
+  \node[dati] (pt) [right=of cfg] {parsing table};
+  \node[dati] (lr) [right=of pt] {augmented LR parser};
+
+\end{tikzpicture}
+\end{scriptsize}

@@ -1,0 +1,73 @@
+{% if rules.is_invariant %}
+  <td class="borderbottomright" colspan="2" rowspan="2">
+    {% with rules.invariant as rules_list %}
+    {% include "helper_italiano/includes/table_morphrule.html" %}
+    {% endwith %}
+  </td>
+  {% include incl_singolare %}
+</tr>
+<tr>
+  <th class="borderbottomright">plurale</th>
+  {% include incl_plurale %}
+</tr>
+{% else %}{% if not rules.has_gender %}
+  <td class="borderbottomright" colspan="2">
+    {% with rules.singolare as rules_list %}
+    {% include "helper_italiano/includes/table_morphrule.html" %}
+    {% endwith %}
+  </td>
+  {% include incl_singolare %}
+</tr>
+<tr>
+  <th class="borderbottomright">plurale</th>
+  <td class="borderbottomright" colspan="2">
+    {% with rules.plurale as rules_list %}
+    {% include "helper_italiano/includes/table_morphrule.html" %}
+    {% endwith %}
+  </td>
+  {% include incl_plurale %}
+</tr>
+{% else %}{% if not rules.has_number %}
+  <td class="borderbottomright" rowspan="2">
+    {% with rules.maschile as rules_list %}
+    {% include "helper_italiano/includes/table_morphrule.html" %}
+    {% endwith %}
+  </td>
+  <td class="borderbottomright" rowspan="2">
+    {% with rules.femminile as rules_list %}
+    {% include "helper_italiano/includes/table_morphrule.html" %}
+    {% endwith %}
+  </td>
+  {% include incl_singolare %}
+</tr>
+<tr>
+  <th class="borderbottomright">plurale</th>
+  {% include incl_plurale %}
+</tr>
+{% else %}
+  <td class="borderbottomright">
+    {% with rules.singolare.maschile as rules_list %}
+    {% include "helper_italiano/includes/table_morphrule.html" %}
+    {% endwith %}
+  </td>
+  <td class="borderbottomright">
+    {% with rules.singolare.femminile as rules_list %}
+    {% include "helper_italiano/includes/table_morphrule.html" %}
+    {% endwith %}
+  </td>
+  {% include incl_singolare %}
+</tr>
+<tr><th class="borderbottomright">plurale</th>
+  <td class="borderbottomright">
+    {% with rules.plurale.maschile as rules_list %}
+    {% include "helper_italiano/includes/table_morphrule.html" %}
+    {% endwith %}
+  </td>
+  <td class="borderbottomright">
+    {% with rules.plurale.femminile as rules_list %}
+    {% include "helper_italiano/includes/table_morphrule.html" %}
+    {% endwith %}
+  </td>
+  {% include incl_plurale %}
+</tr>
+{% endif %}{% endif %}{% endif %}

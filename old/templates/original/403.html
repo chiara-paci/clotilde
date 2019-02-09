@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - Forbidden{% endblock %}
+
+{% block content %}
+<div id="errors" class="contentbox">
+<p>{% trans "We're sorry" %}.</p>
+<hr/>
+<p>{% trans "You do not have permission to access this document" %}.</p>
+</div>
+{% endblock %}

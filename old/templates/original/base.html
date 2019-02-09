@@ -1,0 +1,47 @@
+{% load i18n %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="{{ LANGUAGE_CODE }}" xml:lang="{{ LANGUAGE_CODE }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<head>
+<title>{{ SITE_NAME }}{% block title %}{% endblock %}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="icon" href="{{ SITE_ICON }}" type="image/png">
+<link rel="stylesheet" type="text/css" href="/static/css/font-awesome-ie7.min.css"/>
+<link rel="stylesheet" type="text/css" href="/static/css/font-awesome.min.css"/>
+<link rel="stylesheet" type="text/css" href="{{ DYNAMIC_CSS }}/base.css">
+{% block header %}{% endblock %} 
+{% block css %}{% endblock %} 
+</head>
+
+<body>
+  
+  <div id="header"><div id="headertitle">{% block bigtitle %}{{ SITE_NAME }}{% endblock %}</div></div>
+
+  <div id="headermenu">
+    <ul>
+      {% for x,xlist in HEADERMENU %}
+      <li class="menu{% if forloop.last %} last{% endif %}">
+	<a href="{{ x.url }}">{{ x.long }}</a>
+	{% if xlist %}
+	<ul class="submenu">
+	  {% for l in xlist %}
+	  <li class="item"><a href="{{ l.url }}">{{ l.long }}</a>
+	    {% endfor %}
+	  </ul>
+	  {% endif %}
+	</li>
+	{% endfor %}
+      </ul>
+    </div>
+  
+  <div id="content">
+  {% block content %}
+    <div id="applicationmenu">
+      {% block applicationmenu %}{% endblock %}
+    </div>    
+    <div id="text">
+      {% block centercontent %}{% endblock %}
+    </div>
+  {% endblock %}
+  </div>
+
+</body>
+</html>

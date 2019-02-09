@@ -1,0 +1,68 @@
+\begin{scriptsize}
+\begin{tikzpicture}
+  [x=5mm,y=5mm,node distance=0,
+    %>=triangle 45,
+    stgrid/.style={draw=#1,},
+    agrid/.style={stgrid=black!10},
+    bgrid/.style={stgrid=cyan!50},
+    anchortab/.style={circle,draw},
+    tab/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!20,
+    },
+    tabtop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1,
+    },
+    tabsoft/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!5,
+    },
+    tabsofttop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1!25,
+    },
+    multirel/.style={tab=gray},
+    multireltop/.style={tabtop=gray},
+    alpha/.style={tab=green},
+    alphatop/.style={tabtop=green},
+    morph/.style={tab=blue},
+    morphtop/.style={tabtop=blue},
+    morphcalc/.style={tab=bluea},
+    morphcalctop/.style={tabtop=bluea},
+    morphcache/.style={tab=blueb},
+    morphcachetop/.style={tabtop=blueb},
+    syntax/.style={tab=yellow},
+    syntaxtop/.style={tabtop=yellow},
+    lexicon/.style={tab=red},
+    lexicontop/.style={tabtop=red},
+  ]
+
+  \begin{dbtabella}{morph}{2}{8}{9}{2}{morphology}{fusion}
+    \tablerow{name}{varchar(1024)}
+    \tablerow{language}{f.k. language}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morphcalc}{2}{13}{7}{2}{morphology}{word}
+    \tableflink{stem}{stem}
+    \tableflink{inflection}{inflection}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morphcalc}{-9}{9}{7}{1}{morphology}{fusedword}
+    \tablelink{fusion}{fusion}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morphcalc}{-7}{5}{7}{2}{morphology}{fusedwordcache}
+    \tableolink[left]{fusedword}{fusedword}
+    \tablerow{cache}{cache}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-7}{15}{7}{3}{morphology}{}
+    \tablelink[link]{fused word}{fusedword}
+    \tablelink{word}{word}
+    \tablerow{order}{integer}
+  \end{dbtabella}
+
+
+\end{tikzpicture}
+\end{scriptsize}

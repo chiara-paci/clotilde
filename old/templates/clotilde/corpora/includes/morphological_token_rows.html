@@ -1,0 +1,37 @@
+{% for tok in token_list %}
+{% if tok.num_words == 0 %}
+<tr class="{{ tok.label }} nottoken">
+  <td class="{{ tok.label }} borderbottomright">{{ tok.human|safe }}</td>
+  <td class="{{ tok.label }} borderbottomright">{{ tok.name }}</td>
+</tr>
+{% else %}
+  {% for num,wlist in tok.words %}
+{% if num == 1 %}
+<tr class="{{ wlist.0.slug }} token">
+  {% if forloop.first %}<td class="{{ tok.label }} borderbottomright" rowspan="{{ tok.num_words }}">{{ tok.human|safe }}</td>{% endif %}
+  <td class="{{ wlist.0.slug }} borderbottomright" colspan="2">{{ wlist.0.part_of_speech }}</td>
+  <td class="{{ wlist.0.slug }} borderbottomright">{{ wlist.0.scache }}</td>
+  <td class="{{ wlist.0.slug }} borderbottomright">{{ wlist.0.get_class_string }}</td></tr>
+</tr>
+{% else %}
+<tr class="{{ wlist.0.slug }} token">
+{% if forloop.first %}<td class="{{ tok.label }} borderbottomright" rowspan="{{ tok.num_words }}">{{ tok.human|safe }}</td>{% endif %}
+{% for w in wlist %}
+{% if forloop.first %}
+<td class="{{ tok.label }} borderbottomright" rowspan="{{ num }}">F</td>
+{% else %}
+<tr class="{{ w.slug }} token">
+{% endif %}
+  <td class="{{ w.slug }} borderbottomright">{{ w.part_of_speech }}</td>
+  <td class="{{ w.slug }} borderbottomright">{{ w.scache }}</td>
+  <td class="{{ w.slug }} borderbottomright">{{ w.get_class_string }}</td></tr>
+</tr>
+{% endfor %}
+
+{% endif %}
+  {% endfor %}
+
+{% endif %}
+{% endfor %}
+
+

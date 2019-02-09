@@ -1,0 +1,367 @@
+# Create your views here.
+from django.shortcuts import render_to_response,get_object_or_404
+from django.template import RequestContext
+from django.conf import settings
+
+from corpora.models import *
+from languages.models import MARKERS,NEW_LINES
+from morphology.models import WordCache,NotWord,FusedWordCache
+from django.core.exceptions import ObjectDoesNotExist
+
+import re,time
+
+# Newline's:
+#
+# LF:    Line Feed, U+000A                   '\n'
+# VT:    Vertical Tab, U+000B                u'\x0b'
+# FF:    Form Feed, U+000C                   u'\x0c'
+# CR:    Carriage Return, U+000D             '\r'
+# CR+LF: CR (U+000D) followed by LF (U+000A) '\r\n'
+# NEL:   Next Line, U+0085                   u'\x85'
+# LS:    Line Separator, U+2028              unichr(0x2028)
+# PS:    Paragraph Separator, U+2029         unichr(0x2029)
+
+def replace_newline(S,repl,preserve=False):
+    if not preserve:
+        for (r,n) in NEW_LINES:
+            S=S.replace(n,repl)
+        return(S)
+    for (r,n) in NEW_LINES:
+        S=S.replace(n,r+repl)
+    return(S)
+
+LF_IMG='<img src="'+settings.CLOTILDE_ICONS_MARKERS_PATH+'/lf.png"/>'
+END_IMG='<img src="'+settings.CLOTILDE_ICONS_MARKERS_PATH+'/end.png"/>'
+BEGIN_IMG='<img src="'+settings.CLOTILDE_ICONS_MARKERS_PATH+'/begin.png"/>'
+
+def alpha_parser(request,text_id):
+    t0=time.time()
+    text=get_object_or_404(Text,id=text_id)
+    regexp_set=text.corpus.language.token_regexp_set
+    c=re.compile(regexp_set.regexp_all())
+    tokens=filter(bool,c.split(text.text))
+    rexp_list=regexp_set.regexp_objects()
+
+    L=len(tokens)
+    t1=time.time()
+    print "prima fase ok numtok=%d, sec.=%4.4f" % (L,t1-t0)
+
+    def f(t):
+        for (name,label,bg,fg,rexp,rexp_t) in rexp_list:
+            if rexp.match(t):
+                T='<span class="'+label+'"> '
+                t=t.replace(" ","&nbsp;")
+                t=replace_newline(t," "+LF_IMG+"<br/>\n")
+                T+=t
+                T+="</span>"
+                return(T)
+        if t[0]=='[':
+            if t[1]=="/":
+                m=t[2:-1]
+                T='<img src="'+settings.CLOTILDE_ICONS_MARKERS_PATH+'/'+m+'.png"/>'
+                T+=END_IMG
+            else:
+                m=t[1:-1]
+                T=BEGIN_IMG
+                T+='<img src="'+settings.CLOTILDE_ICONS_MARKERS_PATH+'/'+m+'.png"/>'
+            if m in MARKERS:
+                return(T)
+        t=t.replace(" ","&nbsp;")
+        t=replace_newline(t," "+LF_IMG+"<br/>\n")
+        T='<span class="not-found"> '
+        T+=t
+        T+="</span>"
+        return(T)
+        
+    newtext=""
+    n=1
+    for t in tokens:
+        ta=time.time()
+        newtext+=f(t)
+        tb=time.time()
+        print "%d/%d %4.4f" % (n,L,tb-ta)
+        n+=1
+    t2=time.time()
+    print "seconda fase ok - sec.=%4.4f" % (t2-t1)
+    t3=time.time()
+    print "terza fase ok - sec.=%4.4f" % (t3-t2)
+    params={}
+    params["rexp_list"]=rexp_list
+    params["style_list"]=map(lambda (name,label,bg,fg,rexp,rexp_t): (name+': '+rexp_t,label,fg,bg),rexp_list)
+    params["text"]=text
+    params["regexp_set"]=regexp_set
+    params["newtext"]=newtext
+    return render_to_response("corpora/text_detail_parsed.html", params,
+                              context_instance=RequestContext(request))
+
+def alpha_token(request,text_id):
+    t0=time.time()
+    text=get_object_or_404(Text,id=text_id)
+    language=text.corpus.language
+    regexp_set=language.token_regexp_set
+    c=re.compile(regexp_set.regexp_all())
+    tokens=list(set(filter(bool,c.split(text.text))))
+    tokens.sort()
+    rexp_list=regexp_set.regexp_objects()
+
+    L=len(tokens)
+    t1=time.time()
+    print "prima fase ok numtok=%d, sec.=%4.4f" % (L,t1-t0)
+
+    def f(t):
+        for (name,label,bg,fg,rexp,rexp_t) in rexp_list:
+            if rexp.match(t):
+                t=t.replace(" ","&nbsp;")
+                t=replace_newline(t," "+LF_IMG+"<br/>\n")
+                return(label,name,t)
+        if t[0]=='[':
+            if t[1]=="/":
+                m=t[2:-1]
+                T='<img src="'+settings.CLOTILDE_ICONS_MARKERS_PATH+'/'+m+'.png"/>'
+                T+=END_IMG
+            else:
+                m=t[1:-1]
+                T=BEGIN_IMG
+                T+='<img src="'+settings.CLOTILDE_ICONS_MARKERS_PATH+'/'+m+'.png"/>'
+            if m in MARKERS:
+                return("marker","marker",T)
+        t=t.replace(" ","&nbsp;")
+        t=replace_newline(t," "+LF_IMG+"<br/>\n")
+        return("not-found","not found",t)
+        
+    token_list=[]
+    n=1
+    for t in tokens:
+        ta=time.time()
+        token_list.append(f(t))
+        tb=time.time()
+        print "%d/%d %4.4f" % (n,L,tb-ta)
+        n+=1
+    t2=time.time()
+    print "seconda fase ok - sec.=%4.4f" % (t2-t1)
+    t3=time.time()
+    print "terza fase ok - sec.=%4.4f" % (t3-t2)
+    params={}
+    params["rexp_list"]=rexp_list
+    params["style_list"]=map(lambda (name,label,bg,fg,rexp,rexp_t): (name+': '+rexp_t,label,fg,bg),rexp_list)
+    params["text"]=text
+    params["regexp_set"]=regexp_set
+    params["token_list"]=token_list
+    params["rowtemplate"]="corpora/includes/alpha_token_rows.html"
+    return render_to_response("corpora/text_detail_token.html", params,
+                              context_instance=RequestContext(request))
+
+class MWord(object):
+    def __init__(self,word):
+        self.word=word
+        self.slug=word.part_of_speech().slug()
+        self.part_of_speech=word.part_of_speech
+        self.scache=word.scache
+        self.get_class_string=word.get_class_string()
+
+class MToken(object):
+    def __init__(self,label,name,fg,bg,token):
+        self.label=label
+        self.name=name
+        self.fg=fg
+        self.bg=bg
+        self.token=token
+        self.words=[]
+        self.num_words=0
+        
+    def human(self):
+        t=self.token.replace(" ","&nbsp;")
+        t=replace_newline(t," "+LF_IMG+"<br/>\n")
+        return(t)
+
+    def append_words(self,wlist):
+        L=len(wlist)
+        self.num_words+=L
+        self.words.append( (L,map(MWord,wlist)) ) 
+
+    def has_words(self): return(bool(self.words))
+    def is_token(self): return( (self.label!="not-found") )
+
+    def k(self): return(self.token.lower())
+
+    def get_styles(self):
+        sL=[]
+        for (L,wlist) in self.words:
+            for w in wlist:
+                pos=w.part_of_speech()
+                sL.append((pos.name,pos.slug(),pos.fg_color,pos.bg_color))
+        return(sL)
+        
+def morphological_token(request,text_id):
+    text=get_object_or_404(Text,id=text_id)
+    language=text.corpus.language
+    regexp_set=language.token_regexp_set
+    c=re.compile(regexp_set.regexp_all())
+    tokens=list(set(filter(bool,c.split(text.text))))
+    tokens.sort()
+    rexp_list=regexp_set.regexp_objects()
+    
+    def f(t):
+        for (name,label,bg,fg,rexp,rexp_t) in rexp_list:
+            if rexp.match(t):
+                return MToken(label,name,fg,bg,t)
+        if t[0]=='[':
+            if t[1]=="/":
+                m=t[2:-1]
+            else:
+                m=t[1:-1]
+            if m in MARKERS:
+                return None
+        return MToken("not-found","not found",t,"","")
+
+    L=len(tokens)
+    t0=time.time()
+    print "numtok=%d" % L
+
+    tlist=filter(bool,map(f,tokens))
+    nlist=filter(lambda x: not x.is_token(),tlist)
+    tlist=filter(lambda x: x.is_token(),tlist)
+    tdict=dict(map(lambda x: (x.k(),x),tlist))
+
+    t1=time.time()
+    print "fase 1 sec.=%4.4f (init)" % (t1-t0)
+
+    for nw in NotWord.objects.filter(word__in=tdict.keys()): 
+        del(tdict[nw.word])
+
+    cdict={}
+    for cw in WordCache.objects.select_related().filter(cache__in=tdict.keys()):
+        k=cw.cache
+        tdict[k].append_words([cw])
+    for fw in FusedWordCache.objects.select_related().filter(cache__in=tdict.keys()):
+        k=fw.cache
+        tdict[k].append_words(fw.get_words())
+
+    t2=time.time()
+    print "fase 2 sec.=%4.4f (database)" % (t2-t1)
+
+    tlist=filter(lambda w: not w.has_words(),tdict.values())
+    wlist=filter(lambda w: w.has_words(),tdict.values())
+
+    def s(w): w.k()
+
+
+    token_list=nlist+tlist+wlist
+
+    token_list.sort(key=lambda w: w.k())
+
+    def f_style(tok):
+        return (tok.name,tok.label,tok.fg,tok.bg)
+
+    style_list=map(f_style,tlist)
+
+    for tok in wlist:
+        style_list+=tok.get_styles()
+
+    style_list=list(set(style_list))
+
+    t3=time.time()
+    print "fase 3 sec.=%4.4f (liste)" % (t3-t2)
+
+    params={}
+    params["rexp_list"]=rexp_list
+    params["style_list"]=style_list
+    params["text"]=text
+    params["regexp_set"]=regexp_set
+    params["token_list"]=token_list
+    params["rowtemplate"]="corpora/includes/morphological_token_rows.html"
+    ret=render_to_response("corpora/text_detail_token.html", params,
+                           context_instance=RequestContext(request))
+    t4=time.time()
+    print "fase 4 sec.=%4.4f (template)" % (t4-t3)
+    print
+    print "totale sec.=%4.4f" % (t4-t0)
+    
+    return ret
+
+def morphological_parser(request,text_id):
+    text=get_object_or_404(Text,id=text_id)
+    language=text.corpus.language
+    regexp_set=language.token_regexp_set
+    c=re.compile(regexp_set.regexp_all())
+    tokens=filter(bool,c.split(text.text))
+    #tokens.sort()
+    rexp_list=regexp_set.regexp_objects()
+    
+    def f(t):
+        for (name,label,bg,fg,rexp,rexp_t) in rexp_list:
+            if rexp.match(t):
+                return MToken(label,name,fg,bg,t)
+        if t[0]=='[':
+            if t[1]=="/":
+                m=t[2:-1]
+            else:
+                m=t[1:-1]
+            if m in MARKERS:
+                return None
+        return MToken("not-found","not found",t,"","")
+
+    L=len(tokens)
+    t0=time.time()
+    print "numtok=%d" % L
+
+    tlist=filter(bool,map(f,tokens))
+    nlist=filter(lambda x: not x.is_token(),tlist)
+    tlist=filter(lambda x: x.is_token(),tlist)
+    tdict=dict(map(lambda x: (x.k(),x),tlist))
+
+    t1=time.time()
+    print "fase 1 sec.=%4.4f (init)" % (t1-t0)
+
+    for nw in NotWord.objects.filter(word__in=tdict.keys()): 
+        del(tdict[nw.word])
+
+    cdict={}
+    for cw in WordCache.objects.select_related().filter(cache__in=tdict.keys()):
+        k=cw.cache
+        tdict[k].append_words([cw])
+    for fw in FusedWordCache.objects.select_related().filter(cache__in=tdict.keys()):
+        k=fw.cache
+        tdict[k].append_words(fw.get_words())
+
+    t2=time.time()
+    print "fase 2 sec.=%4.4f (database)" % (t2-t1)
+
+    tlist=filter(lambda w: not w.has_words(),tdict.values())
+    wlist=filter(lambda w: w.has_words(),tdict.values())
+
+    def s(w): w.k()
+
+    token_list=nlist+tlist+wlist
+
+    #token_list.sort(key=lambda w: w.k())
+
+    def f_style(tok):
+        return (tok.name,tok.label,tok.fg,tok.bg)
+
+    style_list=map(f_style,tlist)
+
+    for tok in wlist:
+        style_list+=tok.get_styles()
+
+    style_list=list(set(style_list))
+
+    t3=time.time()
+    print "fase 3 sec.=%4.4f (liste)" % (t3-t2)
+
+    params={}
+    params["rexp_list"]=rexp_list
+    params["style_list"]=style_list
+    params["text"]=text
+    params["regexp_set"]=regexp_set
+    params["token_list"]=token_list
+    params["rowtemplate"]="corpora/includes/morphological_token_rows.html"
+    ret=render_to_response("corpora/text_detail_token.html", params,
+                           context_instance=RequestContext(request))
+    t4=time.time()
+    print "fase 4 sec.=%4.4f (template)" % (t4-t3)
+    print
+    print "totale sec.=%4.4f" % (t4-t0)
+    
+    return ret
+

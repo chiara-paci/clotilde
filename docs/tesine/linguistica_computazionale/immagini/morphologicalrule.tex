@@ -1,0 +1,86 @@
+\begin{tiny}
+\begin{tikzpicture}
+  [x=3.5mm,y=3.5mm,node distance=0,
+    %>=triangle 45,
+    stgrid/.style={draw=#1!10,},
+    agrid/.style={stgrid=black},
+    bgrid/.style={stgrid=cyan},
+    anchortab/.style={circle,draw},
+    tab/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!20,
+    },
+    tabtop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1,
+    },
+    tabsoft/.style={rounded corners,
+      top color=white, 
+      bottom color=#1!5,
+    },
+    tabsofttop/.style={rounded corners,
+      top color=#1!5, 
+      bottom color=#1!25,
+    },
+    multirel/.style={tab=gray},
+    multireltop/.style={tabtop=gray},
+    alpha/.style={tab=green},
+    alphatop/.style={tabtop=green},
+    morph/.style={tab=blue},
+    morphtop/.style={tabtop=blue},
+    syntax/.style={tab=yellow},
+    syntaxtop/.style={tabtop=yellow},
+    lexicon/.style={tab=red},
+    lexicontop/.style={tabtop=red},
+  ]
+
+  \draw[agrid] (-10,-20) grid[xstep=1,ystep=1] (30,30);
+  \draw[bgrid] (-10,-20) grid[xstep=5,ystep=5] (30,30);
+
+%%% alpha
+
+  \begin{dbtabella}{alpha}{15}{19}{10}{2}{\alphapref}{\classification}
+    \tablerow{\exponent}{varchar(1024)}
+    \tablerow{\category}{f.k. \category}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{15}{14}{11}{2}{morphology}{regexpreplacement}
+    \tablerow{pattern}{varchar(1024)}
+    \tablerow{replacement}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{15}{9}{8}{1}{\alphapref}{partofspeech}
+    \tablerow{name}{varchar(1024)}
+  \end{dbtabella}
+
+  \begin{dbtabella}{alpha}{15}{5}{15}{3}{\alphapref}{language}
+    \tablerow{name}{varchar(1024)}
+    \tablerow{period sep}{f.k. tokenregexp}
+    \tablerow{token regexp set}{f.k. tokenregexpset}
+  \end{dbtabella}
+
+
+  \begin{dbtabella}{morph}{3}{15}{9}{2}{morphology}{morphologicalrule}
+    \tablelink{regexp}{regexpreplacement}
+    \tablerow{dict entry}{boolean}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-12}{19}{12}{3}{\alphapref}{morphologicalruleclassification}
+    \tablelink{classification}{classification}
+    \tablelink{morphologicalrule}{morphologicalrule}
+    \tablerow{negate}{boolean}
+  \end{dbtabella}
+
+  \begin{dbtabella}{morph}{3}{8}{9}{3}{morphology}{paradigma}
+    \tablerow{name}{varchar(1024)}
+    \tablelink{part of speech}{partofspeech}
+    \tablelink{language}{language}
+  \end{dbtabella}
+
+  \begin{dbtabella}{multirel}{-10}{10}{10}{2}{\alphapref}{}
+    \tablelink{morphologicalrule}{morphologicalrule}
+    \tablelink{paradigma}{paradigma}
+  \end{dbtabella}
+
+\end{tikzpicture}
+\end{tiny}

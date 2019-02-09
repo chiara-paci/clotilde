@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} - Helper Italiano{% endblock %}
+
+{% block script %}
+{% include "helper_italiano/includes/scripts/coniugazione.js" %}
+{% with "coniugazione" as mrtype %}
+{% include "helper_italiano/includes/scripts/table_morphrule.js" %}
+{% endwith %}
+{% endblock %}
+
+{% block content %}
+
+<div id="largecontent">
+<h1>{{ paradigma }}</h1>
+
+<center>
+<table class="shadow inflection">
+<tr>
+  {# <td class="button" rowspan="2"><img id="save" src="{{ ICON_SAVE }}"/><img id="edit" src="{{ ICON_EDIT }}"/></td> #}
+  <td class="button" rowspan="2" id="refresh"><img src="{{ ICON_RECYCLE }}"/></td>
+  <td colspan="3" class="right bottom"><span class="note">stem</span></td>
+  <td rowspan="61" class="spc">&nbsp;</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td colspan="3" class="right top"><input type="text" id="stem" value="{{ stem }}"/></td>
+</tr>
+<tr>
+  <td colspan="3">&nbsp;</td>  
+</tr>
+<tr>
+  <td colspan="3" class="borderbottomright">&nbsp</td>
+  <th class="hdr borderbottomright">regexp</th>
+  <th class="hdr borderbottomright borderleft">coniugazione</th>
+</tr>
+
+{% for modo,rspan,tlist in finiti %}
+{% for tempo,persone in tlist %}
+{% if forloop.first %}
+<tr>
+<th rowspan="{{ rspan }}" class="top borderbottomright">{{ modo }}</th>
+{% else %}
+<tr>
+{% endif %}
+{% for pid,pers in persone %}
+
+{% if forloop.first %}
+{% if modo == "imperativo" %}
+<th rowspan="5" class="top borderbottomright">{{ tempo }}</th>
+{% else %}
+<th rowspan="6" class="top borderbottomright">{{ tempo }}</th>
+{% endif %}
+{% else %}
+<tr>
+{% endif %}
+
+<th class="borderbottomright right">
+  {% if pid == "si" %}I s.
+  {% else %}{% if pid == "sii" %}II s.
+  {% else %}{% if pid == "siii" %}III s.
+  {% else %}{% if pid == "pi" %}I p.
+  {% else %}{% if pid == "pii" %}II p.
+  {% else %}III p.
+  {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+</th>
+<td class="voice mrparent borderbottomright" id="{{ pers.oid }}">    
+  {% with pers.rules as rules_list %}
+  {% include "helper_italiano/includes/table_morphrule.html" %}
+  {% endwith %}
+</td>
+<td class="borderleft borderbottomright example"><table class="example" id="ex{{ pers.oid }}"></table></td>
+</tr>
+
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+<tr>
+<th rowspan="10" class="top borderbottomright">deverbali</th>
+<th colspan="2" class="borderbottomright">infinito</th>
+<td class="voice mrparent borderbottomright" id="{{ deverbali.infinito.oid }}">    
+  {% with deverbali.infinito.rules as rules_list %}
+  {% include "helper_italiano/includes/table_morphrule.html" %}
+  {% endwith %}
+</td>
+<td class="borderleft borderbottomright example"><table class="example" id="ex{{ deverbali.infinito.oid }}"></table></td>
+</tr>
+
+<tr>
+<th colspan="2" class="borderbottomright">gerundio</th>
+<td class="voice mrparent borderbottomright" id="{{ deverbali.gerundio.oid }}">    
+  {% with deverbali.gerundio.rules as rules_list %}
+  {% include "helper_italiano/includes/table_morphrule.html" %}
+  {% endwith %}
+</td>
+<td class="borderleft borderbottomright example"><table class="example" id="ex{{ deverbali.gerundio.oid }}"></table></td>
+</tr>
+
+{% for tense,persone in deverbali.participio %} 
+{% for pid,pers in persone %}
+<tr>
+{% if forloop.first %}
+<th class="borderbottomright" rowspan="4">participio {{ tense }}</th>
+{% endif %}
+<th class="borderbottomright">
+  {% if pid == "sm" %}m.s.
+  {% else %}{% if pid == "sf" %}f.s.
+  {% else %}{% if pid == "pm" %}m.p.
+  {% else %}f.p.
+  {% endif %}{% endif %}{% endif %}
+</th>
+<td class="voice mrparent borderbottomright" id="{{ pers.oid }}">    
+  {% with pers.rules as rules_list %}
+  {% include "helper_italiano/includes/table_morphrule.html" %}
+  {% endwith %}
+</td>
+<td class="borderleft borderbottomright example"><table class="example" id="ex{{ pers.oid }}"></table></td>
+</tr>
+{% endfor %}
+{% endfor %}
+
+</table>
+</center>
+</div>
+
+{% endblock %}
