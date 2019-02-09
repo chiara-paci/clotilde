@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.db.models.signals import post_save
 
 import re
 
@@ -117,3 +118,43 @@ class TokenRegexpSetThrough(models.Model):
 class AlphabeticOrder(AbstractName):
     order=models.CharField(max_length=2048,default=ALPHA_ORDER)
 
+class Language(AbstractName):
+    token_regexp_set = models.ForeignKey(TokenRegexpSet,on_delete="cascade")
+    case_set = models.ForeignKey(CaseSet,default=1,on_delete="cascade")
+    period_sep = models.ForeignKey(TokenRegexp,on_delete="cascade")
+    alphabetic_order = models.ForeignKey(AlphabeticOrder,on_delete="cascade")
+
+    def clean(self):
+        if not self.token_regexp_set.has_regexp(self.period_sep):
+            raise ValidationError('Period regexp must be in language token regexp set')
+        models.Model.clean(self)
+
+    def __unicode__(self): return(self.name)
+
+    def has_case(self):
+        return(self.case_set.length()!=0)
+
+    def token_regexp_expression(self):
+        return(self.token_regexp_set.regexp_all())
+
+
+    def get_absolute_url(self):
+        return( "/base/language/%d" % self.id )
+
+    def part_of_speech_set(self):
+        return(PartOfSpeech.objects.by_language(self))
+
+    def derivation_set(self):
+        return(Derivation.objects.by_language(self))
+
+class NotWord(AbstractName):
+    language = models.ForeignKey('Language',on_delete="cascade")    
+    word=models.CharField(max_length=1024,db_index=True)
+
+    def __unicode__(self): return("not word: "+self.name)
+
+def insert_newlines_as_notword(sender,instance,created,**kwargs):
+    for (r,n) in NEW_LINES: 
+        NotWord.objects.get_or_create(language=instance,name="new line ("+r+")",word=n)
+
+post_save.connect(insert_newlines_as_notword,sender=Language)

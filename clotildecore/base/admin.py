@@ -2,23 +2,6 @@ from django.contrib import admin
 from . import models
 
 admin.site.register(models.CasePair)
-#admin.site.register(Classification)
-#admin.site.register(CapitalizedWord)
-
-# class ClassificationInline(admin.TabularInline):
-#     model = Classification
-#     extra = 0
-
-# class CategoryAdmin(admin.ModelAdmin):
-#     inlines = [ClassificationInline]
-
-# admin.site.register(Category,CategoryAdmin)
-
-# class PartOfSpeechAdmin(admin.ModelAdmin):
-#     list_display=["name","is_inflected","bg_color","fg_color"]
-#     list_editable=["bg_color","fg_color"]
-
-# admin.site.register(PartOfSpeech,PartOfSpeechAdmin)
 
 class CasePairInline(admin.TabularInline):
     model = models.CaseSet.pairs.through
@@ -59,3 +42,13 @@ class TokenRegexpSetAdmin(admin.ModelAdmin):
 
 admin.site.register(models.TokenRegexpSet,TokenRegexpSetAdmin)
 
+class LanguageAdmin(admin.ModelAdmin):
+    list_display=['name','has_case','case_set','token_regexp_set','token_regexp_expression']
+    list_editable=['case_set','token_regexp_set']
+
+admin.site.register(models.Language,LanguageAdmin)
+
+class NotWordAdmin(admin.ModelAdmin):
+    list_display=('name','word')
+
+admin.site.register(models.NotWord,NotWordAdmin)
