@@ -1,19 +1,16 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.conf import settings
 
 from django.views.generic import DetailView,ListView
 
-from . import models
+from . import models,views
 
 urlpatterns =[
-    url( r'^/corpus/?$',ListView.as_view(queryset=Corpus.objects.order_by('name')),name="corpus_list" ),
-    url( r'^/corpus/(?P<pk>\d+)/?$',DetailView.as_view(model=Corpus),name="corpus_detail"),
-    url( r'^/text/(?P<pk>\d+)/?$',TextView.as_view(model=Text,context_object_name="text")),
-    url( r'^/text/(?P<text_id>\d+)/alpha_parser/?$',AlphaParserView.as_view()),
+    url( r'^$',ListView.as_view(queryset=models.Corpus.objects.order_by('name')),name="corpus_list" ),
+    url( r'^corpus/(?P<pk>\d+)/?$',DetailView.as_view(model=models.Corpus),name="corpus_detail"),
+    url( r'^text/(?P<pk>\d+)/?$',views.TextView.as_view(),name="text_detail"),
+    url( r'^text/(?P<pk>\d+)/alpha_parser/?$',views.TextAlphaParserView.as_view(),name="text_alpha_parser"),
+    url( r'^text/(?P<pk>\d+)/alpha_token/?$',views.TextAlphaTokenView.as_view(),name="text_alpha_token"),
+    url( r'^text/(?P<pk>\d+)/morphological_parser/?$',views.TextMorphologicalParserView.as_view(),name="text_morphological_parser"),
+    url( r'^text/(?P<pk>\d+)/morphological_token/?$',views.TextMorphologicalTokenView.as_view(),name="text_morphological_token"),
 ]
-
-  # r'^text/(?P<pk>\d+)/alpha_parser/?$'
-  # r'^text/(?P<pk>\d+)/alpha_token/?$'
-  # r'^text/(?P<pk>\d+)/morphological_parser/?$'
-  # r'^text/(?P<pk>\d+)/morphological_token/?$'
-  # r'^text/(?P<pk>\d+)/syntax_parser/?$'

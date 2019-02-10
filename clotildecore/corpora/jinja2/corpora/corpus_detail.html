@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %} – Corpus – {{ corpus }}{% endblock %}
+
+{% block centercontent %}
+
+<h1>{{ corpus }}</h1>
+
+<p class="subtitle">{{ corpus.language }}</p>
+
+<p>{{ corpus.description }}</p>
+<table class="index">
+  <tr><th colspan="2">&nbsp;</th><th>author</th><th>length</th><th colspan="2">date</th></tr>
+  {% for l in corpus.text_set.all() %}
+  <tr>
+    <td><a href="{{ l.get_absolute_url() }}">{{ l }}</a></td>
+    <td class="info center">{{ l.author }}</td>
+    <td class="info center">{{ l.length() }}</td>
+    <td class="info right">{{ l.pub_date.strftime("%j %b %Y") }}</td>
+    <td class="info center">{{ l.pub_date.strftime("%H:%M") }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+
+{% endblock %}

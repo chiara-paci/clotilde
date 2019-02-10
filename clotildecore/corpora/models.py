@@ -35,10 +35,13 @@ class Text(models.Model):
         L=len(self.text)
         return(L)
 
-    def text_br(self):
-        l=self.text.split('\n')
-        t='[br/]'.join(l)
-        return(t)
+    def html(self):
+        html="\n".join(["<p>"+x+"</p>" for x in self.text.split('\n')])
+        
+        for k in ["center","left","right","i"]:
+            html=html.replace('['+k+']','<'+k+'>')
+            html=html.replace('[/'+k+']','</'+k+'>')
+        return html
 
 class WDConcorso(models.Model):
     title = models.CharField(max_length=1024)

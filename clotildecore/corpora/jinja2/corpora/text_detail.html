@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %} – Corpus – {{ text.corpus }} – {{ text }}{% endblock %}
+
+{% block addhead %}
+{% if style_list %}
+<style>
+{% for name,label,fg,bg in style_list %}
+span.{{ label }} {
+    color: {{ fg }};
+    background-color: {{ bg }};
+}
+{% endfor %}
+</style>
+{% endif %}
+{% endblock %}
+
+{% block centercontent %}
+
+<h1>{{ text }}</h1>
+<p class="subtitle">{{ text.author }}, {{ text.pub_date.strftime("%j %b %Y %H:%M") }}, {{ text.length() }} characters</p>
+
+
+{% if style_list %}
+<aside>
+<ul>
+{% for name,label,fg,bg in style_list %}
+<li><span style="color: {{ fg }};background-color: {{ bg }};">{{ name }}</span></li>
+{% endfor %}
+</ul>
+</aside>
+{% endif %}
+
+{% block output %}
+<section class="text">
+{{ text_html|safe }}
+</section>
+{% endblock %}
+
+{% endblock %}
+
+
+{% block applicationmenu %}
+  <a href="{{ text.get_absolute_url() }}/">
+    <i class="{% if phase == "text" %}fas{% else %}far{% endif%} fa-circle"></i> 
+    Text</a>
+  <a href="{{ text.get_absolute_url() }}/alpha_parser/">
+    <i class="{% if phase == "alpha_parser" %}fas{% else %}far{% endif%} fa-circle"></i> 
+    Alpha parser</a>
+  <a href="{{ text.get_absolute_url() }}/alpha_token/">
+    <i class="{% if phase == "alpha_token" %}fas{% else %}far{% endif%} fa-circle"></i> 
+    Alpha token list</a>
+  <a href="{{ text.get_absolute_url() }}/morphological_parser/">
+    <i class="{% if phase == "morphological_parser" %}fas{% else %}far{% endif%} fa-circle"></i> 
+    Morphological parser</a>
+  <a href="{{ text.get_absolute_url() }}/morphological_token/">
+    <i class="{% if phase == "morphological_token" %}fas{% else %}far{% endif%} fa-circle"></i> 
+    Morphological token list</a>
+{% endblock %}

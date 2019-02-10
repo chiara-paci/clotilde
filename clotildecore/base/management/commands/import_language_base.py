@@ -98,9 +98,6 @@ class Command(BaseCommand):
     requires_migrations_checks = True
     help = 'Export <language>'
 
-
-    args = '<language>'
-
     def add_arguments(self, parser):
         parser.add_argument(
             'language',

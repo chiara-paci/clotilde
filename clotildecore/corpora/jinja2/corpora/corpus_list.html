@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %} - Corpora{% endblock %}
+
+{% block centercontent %}
+
+<h1>Corpus</h1>
+
+<ul>
+{% for c in corpus_list %}
+<li><a href="{{ c.get_absolute_url() }}">{{ c }}</a> ({{ c.language }})</li>
+{% endfor %}
+</ul>
+
+
+{% endblock %}

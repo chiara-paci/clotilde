@@ -88,6 +88,15 @@ class AlphaParserView(View):
         print "terza fase ok - sec.=%4.4f" % (t3-t2)
         params={}
         params["rexp_list"]=rexp_list
+        # aggiungere style per not-found (name=not matched)
+        # 
+        # span.not-found {
+        #     color: #ffffff;
+        #     background-color: #900000;
+        #     border-left: 1px solid #ffffff;
+        #     padding-right: 1em;
+        # }
+
         params["style_list"]=map(lambda (name,label,bg,fg,rexp,rexp_t): (name+': '+rexp_t,label,fg,bg),rexp_list)
         params["text"]=text
         params["regexp_set"]=regexp_set
