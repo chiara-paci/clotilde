@@ -5,7 +5,7 @@
 {% block addhead %}
 {% if style_list %}
 <style>
-{% for name,label,fg,bg in style_list %}
+{% for name,label,bg,fg,rexp,rexp_t in style_list %}
 span.{{ label }} {
     color: {{ fg }};
     background-color: {{ bg }};
@@ -23,11 +23,11 @@ span.{{ label }} {
 
 {% if style_list %}
 <aside>
-<ul>
-{% for name,label,fg,bg in style_list %}
-<li><span style="color: {{ fg }};background-color: {{ bg }};">{{ name }}</span></li>
+<table>
+{% for name,label,bg,fg,rexp,rexp_t in style_list %}
+<tr style="color: {{ fg }};background-color: {{ bg }};"><td>{{ name }}</td><td>{{ rexp_t }}</td></tr>
 {% endfor %}
-</ul>
+</table>
 </aside>
 {% endif %}
 

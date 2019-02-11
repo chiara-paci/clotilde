@@ -3,23 +3,34 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models.signals import post_save
+from django.utils.functional import cached_property
 
 import re
 
+from . import tokens
+
 # Create your models here.
 
-ALPHA=u'a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ'
-MARKERS=[u"center",u"right",u"i",u"left"]
-ALPHA_ORDER="AaÁáÀàÄäÆæ:Bb:CcÇç;Dd;EeÈèÉéËë;Ff;Gg;Hh;Ii;Jj;Kk;Ll;Mm;OoÒòÓóÖöŒœ;Pp;Qq;Rr;SsŞş;Tt;UuÙùÚúÜü;Vv;Ww;Xx;Yy;Zz"
-NEW_LINES=[('RN',   '\r\n'),
-           ('NR',   '\n\r'),
-           ('N',    '\n'),
-           ('XB',   u'\x0b'),
-           ('XC',   u'\x0c'),
-           ('R',    '\r'),
-           ('X85',  u'\x85'),
-           ('X2028',chr(0x2028)),
-           ('X2029',chr(0x2029))]
+MARKERS=[ u"center",u"right",u"i",u"left"]
+# NEW_LINES=[('RN',   '\r\n'),
+#            ('NR',   '\n\r'),
+#            ('N',    '\n'),
+#            ('XB',   u'\x0b'),
+#            ('XC',   u'\x0c'),
+#            ('R',    '\r'),
+#            ('X85',  u'\x85'),
+#            ('X2028',chr(0x2028)),
+#            ('X2029',chr(0x2029))]
+
+# def replace_newline(S,repl,preserve=False):
+#     if not preserve:
+#         for (r,n) in NEW_LINES:
+#             S=S.replace(n,repl)
+#         return(S)
+#     for (r,n) in NEW_LINES:
+#         S=S.replace(n,r+repl)
+#     return(S)
+
 
 class AbstractName(models.Model):
     name = models.CharField(max_length=1024)
@@ -63,6 +74,7 @@ class CaseSet(AbstractName):
     def get_absolute_url(self):
         return("/base/caseset/%d" % self.id)
 
+ALPHA=u'a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ'
 class TokenRegexp(AbstractName):
     regexp = models.CharField(max_length=2048,default=r'['+ALPHA+r']+')
 
@@ -71,20 +83,39 @@ class TokenRegexpSet(AbstractName):
 
     def regexp_all(self):
         regs=[ r'\[/?'+x+r'\]' for x in MARKERS ]
-        for rel in self.tokenregexpsetthrough_set.all():
-            if rel.disabled: continue
-            regs.append(rel.regexp())
+        regs+=[ rexp_t for (name,label,bg,fg,rexp,rexp_t) in self.regexp_objects ]
         t="|".join(regs)
         t="("+t+")"
         return(t)
 
+    def _f(self,t):
+        for (name,label,bg,fg,rexp,rexp_t) in self.regexp_objects:
+            print("==%s==" % t,[ord(x) for x in t])
+            if rexp.match(t):
+                return tokens.Token(label,t)
+        if t[0]=='[':
+            if t[1]=="/":
+                m=t[2:-1]
+                return tokens.TokenMarker(m,"end")
+            m=t[1:-1]
+            return tokens.TokenMarker(m,"begin")
+        return tokens.TokenNotFound(t)
+
+    def tokenize(self,text):
+        c=re.compile(self.regexp_all())
+        tokens=list(filter(bool,c.split(text)))
+        return self.regexp_objects,[ self._f(t) for t in tokens ]
+
+    @cached_property
     def regexp_objects(self):
         objs=[]
         for rel in self.tokenregexpsetthrough_set.all():
             if rel.disabled: continue
             name=rel.token_regexp.name
+            regexp=rel.token_regexp.regexp
             objs.append( (name,name.lower().replace(' ',''),
-                          rel.bg_color,rel.fg_color,re.compile('^'+rel.regexp()+'$'),rel.regexp()) )
+                          rel.bg_color,rel.fg_color,
+                          re.compile('^'+regexp+'$'),regexp) )
         return(objs)
 
     def has_regexp(self,obj):
@@ -115,6 +146,7 @@ class TokenRegexpSetThrough(models.Model):
     def name(self):
         return(self.token_regexp.name)
 
+ALPHA_ORDER="AaÁáÀàÄäÆæ:Bb:CcÇç;Dd;EeÈèÉéËë;Ff;Gg;Hh;Ii;Jj;Kk;Ll;Mm;OoÒòÓóÖöŒœ;Pp;Qq;Rr;SsŞş;Tt;UuÙùÚúÜü;Vv;Ww;Xx;Yy;Zz"
 class AlphabeticOrder(AbstractName):
     order=models.CharField(max_length=2048,default=ALPHA_ORDER)
 
@@ -154,7 +186,7 @@ class NotWord(AbstractName):
     def __unicode__(self): return("not word: "+self.name)
 
 def insert_newlines_as_notword(sender,instance,created,**kwargs):
-    for (r,n) in NEW_LINES: 
+    for (r,n) in tokens.NEW_LINES: 
         NotWord.objects.get_or_create(language=instance,name="new line ("+r+")",word=n)
 
 post_save.connect(insert_newlines_as_notword,sender=Language)

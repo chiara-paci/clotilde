@@ -176,6 +176,12 @@ main article {
   margin-left: 5%;
   margin-right: 5%;
 }
+main aside {
+  font-size: .8em;
+  padding: .5em;
+  border: 1px solid #383529;
+  float: right;
+}
 main section.text {
   margin: 2em;
 }
