@@ -41,8 +41,6 @@ class Command(BaseCommand):
         fd=archive.extractfile(m_index)
         index=json.loads(fd.read().decode())
 
-        print(index.keys())
-
         alphabetic_order=models.AlphabeticOrder.objects.de_serialize(index["alphabetic_order"])
         case_set=models.CaseSet.objects.de_serialize(index["case_set"])
         trexp_set=models.TokenRegexpSet.objects.de_serialize(index["token_regexp_set"])
@@ -55,6 +53,4 @@ class Command(BaseCommand):
                                               defaults={
                                                   "period_sep": period,
                                               })
-
-
         archive.close()
