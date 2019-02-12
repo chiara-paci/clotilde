@@ -10,14 +10,13 @@
 
 <p>{{ corpus.description }}</p>
 <table class="index">
-  <tr><th colspan="2">&nbsp;</th><th>author</th><th>length</th><th colspan="2">date</th></tr>
+  <tr><th colspan="2">&nbsp;</th><th>author</th><th>length</th></tr>
   {% for l in corpus.text_set.all() %}
   <tr>
-    <td><a href="{{ l.get_absolute_url() }}">{{ l }}</a></td>
-    <td class="info center">{{ l.author }}</td>
+    <td class="info">{{ l.author }}</td>
+    <td>
+      <a href="{{ l.get_absolute_url() }}">{{ l }}</a></td>
     <td class="info center">{{ l.length() }}</td>
-    <td class="info right">{{ l.pub_date.strftime("%j %b %Y") }}</td>
-    <td class="info center">{{ l.pub_date.strftime("%H:%M") }}</td>
   </tr>
   {% endfor %}
 </table>

@@ -24,7 +24,6 @@ class Text(models.Model):
     author = models.ForeignKey(Author,on_delete="cascade")
     title = models.CharField(max_length=1024)
     text = models.TextField()
-    pub_date = models.DateTimeField(auto_now_add=False)
     
     def __str__(self): return(self.title)
 
@@ -65,6 +64,7 @@ class WDText(Text):
     concorso = models.ForeignKey(WDConcorso,on_delete="cascade")
     forum = models.ForeignKey(WDForum,on_delete="cascade")
     wd_id = models.IntegerField()
+    pub_date = models.DateTimeField(auto_now_add=False)
 
     def __str__(self): return(str(self.text))
     

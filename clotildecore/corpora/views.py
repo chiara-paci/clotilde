@@ -7,18 +7,7 @@ import time
 import re
 
 from . import models
-#from base import models as base_models
 
-# def replace_newline(S,repl,preserve=False):
-#     if not preserve:
-#         for (r,n) in base_models.NEW_LINES:
-#             S=S.replace(n,repl)
-#         return(S)
-#     for (r,n) in base_models.NEW_LINES:
-#         S=S.replace(n,r+repl)
-#     return(S)
-
-# Create your views here.
 class TextView(DetailView):
     model = models.Text
     phase = "text"

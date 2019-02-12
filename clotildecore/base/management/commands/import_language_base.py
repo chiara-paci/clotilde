@@ -5,9 +5,6 @@ import re,time
 
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-#from morphology.models import *
-#from languages.models import *
-#from base.models import *
 
 from base import models
 
