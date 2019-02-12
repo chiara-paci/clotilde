@@ -22,9 +22,10 @@ def replace_newline(S,repl,preserve=False):
     return(S)
 
 class Token(object):
-    def __init__(self,label,text):
-        self._label=label
-        self._text=self._clean(text)
+    def __init__(self,label,text,description):
+        self.label=label
+        self.text=self._clean(text)
+        self.description=description
 
     def _clean(self,t):
         t=t.replace('\xa0'," ") # non breaking space
@@ -32,12 +33,16 @@ class Token(object):
         return t
 
     def html(self):
-        T='<span class="token '+self._label+'"> '
-        T+=self._text
+        T='<span class="token '+self.label+'"> '
+        T+=self.text
         T+="</span>"
         return T
 
-class TokenMarker(Token):
+class TokenBase(Token):
+    def __init__(self,label,text):
+        Token.__init__(self,label,text,{"base": label})
+
+class TokenMarker(TokenBase):
     def __init__(self,marker,pos):
         self._marker=marker
         self._pos=pos
@@ -62,8 +67,6 @@ class TokenMarker(Token):
             return '<i class="fas fa-align-%s"></i>' % self._marker
         return '<i class="fas fa-italic"></i>'
 
-        
-
-class TokenNotFound(Token):
+class TokenNotFound(TokenBase):
     def __init__(self,text):
         Token.__init__(self,"not-found",text)

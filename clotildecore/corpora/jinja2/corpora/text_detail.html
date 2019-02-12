@@ -6,7 +6,7 @@
 {% if style_list %}
 <style>
 {% for name,label,bg,fg,rexp,rexp_t in style_list %}
-span.{{ label }} {
+.{{ label }} {
     color: {{ fg }};
     background-color: {{ bg }};
 }

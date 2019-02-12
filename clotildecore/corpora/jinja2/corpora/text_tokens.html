@@ -1,0 +1,13 @@
+{% extends "corpora/text_detail.html" %}
+
+{% block output %}
+<table class="token">
+{% for token in token_list %}
+<tr class="{{ token.label }}">
+  <td>{{ token.text|safe }}</td>
+  <td>{{ token.label }}</td>
+  <td>{{ token.description }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

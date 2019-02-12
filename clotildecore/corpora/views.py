@@ -34,6 +34,17 @@ class TextAlphaParserView(TextView):
 
 class TextAlphaTokenView(TextView):
     phase = "alpha_token"
+    template_name = "corpora/text_tokens.html"
+
+    def get_context_data(self, **kwargs):
+        context = TextView.get_context_data(self,**kwargs)
+        regexp_set=self.object.corpus.language.token_regexp_set
+        rexp_list,tokens=regexp_set.tokenize(self.object.text)
+        context["style_list"]=rexp_list
+        context["style_list"].append(["not matched","not-found","#900000","#ffffff","",""])
+        context["token_list"]=tokens
+        return context
+
 
 class TextMorphologicalParserView(TextView):
     phase = "morphological_parser"

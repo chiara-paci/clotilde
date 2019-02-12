@@ -92,7 +92,7 @@ class TokenRegexpSet(AbstractName):
         for (name,label,bg,fg,rexp,rexp_t) in self.regexp_objects:
             print("==%s==" % t,[ord(x) for x in t])
             if rexp.match(t):
-                return tokens.Token(label,t)
+                return tokens.TokenBase(label,t)
         if t[0]=='[':
             if t[1]=="/":
                 m=t[2:-1]
