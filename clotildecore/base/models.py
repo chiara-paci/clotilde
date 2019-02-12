@@ -11,7 +11,7 @@ from . import tokens
 
 # Create your models here.
 
-MARKERS=[ u"center",u"right",u"i",u"left"]
+# MARKERS=[ u"center",u"right",u"i",u"left"]
 # NEW_LINES=[('RN',   '\r\n'),
 #            ('NR',   '\n\r'),
 #            ('N',    '\n'),
@@ -65,8 +65,19 @@ class CasePair(models.Model):
     def get_absolute_url(self):
         return("/base/casepair/%d" % self.id)
 
+class CaseSetManager(models.Manager):
+    def de_serialize(self,D):
+        case_set,created=self.get_or_create(name=D["name"])
+        for pair in D["pairs"]:
+            p=pair.split("/")
+            case_pair,created=CasePair.objects.get_or_create(lower=p[0],upper=p[1])
+            case_set.pairs.add(case_pair)
+        return case_set
+
 class CaseSet(AbstractName):
     pairs = models.ManyToManyField(CasePair,blank=True)
+
+    objects = CaseSetManager()
 
     def length(self):
         return(self.pairs.count())
@@ -74,15 +85,38 @@ class CaseSet(AbstractName):
     def get_absolute_url(self):
         return("/base/caseset/%d" % self.id)
 
+    def serialize(self):
+        return {
+            "name": self.name,
+            "pairs": [ str(cp) for cp in self.pairs.all() ]
+        }
+
 ALPHA=u'a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ'
 class TokenRegexp(AbstractName):
     regexp = models.CharField(max_length=2048,default=r'['+ALPHA+r']+')
 
+class TokenRegexpSetManager(models.Manager):
+    def de_serialize(self,D):
+        reg_set,created=self.get_or_create(name=D["name"])
+        for rexp in D["regexps"]:
+            t_rexp,created=TokenRegexp.objects.get_or_create(name=rexp["name"],regexp=rexp["regexp"])
+            tr,created=TokenRegexpSetThrough.objects.get_or_create(token_regexp=t_rexp,token_regexp_set=reg_set,
+                                                                   defaults={
+                                                                       "bg_color": rexp["bg_color"],
+                                                                       "fg_color": rexp["fg_color"],
+                                                                       "order": rexp["order"],
+                                                                       "disabled": rexp["disabled"],
+                                                                   })
+        return reg_set
+
 class TokenRegexpSet(AbstractName):
-    regexps = models.ManyToManyField(TokenRegexp,through='TokenRegexpSetThrough',blank=True)
+    regexps = models.ManyToManyField(TokenRegexp,
+                                     through='TokenRegexpSetThrough',blank=True)
+
+    objects=TokenRegexpSetManager()
 
     def regexp_all(self):
-        regs=[ r'\[/?'+x+r'\]' for x in MARKERS ]
+        regs=[ r'\[/?'+x+r'\]' for x in tokens.MARKERS ]
         regs+=[ rexp_t for (name,label,bg,fg,rexp,rexp_t) in self.regexp_objects ]
         t="|".join(regs)
         t="("+t+")"
@@ -121,6 +155,13 @@ class TokenRegexpSet(AbstractName):
     def has_regexp(self,obj):
         return(self.tokenregexpsetthrough_set.filter(token_regexp=obj).exists())
 
+    def serialize(self):
+        return {
+            "name": self.name,
+            "regexps": [ r.serialize() for r in self.tokenregexpsetthrough_set.all() ]
+        }
+
+
 class TokenRegexpSetThrough(models.Model):
     token_regexp_set = models.ForeignKey(TokenRegexpSet,on_delete="cascade")
     token_regexp = models.ForeignKey(TokenRegexp,on_delete="cascade")
@@ -146,9 +187,33 @@ class TokenRegexpSetThrough(models.Model):
     def name(self):
         return(self.token_regexp.name)
 
+    def serialize(self):
+        return {
+            "name": self.token_regexp.name,
+            "regexp": self.token_regexp.regexp,
+            "bg_color": self.bg_color,
+            "fg_color": self.fg_color,
+            "order": self.order,
+            "disabled": self.disabled
+        }
+
+class AlphabeticOrderManager(models.Manager):
+    def de_serialize(self,D):
+        obj,created=self.get_or_create(name=D["name"],
+                                       order=D["order"])
+        return obj
+
 ALPHA_ORDER="AaÁáÀàÄäÆæ:Bb:CcÇç;Dd;EeÈèÉéËë;Ff;Gg;Hh;Ii;Jj;Kk;Ll;Mm;OoÒòÓóÖöŒœ;Pp;Qq;Rr;SsŞş;Tt;UuÙùÚúÜü;Vv;Ww;Xx;Yy;Zz"
 class AlphabeticOrder(AbstractName):
     order=models.CharField(max_length=2048,default=ALPHA_ORDER)
+
+    objects=AlphabeticOrderManager()
+
+    def serialize(self):
+        return {
+            "name": self.name,
+            "order": self.order
+        }
 
 class Language(AbstractName):
     token_regexp_set = models.ForeignKey(TokenRegexpSet,on_delete="cascade")
@@ -178,6 +243,17 @@ class Language(AbstractName):
 
     def derivation_set(self):
         return(Derivation.objects.by_language(self))
+
+    def serialize(self):
+        return { 
+            "name": self.name,
+            "alphabetic_order": self.alphabetic_order.serialize(),
+            "token_regexp_set": self.token_regexp_set.serialize(),
+            "case_set": self.case_set.serialize(),
+            # questo dovrebbe essere solo un "link" a un oggetto in "token_regexp_set"
+            "period_sep": self.period_sep.name
+        }
+        
 
 class NotWord(AbstractName):
     language = models.ForeignKey('Language',on_delete="cascade")    
