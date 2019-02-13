@@ -15,7 +15,7 @@ class CaseSetAdmin(admin.ModelAdmin):
 admin.site.register(models.CaseSet,CaseSetAdmin)
 
 class TokenRegexpAdmin(admin.ModelAdmin):
-    list_display=['name','regexp']
+    list_display=['name','regexp',"set_number"]
     list_editable=['regexp']
 
 admin.site.register(models.TokenRegexp,TokenRegexpAdmin)
@@ -29,6 +29,8 @@ admin.site.register(models.AlphabeticOrder,AlphabeticOrderAdmin)
 class TokenRegexpSetThroughAdmin(admin.ModelAdmin):
     list_display=['__str__','token_regexp_set','order','token_regexp','regexp','bg_color','fg_color','disabled']
     list_editable=['order','token_regexp','bg_color','fg_color','disabled']
+
+    list_filter=["token_regexp_set"]
 
 admin.site.register(models.TokenRegexpSetThrough,TokenRegexpSetThroughAdmin)
 

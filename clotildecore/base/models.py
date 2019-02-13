@@ -95,6 +95,13 @@ ALPHA=u'a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ'
 class TokenRegexp(AbstractName):
     regexp = models.CharField(max_length=2048,default=r'['+ALPHA+r']+')
 
+    def __str__(self):
+        return "%s(%d)" % (self.name,self.pk)
+
+    def set_number(self):
+        return(self.tokenregexpsetthrough_set.all().count())
+
+
 class TokenRegexpSetManager(models.Manager):
     def de_serialize(self,D):
         reg_set,created=self.get_or_create(name=D["name"])
