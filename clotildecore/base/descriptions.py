@@ -1,4 +1,5 @@
 import collections.abc
+import collections
 
 class FailedUnification(Exception): pass
 
@@ -14,6 +15,31 @@ class Description(collections.abc.MutableMapping):
     def __setitem__(self,k,v): return self._dict.__setitem__(k,v)
     def keys(self): return self._dict.keys()
 
+    def __str__(self):
+        keys=list(self.keys())
+        keys.sort()
+        S=",".join( [ "%s:%s" % (k,str(self._dict[k])) for k in keys ] )
+        return S
+
+    def __hash__(self):
+        return hash(self.__str__())
+
+    def html(self,inner=False):
+        #S=str(self._dict)
+        S=""
+        for k in self._dict:
+            r='<mtd columnalign="center"><mi>%s</mi></mtd>' % k
+            r+='<mtd columnalign="center"><mo>=</mo></mtd>'
+            if isinstance(self._dict[k],Description):
+                r+='<mtd columnalign="center">%s</mtd>' % self._dict[k].html(inner=True)
+            else:
+                r+='<mtd columnalign="center"><mn>%s</mn></mtd>' % str(self._dict[k])
+            S+="<mtr>%s</mtr>" % r
+        S="<mrow><mo>[</mo><mtable>%s</mtable><mo>]</mo></mrow>" % S
+        if not inner:
+            S="<math>%s</math>" % S
+        return S
+
     def copy(self):
         D=self._dict.copy()
         for k in D:
@@ -23,8 +49,8 @@ class Description(collections.abc.MutableMapping):
 
     def __eq__(self,other):
         if not isinstance(other,Description): return NotImplemented
-        s_k=self.keys()
-        o_k=other.keys()
+        s_k=list(self.keys())
+        o_k=list(other.keys())
         s_k.sort()
         o_k.sort()
         if s_k!=o_k: return False

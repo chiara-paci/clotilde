@@ -101,7 +101,6 @@ class TokenRegexp(AbstractName):
     def set_number(self):
         return(self.tokenregexpsetthrough_set.all().count())
 
-
 class TokenRegexpSetManager(models.Manager):
     def de_serialize(self,D):
         reg_set,created=self.get_or_create(name=D["name"])
@@ -210,7 +209,7 @@ class AlphabeticOrderManager(models.Manager):
                                        order=D["order"])
         return obj
 
-ALPHA_ORDER="AaÁáÀàÄäÆæ:Bb:CcÇç;Dd;EeÈèÉéËë;Ff;Gg;Hh;Ii;Jj;Kk;Ll;Mm;OoÒòÓóÖöŒœ;Pp;Qq;Rr;SsŞş;Tt;UuÙùÚúÜü;Vv;Ww;Xx;Yy;Zz"
+ALPHA_ORDER="AaÁáÀàÄäÆæ;Bb;CcÇç;Dd;EeÈèÉéËë;Ff;Gg;Hh;Ii;Jj;Kk;Ll;Mm;OoÒòÓóÖöŒœ;Pp;Qq;Rr;SsŞş;Tt;UuÙùÚúÜü;Vv;Ww;Xx;Yy;Zz"
 class AlphabeticOrder(AbstractName):
     order=models.CharField(max_length=2048,default=ALPHA_ORDER)
 

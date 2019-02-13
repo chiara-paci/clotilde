@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+from . import descriptions
 
 MARKERS=[ u"center",u"right",u"i",u"left"]
 
@@ -38,9 +38,26 @@ class Token(object):
         T+="</span>"
         return T
 
+    def __hash__(self):
+        return hash(self.label+":"+self.text+"/"+str(self.description))
+
+    def __eq__(self,other):
+        if self.text != other.text: return False
+        return self.description == other.description
+
+    def __lt__(self,other):
+        if self.text.lower() < other.text.lower(): return True
+        if self.text.lower() > other.text.lower(): return False
+        return self.description < other.description
+
+    def __le__(self,other): return self.__eq__(other) or self.__lt__(other)
+    def __gt__(self,other): return other.__lt__(self)
+    def __ge__(self,other): return self.__eq__(other) or self.__gt__(other)
+    def __ne__(self,other): return not self.__eq__(other)
+
 class TokenBase(Token):
     def __init__(self,label,text):
-        Token.__init__(self,label,text,{"base": label})
+        Token.__init__(self,label,text,descriptions.Description(base=label))
 
 class TokenMarker(TokenBase):
     def __init__(self,marker,pos):

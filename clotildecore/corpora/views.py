@@ -40,6 +40,10 @@ class TextAlphaTokenView(TextView):
         context = TextView.get_context_data(self,**kwargs)
         regexp_set=self.object.corpus.language.token_regexp_set
         rexp_list,tokens=regexp_set.tokenize(self.object.text)
+
+        tokens=list(set(tokens))
+        tokens.sort()
+
         context["style_list"]=rexp_list
         context["style_list"].append(["not matched","not-found","#900000","#ffffff","",""])
         context["token_list"]=tokens

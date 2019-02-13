@@ -6,7 +6,7 @@
 <tr class="{{ token.label }}">
   <td>{{ token.text|safe }}</td>
   <td>{{ token.label }}</td>
-  <td>{{ token.description }}</td>
+  <td>{{ token.description.html()|safe }}</td>
 </tr>
 {% endfor %}
 </table>
