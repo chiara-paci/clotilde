@@ -22,13 +22,17 @@ class TextView(DetailView):
 class TextAlphaParserView(TextView):
     phase = "alpha_parser"
 
+    def build_text(self):
+        style_list,tokens=self.object.corpus.language.alpha_tokenize(self.object.text)
+        newtext="".join( [t.html() for t in tokens ] )
+        return style_list,newtext
+
     def get_context_data(self, **kwargs):
         context = TextView.get_context_data(self,**kwargs)
-        regexp_set=self.object.corpus.language.token_regexp_set
-        rexp_list,tokens=regexp_set.tokenize(self.object.text)
-        newtext="".join( [t.html() for t in tokens ] )
-        context["style_list"]=rexp_list
-        context["style_list"].append(["not matched","not-found","#900000","#ffffff","",""])
+
+        style_list,newtext=self.build_text()
+
+        context["style_list"]=style_list
         context["text_html"]=newtext
         return context
 
@@ -36,22 +40,35 @@ class TextAlphaTokenView(TextView):
     phase = "alpha_token"
     template_name = "corpora/text_tokens.html"
 
-    def get_context_data(self, **kwargs):
-        context = TextView.get_context_data(self,**kwargs)
-        regexp_set=self.object.corpus.language.token_regexp_set
-        rexp_list,tokens=regexp_set.tokenize(self.object.text)
-
+    def build_token_list(self):
+        style_list,tokens=self.object.corpus.language.alpha_tokenize(self.object.text)
         tokens=list(set(tokens))
         tokens.sort()
+        return style_list,tokens
 
-        context["style_list"]=rexp_list
-        context["style_list"].append(["not matched","not-found","#900000","#ffffff","",""])
+    def get_context_data(self, **kwargs):
+        context = TextView.get_context_data(self,**kwargs)
+
+        style_list,tokens=self.build_token_list()
+
+        context["style_list"]=style_list
         context["token_list"]=tokens
         return context
 
 
-class TextMorphologicalParserView(TextView):
+class TextMorphologicalParserView(TextAlphaParserView):
     phase = "morphological_parser"
 
-class TextMorphologicalTokenView(TextView):
+    def build_text(self):
+        style_list,tokens=self.object.corpus.language.morph_tokenize(self.object.text)
+        newtext="".join( [t.html() for t in tokens ] )
+        return style_list,newtext
+
+class TextMorphologicalTokenView(TextAlphaTokenView):
     phase = "morphological_token"
+
+    def build_token_list(self):
+        style_list,tokens=self.object.corpus.language.morph_tokenize(self.object.text)
+        tokens=list(set(tokens))
+        tokens.sort()
+        return style_list,tokens

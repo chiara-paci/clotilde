@@ -3,6 +3,7 @@ from django.conf import settings
 
 # Create your models here.
 
+from languages import models as lang_models
 from base import models as base_models
 
 class Author(models.Model):
@@ -11,7 +12,7 @@ class Author(models.Model):
     def __str__(self): return(self.name)
 
 class Corpus(base_models.AbstractNameDesc):
-    language = models.ForeignKey(base_models.Language,on_delete="cascade")
+    language = models.ForeignKey(lang_models.Language,on_delete="cascade")
 
     def get_absolute_url(self):
         return "/%s/corpus/%d" % ("corpora",self.id)

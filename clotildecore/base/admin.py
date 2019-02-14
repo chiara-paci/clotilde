@@ -44,13 +44,19 @@ class TokenRegexpSetAdmin(admin.ModelAdmin):
 
 admin.site.register(models.TokenRegexpSet,TokenRegexpSetAdmin)
 
-class LanguageAdmin(admin.ModelAdmin):
-    list_display=['name','has_case','case_set','token_regexp_set','token_regexp_expression']
-    list_editable=['case_set','token_regexp_set']
+# class LanguageAdmin(admin.ModelAdmin):
+#     list_display=['name','has_case','case_set','token_regexp_set','token_regexp_expression']
+#     list_editable=['case_set','token_regexp_set']
 
-admin.site.register(models.Language,LanguageAdmin)
+# admin.site.register(models.Language,LanguageAdmin)
 
-class NotWordAdmin(admin.ModelAdmin):
-    list_display=('name','word')
+# class NotWordAdmin(admin.ModelAdmin):
+#     list_display=('name','word')
 
-admin.site.register(models.NotWord,NotWordAdmin)
+# admin.site.register(models.NotWord,NotWordAdmin)
+
+admin.site.register(models.Attribute)
+admin.site.register(models.Value)
+admin.site.register(models.Entry)
+admin.site.register(models.Description)
+admin.site.register(models.SubDescription)

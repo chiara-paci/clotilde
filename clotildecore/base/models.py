@@ -9,29 +9,6 @@ import re
 
 from . import tokens
 
-# Create your models here.
-
-# MARKERS=[ u"center",u"right",u"i",u"left"]
-# NEW_LINES=[('RN',   '\r\n'),
-#            ('NR',   '\n\r'),
-#            ('N',    '\n'),
-#            ('XB',   u'\x0b'),
-#            ('XC',   u'\x0c'),
-#            ('R',    '\r'),
-#            ('X85',  u'\x85'),
-#            ('X2028',chr(0x2028)),
-#            ('X2029',chr(0x2029))]
-
-# def replace_newline(S,repl,preserve=False):
-#     if not preserve:
-#         for (r,n) in NEW_LINES:
-#             S=S.replace(n,repl)
-#         return(S)
-#     for (r,n) in NEW_LINES:
-#         S=S.replace(n,r+repl)
-#     return(S)
-
-
 class AbstractName(models.Model):
     name = models.CharField(max_length=1024)
 
@@ -105,8 +82,10 @@ class TokenRegexpSetManager(models.Manager):
     def de_serialize(self,D):
         reg_set,created=self.get_or_create(name=D["name"])
         for rexp in D["regexps"]:
-            t_rexp,created=TokenRegexp.objects.get_or_create(name=rexp["name"],regexp=rexp["regexp"])
-            tr,created=TokenRegexpSetThrough.objects.get_or_create(token_regexp=t_rexp,token_regexp_set=reg_set,
+            t_rexp,created=TokenRegexp.objects.get_or_create(name=rexp["name"],
+                                                             regexp=rexp["regexp"])
+            tr,created=TokenRegexpSetThrough.objects.get_or_create(token_regexp=t_rexp,
+                                                                   token_regexp_set=reg_set,
                                                                    defaults={
                                                                        "bg_color": rexp["bg_color"],
                                                                        "fg_color": rexp["fg_color"],
@@ -221,54 +200,75 @@ class AlphabeticOrder(AbstractName):
             "order": self.order
         }
 
-class Language(AbstractName):
-    token_regexp_set = models.ForeignKey(TokenRegexpSet,on_delete="cascade")
-    case_set = models.ForeignKey(CaseSet,default=1,on_delete="cascade")
-    period_sep = models.ForeignKey(TokenRegexp,on_delete="cascade")
-    alphabetic_order = models.ForeignKey(AlphabeticOrder,on_delete="cascade")
+# class Language(AbstractName):
+#     token_regexp_set = models.ForeignKey(TokenRegexpSet,on_delete="cascade")
+#     case_set = models.ForeignKey(CaseSet,default=1,on_delete="cascade")
+#     period_sep = models.ForeignKey(TokenRegexp,on_delete="cascade")
+#     alphabetic_order = models.ForeignKey(AlphabeticOrder,on_delete="cascade")
 
-    def clean(self):
-        if not self.token_regexp_set.has_regexp(self.period_sep):
-            raise ValidationError('Period regexp must be in language token regexp set')
-        models.Model.clean(self)
+#     def clean(self):
+#         if not self.token_regexp_set.has_regexp(self.period_sep):
+#             raise ValidationError('Period regexp must be in language token regexp set')
+#         models.Model.clean(self)
 
-    def __unicode__(self): return(self.name)
+#     def __unicode__(self): return(self.name)
 
-    def has_case(self):
-        return(self.case_set.length()!=0)
+#     def has_case(self):
+#         return(self.case_set.length()!=0)
 
-    def token_regexp_expression(self):
-        return(self.token_regexp_set.regexp_all())
+#     def token_regexp_expression(self):
+#         return(self.token_regexp_set.regexp_all())
 
 
-    def get_absolute_url(self):
-        return( "/base/language/%d" % self.id )
+#     def get_absolute_url(self):
+#         return( "/base/language/%d" % self.id )
 
-    def part_of_speech_set(self):
-        return(PartOfSpeech.objects.by_language(self))
+#     def part_of_speech_set(self):
+#         return(PartOfSpeech.objects.by_language(self))
 
-    def derivation_set(self):
-        return(Derivation.objects.by_language(self))
+#     def derivation_set(self):
+#         return(Derivation.objects.by_language(self))
 
-    def serialize(self):
-        return { 
-            "name": self.name,
-            "alphabetic_order": self.alphabetic_order.serialize(),
-            "token_regexp_set": self.token_regexp_set.serialize(),
-            "case_set": self.case_set.serialize(),
-            # questo dovrebbe essere solo un "link" a un oggetto in "token_regexp_set"
-            "period_sep": self.period_sep.name
-        }
+#     def serialize(self):
+#         return { 
+#             "name": self.name,
+#             "alphabetic_order": self.alphabetic_order.serialize(),
+#             "token_regexp_set": self.token_regexp_set.serialize(),
+#             "case_set": self.case_set.serialize(),
+#             # questo dovrebbe essere solo un "link" a un oggetto in "token_regexp_set"
+#             "period_sep": self.period_sep.name
+#         }
         
 
-class NotWord(AbstractName):
-    language = models.ForeignKey('Language',on_delete="cascade")    
-    word=models.CharField(max_length=1024,db_index=True)
+# class NotWord(AbstractName):
+#     language = models.ForeignKey('Language',on_delete="cascade")    
+#     word=models.CharField(max_length=1024,db_index=True)
 
-    def __unicode__(self): return("not word: "+self.name)
+#     def __unicode__(self): return("not word: "+self.name)
 
-def insert_newlines_as_notword(sender,instance,created,**kwargs):
-    for (r,n) in tokens.NEW_LINES: 
-        NotWord.objects.get_or_create(language=instance,name="new line ("+r+")",word=n)
+# def insert_newlines_as_notword(sender,instance,created,**kwargs):
+#     for (r,n) in tokens.NEW_LINES: 
+#         NotWord.objects.get_or_create(language=instance,name="new line ("+r+")",word=n)
 
-post_save.connect(insert_newlines_as_notword,sender=Language)
+# post_save.connect(insert_newlines_as_notword,sender=Language)
+
+class Attribute(AbstractName): pass
+
+class Value(models.Model):
+    string=models.CharField(max_length=1024,db_index=True)
+    variable = models.BooleanField(default=False)
+    
+class Entry(models.Model):
+    attribute = models.ForeignKey(Attribute,on_delete="cascade")    
+    value = models.ForeignKey(Value,on_delete="cascade")    
+    negate = models.BooleanField(default=False)
+    
+class Description(AbstractName): 
+    entries = models.ManyToManyField(Entry,blank=True)
+    subdescriptions = models.ManyToManyField('SubDescription',blank=True)
+    
+class SubDescription(models.Model):
+    attribute = models.ForeignKey(Attribute,on_delete="cascade")    
+    value = models.ForeignKey(Description,on_delete="cascade")    
+
+

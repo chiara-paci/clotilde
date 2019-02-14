@@ -5,7 +5,7 @@
 {% block addhead %}
 {% if style_list %}
 <style>
-{% for name,label,bg,fg,rexp,rexp_t in style_list %}
+{% for desc,label,bg,fg in style_list %}
 .{{ label }} {
     color: {{ fg }};
     background-color: {{ bg }};
@@ -24,8 +24,8 @@
 {% if style_list %}
 <aside>
 <table>
-{% for name,label,bg,fg,rexp,rexp_t in style_list %}
-<tr style="color: {{ fg }};background-color: {{ bg }};"><td>{{ name }}</td><td>{{ rexp_t }}</td></tr>
+{% for desc,label,bg,fg in style_list %}
+<tr style="color: {{ fg }};background-color: {{ bg }};"><td>{{ desc }}</td></tr>
 {% endfor %}
 </table>
 </aside>

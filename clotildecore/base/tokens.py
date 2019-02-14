@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from . import descriptions
 
 MARKERS=[ u"center",u"right",u"i",u"left"]
@@ -29,12 +31,12 @@ class Token(object):
 
     def _clean(self,t):
         t=t.replace('\xa0'," ") # non breaking space
-        t=replace_newline(t,"¶<br/>")
+        t=replace_newline(t,"¶")
         return t
 
     def html(self):
         T='<span class="token '+self.label+'"> '
-        T+=self.text
+        T+=self.text.replace("¶","¶<br/>")
         T+="</span>"
         return T
 
