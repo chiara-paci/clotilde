@@ -55,7 +55,6 @@ class Inflection(models.Model):
 
     def __str__(self):
         return "%s [%s]" % (self.regsub,self.description)
-    
 
 class Root(models.Model):
     root=models.CharField(max_length=1024)

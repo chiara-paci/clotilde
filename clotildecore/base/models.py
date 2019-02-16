@@ -10,7 +10,7 @@ import re
 from . import tokens,descriptions
 
 class AbstractName(models.Model):
-    name = models.CharField(max_length=1024)
+    name = models.CharField(max_length=1024,unique=True)
 
     class Meta:
         abstract = True
@@ -24,7 +24,7 @@ class AbstractName(models.Model):
         models.Model.clean(self)
 
 class AbstractNameDesc(models.Model):
-    name = models.CharField(max_length=1024)
+    name = models.CharField(max_length=1024,unique=True)
     description = models.TextField(blank=True,default='')
 
     class Meta:
