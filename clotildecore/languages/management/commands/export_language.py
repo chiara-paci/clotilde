@@ -8,7 +8,7 @@ import os,pwd,grp
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 
-from base import models
+from languages import models
 
 def build_tarinfo(fname,data):
     data = data.encode('utf8')
@@ -46,5 +46,10 @@ class Command(BaseCommand):
         D=language.serialize()
         info,bdata=build_tarinfo("./index.json",json.dumps(D))
         archive.addfile(info, bdata)
+
+        non_words={ w.name: w.word for w in models.NonWord.objects.filter(language=language) }
+        info,bdata=build_tarinfo("./non_words.json",json.dumps(non_words))
+        archive.addfile(info, bdata)
+        
 
         archive.close()

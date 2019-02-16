@@ -88,7 +88,7 @@ class Description(collections.abc.MutableMapping):
         if not isinstance(other,Description): return NotImplemented
         return not self.__eq__(other)
 
-    def __and__(self,other):
+    def __add__(self,other):
         if not isinstance(other,Description): return NotImplemented
 
         D=self.copy()

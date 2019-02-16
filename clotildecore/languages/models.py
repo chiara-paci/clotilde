@@ -42,31 +42,33 @@ class Language(base_models.AbstractName):
             non_words[w.word].append(w)
 
         words={}
-        for w in Word.objects.filter(word__stem__root__language=self,cache__in=t_list):
+        for w in morph_models.Word.objects.filter(stem__root__language=self,cache__in=t_list):
             if w.cache not in words: words[w.cache]=[]
             words[w.cache].append( ("word",w) )
-        for w in FusedWord.objects.filter(fusion__language=self,cache__in=t_list):
+        for w in morph_models.FusedWord.objects.filter(fusion__language=self,cache__in=t_list):
             if w.cache not in words: words[w.cache]=[]
             words[w.cache].append( ("fused_word",w) )
 
         morph_list=[]
         style_list=[]
         for t in token_list:
-            if not isinstance(t,base_tokens.TokenBase):
+            if not type(t) is base_tokens.TokenBase:
                 morph_list.append(t)
                 continue
-            if t.text in non_words: tobjs.append( tokens.TokenNonWord(t) )
+            if t.text in non_words: 
+                morph_list.append( tokens.TokenNonWord(t) )
+                continue
             if not t.text in words:
                 morph_list.append(morph_tokens.TokenNotFoundMorph(t))
                 continue
-            s_list,m_list=morph_tokens.factory(t,words[t.text])
+            s_list,token=morph_tokens.factory(t,words[t.text])
             style_list+=s_list
-            morph_list+=t_list
+            morph_list.append(token)
 
         style_list.append( ("non word","non-word","#f0f0f0","#909090") )
         style_list.append( ("marker","marker","#e0e0e0","#909090") )
         style_list.append( ("not matched (alpha)","not-found","#900000","#ffffff") )
-        style_list.append( ("not matched (morphology)","not-found-morph","#900000","#ffffff") )
+        style_list.append( ("not matched (morphology)","not-found-morph","#c00000","#ffffff") )
         style_list=list(set(style_list))
         return style_list,morph_list
         

@@ -58,5 +58,18 @@ admin.site.register(models.TokenRegexpSet,TokenRegexpSetAdmin)
 admin.site.register(models.Attribute)
 admin.site.register(models.Value)
 admin.site.register(models.Entry)
-admin.site.register(models.Description)
 admin.site.register(models.SubDescription)
+
+class DescriptionEntryInline(admin.TabularInline):
+    model = models.Description.entries.through
+    extra = 0
+
+class DescriptionSubDescriptionInline(admin.TabularInline):
+    model = models.Description.subdescriptions.through
+    extra = 0
+
+class DescriptionAdmin(admin.ModelAdmin):
+    exclude = [ "entries","subdescriptions"]
+    inlines=[DescriptionEntryInline,DescriptionSubDescriptionInline]
+
+admin.site.register(models.Description,DescriptionAdmin)

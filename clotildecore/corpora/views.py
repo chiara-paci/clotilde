@@ -66,6 +66,7 @@ class TextMorphologicalParserView(TextAlphaParserView):
 
 class TextMorphologicalTokenView(TextAlphaTokenView):
     phase = "morphological_token"
+    template_name = "corpora/text_tokens_morphology.html"
 
     def build_token_list(self):
         style_list,tokens=self.object.corpus.language.morph_tokenize(self.object.text)

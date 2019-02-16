@@ -1,0 +1,18 @@
+{% extends "corpora/text_detail.html" %}
+
+{% block output %}
+<table class="token">
+{% for token in token_list %}
+<tr class="{{ token.label }}">
+  <td>{{ token.text|safe }}</td>
+  {% if token.word is defined %}
+  <td>{{ token.word.stem }}–</td>
+  <td>{{ token.word.part_of_speech }}</td>
+  <td>{{ token.description.html()|safe }}</td>
+  {% else %}
+  <td colspan="3">{{ token.label }}</td>
+  {% endif %}
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
