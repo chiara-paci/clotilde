@@ -71,5 +71,9 @@ class DescriptionSubDescriptionInline(admin.TabularInline):
 class DescriptionAdmin(admin.ModelAdmin):
     exclude = [ "entries","subdescriptions"]
     inlines=[DescriptionEntryInline,DescriptionSubDescriptionInline]
+    list_display=[ "name","_build" ]
+
+    def _build(self,obj):
+        return "[%s]" % obj.build()
 
 admin.site.register(models.Description,DescriptionAdmin)

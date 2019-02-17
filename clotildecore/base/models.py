@@ -223,18 +223,61 @@ class Entry(models.Model):
         if self.negate:
             v="!"+v
         return "%s=%s" % (self.attribute,v)
+
+class DescriptionManager(models.Manager):
+    def get_or_create_by_dict(self,name,data):
+        obj,created=self.get_or_create(name=name)
+        if not created: return obj,False
+
+        for k in data:
+            if type(data[k]) not in [dict,tuple]:
+                attr,created=Attribute.objects.get_or_create(name=k)
+                value,created=Value.objects.get_or_create(string=data[k])
+                entry,created=Entry.objects.get_or_create(attribute=attr,value=value) #,negate=False)
+                obj.entries.add(entry)
+                continue
+            if type(data[k]) is tuple:
+                attr,created=Attribute.objects.get_or_create(name=k)
+                value,created=Value.objects.get_or_create(string=data[k][0])
+                entry,created=Entry.objects.get_or_create(attribute=attr,value=value,negate=data[k][1])
+                obj.entries.add(entry)
+                continue
+            t=k.split(":")
+            if len(t)==1:
+                attr=t[0]
+                name=t[0]
+            else:
+                attr=t[0]
+                name=t[1]
+            subdesc,created=self.get_or_create_by_dict(name,data[k])
+            entry,created=SubDescription.objects.get_or_create(attribute=attr,value=subdesc)
+            obj.subdescriptions.add(entry)
+                
+        return obj,True
     
 class Description(AbstractName): 
     entries = models.ManyToManyField(Entry,blank=True)
     subdescriptions = models.ManyToManyField('SubDescription',blank=True)
+    objects = DescriptionManager()
+
+    class Meta:
+        ordering = [ "name" ]
 
     def build(self):
         kwargs={ str(e.attribute): str(e.value) for e in self.entries.all() }
         kwargsb={ str(e.attribute): e.value.build() for e in self.subdescriptions.all() }
         return descriptions.Description(**kwargs,**kwargsb)
+
+    def serialize(self):
+        kwargs=[ (str(e.attribute), str(e.value)) for e in self.entries.all() ]
+        kwargsb=[ e.serialize() for e in self.subdescriptions.all() ]
+        return (self.name,dict(kwargs+kwargsb))
     
 class SubDescription(models.Model):
     attribute = models.ForeignKey(Attribute,on_delete="cascade")    
     value = models.ForeignKey(Description,on_delete="cascade")    
 
+    def serialize(self):
+        name,ser=self.value.serialize()
+        return "%s:%s" % (self.attribute,name),ser
 

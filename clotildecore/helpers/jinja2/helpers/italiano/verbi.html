@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block centercontent %}
+
+<h1>Paradigma verbale</h1>
+
+<form method="post">
+<p>name: {{ paradigma_form.name }} template: {{ paradigma_form.template }}</p>
+
+<input type="submit" value="create"/>
+
+<div class="helper italiano">
+    {{ csrf_input }}
+    {% for modo in sections %}
+    {% for tempo in sections[modo] %}
+    <section>
+      <h2>{{ modo }} {{ tempo }}</h2>
+      
+      <p>{{ sections[modo][tempo]["form"].remove }} remove</p>
+      
+      {% if sections[modo][tempo]["is_finite"] == "finite" %}
+      {{ sections[modo][tempo]["formset_re"].management_form }}
+      {% for form in sections[modo][tempo]["formset_re"] %}
+      <p>
+	{% if modo == "imperativo" and loop.first %}
+	<input type="hidden" name="imperativo_presente_re-0-person" id="id_imperativo_presente_re-0-person" value="prima singolare">
+	<input type="hidden" name="imperativo_presente_re-0-pattern" value="(.*)" id="id_imperativo_presente_re-0-pattern">
+	<input type="hidden" name="imperativo_presente_re-0-replacement" value="\1a" id="id_imperativo_presente_re-0-replacement">
+        {% else %}
+	{{ form.person }}
+	{{ form.pattern }}
+	<span class="separator">=&gt;</span>
+	{{ form.replacement }}
+	{% endif %}
+      </p>
+      {% endfor %}
+      {% elif sections[modo][tempo]["is_finite"] == "participe" %}
+      {{ sections[modo][tempo]["formset_re"].management_form }}
+      {% for form in sections[modo][tempo]["formset_re"] %}
+      <p>
+	{{ form.gennum }}
+	{{ form.pattern }}
+	<span class="separator">=&gt;</span>
+	{{ form.replacement }}
+      </p>
+      {% endfor %}
+      {% else %}
+      <p>
+	{{ sections[modo][tempo]["form_re"].pattern }}
+	<span class="separator">=&gt;</span>
+	{{ sections[modo][tempo]["form_re"].replacement }}
+      </p>
+      {% endif %}
+      
+    </section>
+    
+    {% endfor %}
+
+{% endfor %}
+
+</div></form>
+
+{% endblock centercontent %}
+
+{% block script %}
+
+$("#id_paradigma-template").change(function(event){
+    var par_id=$(this).val();
+
+    $.get("/morphology/paradigma/"+par_id+"/")
+	.done( function(data){
+	    var n,infl;
+	    var desc,pattern,repl,modo,tempo,person,patt_elem,repl_elem,pind;
+	    for(n=0;n<data["inflections"].length;n++) {
+		pind=2;
+		infl=data["inflections"][n];
+		pattern=infl.regsub[0];
+		repl=infl.regsub[1];
+		desc=infl.description.split(" ");
+
+		modo=desc[0];
+		switch(desc[2]) {
+		case "remoto":
+		    tempo="passato_remoto";
+		    pind=3;
+		    break;
+		default:
+		    tempo=desc[1];
+		    break;
+		}
+
+		switch(modo) {
+		case "indicativo":
+		case "congiuntivo":
+		case "condizionale":
+		case "imperativo":
+		    switch(desc[pind]){
+		    case "prima": person=0;break;
+		    case "seconda": person=1;break;
+		    case "terza": person=2;break;
+		    }
+		    
+		    if (desc[pind+1]=="plurale") person+=3;
+		    patt_elem=$("#id_"+modo+"_"+tempo+"_re-"+person+"-pattern");
+		    repl_elem=$("#id_"+modo+"_"+tempo+"_re-"+person+"-replacement");
+		    
+		    patt_elem.val(pattern);
+		    repl_elem.val(repl);
+		    break;
+		    
+		case "participio":
+		    switch(desc[pind]){
+		    case "maschile": person=0;break;
+		    case "femminile": person=1;break;
+		    };
+		    if (desc[pind+1]=="plurale") person+=2;
+		    patt_elem=$("#id_"+modo+"_"+tempo+"_re-"+person+"-pattern");
+		    repl_elem=$("#id_"+modo+"_"+tempo+"_re-"+person+"-replacement");
+		    
+		    patt_elem.val(pattern);
+		    repl_elem.val(repl);
+		    break;
+		default:
+		    patt_elem=$("#id_"+modo+"_"+tempo+"_re-pattern");
+		    repl_elem=$("#id_"+modo+"_"+tempo+"_re-replacement");
+		    
+		    patt_elem.val(pattern);
+		    repl_elem.val(repl);
+		    break;
+		    
+		
+		}
+	    };
+	});
+
+});
+
+{% endblock script %}

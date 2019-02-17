@@ -55,13 +55,13 @@ class Language(base_models.AbstractName):
             if not type(t) is base_tokens.TokenBase:
                 morph_list.append(t)
                 continue
-            if t.text in non_words: 
+            if t.text.lower() in non_words: 
                 morph_list.append( tokens.TokenNonWord(t) )
                 continue
-            if not t.text in words:
+            if not t.text.lower() in words:
                 morph_list.append(morph_tokens.TokenNotFoundMorph(t))
                 continue
-            s_list,token=morph_tokens.factory(t,words[t.text])
+            s_list,token=morph_tokens.factory(t,words[t.text.lower()])
             style_list+=s_list
             morph_list.append(token)
 

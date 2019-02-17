@@ -3,7 +3,9 @@
 {% block output %}
 <table class="token">
 {% for token in token_list %}
-<tr class="{{ token.label }}">
+
+{% if token.token_list is not defined %}
+<tbody class="{{ token.label }}"><tr>
   <td>{{ token.text|safe }}</td>
   {% if token.word is defined %}
   <td>{{ token.word.stem }}–</td>
@@ -12,7 +14,25 @@
   {% else %}
   <td colspan="3">{{ token.label }}</td>
   {% endif %}
-</tr>
+</tr></tbody>
+{% else %}
+<tbody>
+  {% for sub in token.token_list %}
+  <tr class="{{ sub.label }}">
+    {% if loop.first %}<td class="multiple" rowspan="{{ token.token_list.__len__() }}">{{ token.text|safe }}</td>{% endif %}
+    {% if sub.word is defined %}
+    <td>{{ sub.word.stem }}–</td>
+    <td>{{ sub.word.part_of_speech }}</td>
+    <td>{{ sub.description.html()|safe }}</td>
+    {% else %}
+    <td colspan="3">{{ sub.label }}</td>
+    {% endif %}
+  </tr>
+  {% endfor %}
+</tbody>
+
+{% endif %}
+
 {% endfor %}
 </table>
 {% endblock %}

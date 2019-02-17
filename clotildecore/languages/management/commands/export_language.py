@@ -10,6 +10,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from languages import models
 from morphology import models as morph_models
+from base import models as base_models
+from base import functions
 
 def build_tarinfo(fname,data):
     data = data.encode('utf8')
@@ -62,21 +64,58 @@ class Command(BaseCommand):
         # roots
         root_list=[]
         for root in morph_models.Root.objects.filter(language=language):
-            R={
-                "root": root.root,
-                "tema": root.tema_obj.name,
-                "description": root.description_obj.name,
-                "part_of_speech": root.part_of_speech.name,
-            }
-            root_list.append(R)
-            tema_list.append(root.tema_obj)
-            desc_list.append(root.description_obj)
-            pos_list.append(root.part_of_speech)
+            root_list.append(root.serialize())
+            tema_list.append(root.tema_obj.pk)
+            desc_list.append(root.description_obj.pk)
+            pos_list.append(root.part_of_speech.pk)
         info,bdata=build_tarinfo("./roots.json",json.dumps(root_list))
         archive.addfile(info, bdata)
+
+        # derivations
+        der_list=[]
+        for der in morph_models.Derivation.objects.filter(language=language):
+            der_list.append(der.serialize())
+            tema_list.append(der.tema_obj.pk)
+            desc_list.append(der.description_obj.pk)
+            desc_list.append(der.root_description_obj.pk)
+            pos_list.append(der.root_part_of_speech.pk)
+        info,bdata=build_tarinfo("./derivations.json",json.dumps(dict(der_list)))
+        archive.addfile(info, bdata)
+
+        # paradigmas
+        par_list=[]
+        for par in morph_models.Paradigma.objects.filter(language=language):
+            infl_list=list(par.inflections.all())
+            desc_list+=[ infl.description_obj.pk for infl in infl_list ]
+            infl_list=[ infl.serialize() for infl in infl_list ]
+            pos_list.append(par.part_of_speech.pk)
+            par_obj={
+                "name": par.name,
+                "part_of_speech": par.part_of_speech.name,
+                "inflections": infl_list
+            } 
+
+            info,bdata=build_tarinfo("./paradigmas/%s.json" % functions.slugify(par.name),json.dumps(par_obj))
+            archive.addfile(info, bdata)
         
         # descriptions
         # part of speech
         # temas
+        desc_list=list(set(desc_list))
+        tema_list=list(set(tema_list))
+        pos_list=list(set(pos_list))
+        
+        desc_list=dict([ d.serialize() for d in base_models.Description.objects.filter(pk__in=desc_list)])
+        tema_list=dict([ d.serialize() for d in morph_models.Tema.objects.filter(pk__in=tema_list)])
+        pos_list =dict([ d.serialize() for d in morph_models.PartOfSpeech.objects.filter(pk__in=pos_list)])
+
+        info,bdata=build_tarinfo("./descriptions.json",json.dumps(desc_list))
+        archive.addfile(info, bdata)
+
+        info,bdata=build_tarinfo("./temas.json",json.dumps(tema_list))
+        archive.addfile(info, bdata)
+
+        info,bdata=build_tarinfo("./part_of_speech.json",json.dumps(pos_list))
+        archive.addfile(info, bdata)
 
         archive.close()
