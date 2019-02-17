@@ -4,33 +4,71 @@
 <table class="token">
 {% for token in token_list %}
 
-{% if token.token_list is not defined %}
-<tbody class="{{ token.label }}"><tr>
-  <td>{{ token.text|safe }}</td>
-  {% if token.word is defined %}
-  <td>{{ token.word.stem }}–</td>
-  <td>{{ token.word.part_of_speech }}</td>
-  <td>{{ token.description.html()|safe }}</td>
-  {% else %}
-  <td colspan="3">{{ token.label }}</td>
-  {% endif %}
-</tr></tbody>
-{% else %}
+{% if token.word is defined %}
+<tbody class="{{ token.label }}">
+  <tr>
+    <td>{{ token.text|safe }}</td>
+    <td colspan="3">{{ token.word.part_of_speech }}</td>
+    <td>{{ token.word.stem }}–</td>
+    <td>{{ token.description.html()|safe }}</td>
+  </tr>
+</tbody>
+{% elif token.word_list is defined %}
 <tbody>
-  {% for sub in token.token_list %}
-  <tr class="{{ sub.label }}">
-    {% if loop.first %}<td class="multiple" rowspan="{{ token.token_list.__len__() }}">{{ token.text|safe }}</td>{% endif %}
-    {% if sub.word is defined %}
-    <td>{{ sub.word.stem }}–</td>
-    <td>{{ sub.word.part_of_speech }}</td>
-    <td>{{ sub.description.html()|safe }}</td>
-    {% else %}
-    <td colspan="3">{{ sub.label }}</td>
+  {% for word in token.word_list %}
+  <tr class="{{ slugify(word.part_of_speech.name) }}">
+    {% if loop.first %}
+    <td class="fused" rowspan="{{ token.word_list.__len__() }}">{{ token.text|safe }}</td>
+    <td class="fused" rowspan="{{ token.word_list.__len__() }}">fused</td>
     {% endif %}
+    <td>{{ word.part_of_speech }}</td>
+    <td>{{ word.cache }}</td>
+    <td>{{ word.stem }}–</td>
+    <td>{{ word.description.html()|safe }}</td>
   </tr>
   {% endfor %}
 </tbody>
-
+{% elif token.token_list is defined %}
+<tbody>
+  {% for sub in token.token_list %}
+  {% set sub_loop = loop %}
+  {% if sub.word is defined %}
+  <tr class="{{ sub.label }}">
+    {% if sub_loop.first %}<td class="multiple" rowspan="{{ token.length }}">{{ token.text|safe }}</td>{% endif %}
+    <td colspan="3">{{ sub.word.part_of_speech }}</td>
+    <td>{{ sub.word.stem }}–</td>
+    <td>{{ sub.description.html()|safe }}</td>
+  </tr>
+  {% elif sub.word_list is defined %}
+  {% for word in sub.word_list %}
+  <tr class="{{ slugify(word.part_of_speech.name) }}">
+    {% if loop.first and sub_loop.first %}
+    <td class="multiple" rowspan="{{ token.length }}">{{ token.text|safe }}</td>
+    {% endif %}
+    {% if loop.first %}
+    <td class="fused" rowspan="{{ sub.word_list.__len__() }}">fused</td>
+    {% endif %}
+    <td>{{ word.part_of_speech }}</td>
+    <td>{{ word.cache }}</td>
+    <td>{{ word.stem }}–</td>
+    <td>{{ word.description.html()|safe }}</td>
+  </tr>
+  {% endfor %}
+  {% else %}
+  <tr>
+    {% if sub_loop.first %}<td class="multiple" rowspan="{{ token.length }}">{{ token.text|safe }}</td>{% endif %}
+    <td colspan="5">{{ sub.label }}</td>
+  </tr>
+  {% endif %}
+  {% endfor %}
+</tbody>
+{% else %}
+<tbody class="{{ token.label }}">
+  <tr>
+    <td>{{ token.text|safe }}</td>
+    <td colspan="5">{{ token.label }}</td>
+  </tr>
+</tbody>
 {% endif %}
 
 {% endfor %}

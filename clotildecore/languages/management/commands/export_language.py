@@ -97,6 +97,18 @@ class Command(BaseCommand):
 
             info,bdata=build_tarinfo("./paradigmas/%s.json" % functions.slugify(par.name),json.dumps(par_obj))
             archive.addfile(info, bdata)
+
+        # fusion
+        fusion_list=[]
+        for fusion in morph_models.Fusion.objects.filter(language=language):
+            rule_list=[ rel.fusion_rule for rel in fusion.fusionrulerelation_set.all() ]
+            for rule in rule_list:
+                desc_list.append(rule.description_obj.pk)
+                tema_list.append(rule.tema_obj.pk)
+                pos_list.append(rule.part_of_speech.pk)
+            fusion_list.append( ( fusion.name, [rule.serialize() for rule in rule_list] ) )
+        info,bdata=build_tarinfo("./fusions.json",json.dumps(dict(fusion_list)))
+        archive.addfile(info, bdata)
         
         # descriptions
         # part of speech

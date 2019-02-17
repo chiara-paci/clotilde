@@ -163,6 +163,16 @@ class FusionRule(base_models.AbstractName):
     def tema(self):
         return self.tema_obj.build()
 
+    def serialize(self):
+        return {
+            "name": self.name,
+            "regsub": self.regsub.serialize(),
+            "tema": self.tema_obj.name,
+            "description": self.description_obj.name,
+            "part_of_speech": self.part_of_speech.name,
+        }
+
+
 class FusionRuleRelation(models.Model):
     fusion = models.ForeignKey(Fusion,on_delete="cascade")    
     fusion_rule = models.ForeignKey(FusionRule,on_delete="cascade")    
