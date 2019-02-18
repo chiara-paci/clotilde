@@ -139,7 +139,6 @@ class Command(BaseCommand):
                 par.inflections.add(obj)
 
         # derivations
-
         tarinfo=archive.getmember("./derivations.json")
         fd=archive.extractfile(tarinfo)
         data=json.loads(fd.read().decode())
@@ -169,5 +168,35 @@ class Command(BaseCommand):
             der.save()
             
         # fusions
+
+        tarinfo=archive.getmember("./fusions.json")
+        fd=archive.extractfile(tarinfo)
+        data=json.loads(fd.read().decode())
+        for name in data:
+            fusion,created=morph_models.Fusion.objects.get_or_create(name=name,language=language)
+            n=0
+            for rule in data[name]:
+                regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=rule["regsub"][0],
+                                                                                    replacement=rule["regsub"][1])
+
+                tema=tema_dict[rule["tema"]]
+                desc=desc_dict[rule["description"]]
+                pos=pos_dict[rule["part_of_speech"]]
+                
+                frule,created=morph_models.FusionRule.objects.get_or_create(name=rule["name"],
+                                                                            defaults={
+                                                                                "tema_obj": tema,
+                                                                                "part_of_speech": pos,
+                                                                                "description_obj": desc,
+                                                                                "regsub": regsub
+                                                                            })
+                frule.tema_obj=tema
+                frule.part_of_speech=pos
+                frule.description_obj=desc
+                frule.regsub=regsub
+                frule.save()
+                rel,created=morph_models.FusionRuleRelation.objects.get_or_create(fusion_rule=frule,
+                                                                                  fusion=fusion,order=n)
+                n+=1
 
         archive.close()
