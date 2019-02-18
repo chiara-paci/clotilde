@@ -12,7 +12,7 @@ class Author(models.Model):
     def __str__(self): return(self.name)
 
 class Corpus(base_models.AbstractNameDesc):
-    language = models.ForeignKey(lang_models.Language,on_delete="cascade")
+    language = models.ForeignKey('languages.Language',on_delete="cascade")
 
     def get_absolute_url(self):
         return "/%s/corpus/%d" % ("corpora",self.id)

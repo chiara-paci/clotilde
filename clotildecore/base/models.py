@@ -185,7 +185,9 @@ class TokenRegexpSetThrough(models.Model):
 class AlphabeticOrderManager(models.Manager):
     def de_serialize(self,D):
         obj,created=self.get_or_create(name=D["name"],
-                                       order=D["order"])
+                                       defaults={"order":D["order"]})
+        obj.order=D["order"]
+        obj.save()
         return obj
 
 ALPHA_ORDER="AaÁáÀàÄäÆæ;Bb;CcÇç;Dd;EeÈèÉéËë;Ff;Gg;Hh;Ii;Jj;Kk;Ll;Mm;OoÒòÓóÖöŒœ;Pp;Qq;Rr;SsŞş;Tt;UuÙùÚúÜü;Vv;Ww;Xx;Yy;Zz"

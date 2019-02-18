@@ -10,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from languages import models
 from base import models as base_models
+from morphology import models as morph_models
 
 def build_tarinfo(fname,data):
     data = data.encode('utf8')
@@ -63,5 +64,61 @@ class Command(BaseCommand):
         for k in non_words:
             models.NonWord.objects.get_or_create(language=language,word=non_words[k],
                                                  defaults={"name": k})
+
+        pos_dict={}
+        desc_dict={}
+        tema_dict={}
+
+        # part of speech
+        tarinfo=archive.getmember("./part_of_speech.json")
+        fd=archive.extractfile(tarinfo)
+        data=json.loads(fd.read().decode())
+        for name in data:
+            pos,created=morph_models.PartOfSpeech.objects.get_or_create(name=name,
+                                                                        defaults=data[name])
+            pos_dict[name]=pos
+
+        # descriptions
+        tarinfo=archive.getmember("./descriptions.json")
+        fd=archive.extractfile(tarinfo)
+        data=json.loads(fd.read().decode())
+        for name in data:
+            desc,created=base_models.Description.objects.get_or_create(name=name)
+            desc_dict[name]=desc
+            for k in data[name]:
+                attr,created=base_models.Attribute.objects.get_or_create(name=k)
+                val,created=base_models.Value.objects.get_or_create(string=data[name][k])
+                entry,created=base_models.Entry.objects.get_or_create(attribute=attr,value=val)
+                desc.entries.add(entry)
+
+        # temas
+        tarinfo=archive.getmember("./temas.json")
+        fd=archive.extractfile(tarinfo)
+        data=json.loads(fd.read().decode())
+        for name in data:
+            tema,created=morph_models.Tema.objects.get_or_create(name=name)
+            tema_dict[name]=tema
+            for k in data[name]:
+                attr,created=morph_models.TemaArgument.objects.get_or_create(name=k)
+                val,created=morph_models.TemaValue.objects.get_or_create(name=data[name][k])
+                entry,created=morph_models.TemaEntry.objects.get_or_create(argument=attr,value=val,tema=tema)
+
+
+        # roots
+        tarinfo=archive.getmember("./roots.json")
+        fd=archive.extractfile(tarinfo)
+        data=json.loads(fd.read().decode())
+        for root in data:
+            tema=tema_dict[root["tema"]]
+            pos=pos_dict[root["part_of_speech"]]
+            desc=desc_dict[root["description"]]
+            val=root["root"]
+            obj,created=morph_models.Root.objects.get_or_create(root=val,part_of_speech=pos,
+                                                                tema_obj=tema,description_obj=desc,
+                                                                language=language)
+
+        # derivations
+        # paradigmas
+        # fusions
 
         archive.close()

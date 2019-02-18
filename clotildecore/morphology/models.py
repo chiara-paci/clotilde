@@ -53,7 +53,7 @@ class TemaEntry(models.Model):
 
 class Paradigma(base_models.AbstractName):
     part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
-    language = models.ForeignKey(lang_models.Language,on_delete="cascade")    
+    language = models.ForeignKey('languages.Language',on_delete="cascade")    
     inflections = models.ManyToManyField("Inflection",blank=True)
 
 class Inflection(models.Model):
@@ -80,7 +80,7 @@ class Inflection(models.Model):
 
 class Root(models.Model):
     root=models.CharField(max_length=1024)
-    language = models.ForeignKey(lang_models.Language,on_delete="cascade")    
+    language = models.ForeignKey('languages.Language',on_delete="cascade")    
     tema_obj = models.ForeignKey(Tema,on_delete="cascade")    
     part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
     description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
@@ -105,7 +105,7 @@ class Root(models.Model):
         }
     
 class Derivation(base_models.AbstractName):
-    language = models.ForeignKey(lang_models.Language,on_delete="cascade")    
+    language = models.ForeignKey('languages.Language',on_delete="cascade")    
     regsub = models.ForeignKey(RegexpReplacement,on_delete="cascade")    
     tema_obj = models.ForeignKey(Tema,on_delete="cascade")    
     description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
@@ -147,7 +147,7 @@ class Derivation(base_models.AbstractName):
 #    inflection = models.ForeignKey(Inflection,on_delete="cascade")    
     
 class Fusion(base_models.AbstractName):
-    language = models.ForeignKey(lang_models.Language,on_delete="cascade")    
+    language = models.ForeignKey('languages.Language',on_delete="cascade")    
 
 class FusionRule(base_models.AbstractName):
     regsub = models.ForeignKey(RegexpReplacement,on_delete="cascade")    
