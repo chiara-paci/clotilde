@@ -14,6 +14,7 @@ class TemaEntryInline(admin.TabularInline):
 
 class TemaAdmin(admin.ModelAdmin):
     inlines=[TemaEntryInline]
+    list_display=[ "name", "build", "num_roots","num_derivations","num_fusion_rules" ]
 
 admin.site.register(models.Tema,TemaAdmin)
 
@@ -53,6 +54,7 @@ class InflectionAdmin(admin.ModelAdmin):
 admin.site.register(models.Inflection,InflectionAdmin)
 
 class DerivationAdmin(admin.ModelAdmin):
+    list_display = [ "name", "tema", "root_part_of_speech", "root_description", "part_of_speech", "description", "regsub", "paradigma" ]
     save_as=True
 
 admin.site.register(models.Derivation,DerivationAdmin)
@@ -60,7 +62,8 @@ admin.site.register(models.Derivation,DerivationAdmin)
 class RootAdmin(admin.ModelAdmin):
     save_as=True
     list_filter=["part_of_speech"]
-    list_display=["root","language","part_of_speech","tema","description"]
+    list_display=["root","language","part_of_speech","tema","description_obj"]
+    list_editable=["description_obj"]
 
 admin.site.register(models.Root,RootAdmin)
 
@@ -70,6 +73,7 @@ class FusionRuleRelationInline(admin.TabularInline):
 
 class FusionAdmin(admin.ModelAdmin): 
     inlines=[FusionRuleRelationInline]
+    save_as=True
 
 admin.site.register(models.Fusion,FusionAdmin)
 

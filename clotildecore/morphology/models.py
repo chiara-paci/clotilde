@@ -46,6 +46,18 @@ class Tema(base_models.AbstractName):
     def serialize(self):
         return (self.name,{ str(e.argument): str(e.value) for e in self.temaentry_set.all() })
 
+    def num_roots(self):
+        return self.root_set.all().count()
+
+    def num_derivations(self):
+        return self.derivation_set.all().count()
+
+    def num_fusion_rules(self):
+        return self.fusionrule_set.all().count()
+
+    class Meta:
+        ordering = [ "name" ]
+
 class TemaEntry(models.Model):
     tema = models.ForeignKey(Tema,on_delete="cascade")    
     argument = models.ForeignKey(TemaArgument,on_delete="cascade")    
@@ -115,6 +127,9 @@ class Derivation(base_models.AbstractName):
     root_part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
     paradigma = models.ForeignKey(Paradigma,on_delete="cascade")    
 
+    class Meta:
+        ordering = ['name']
+
     def serialize(self):
         return (self.name,{
             "regsub": self.regsub.serialize(),
@@ -129,6 +144,10 @@ class Derivation(base_models.AbstractName):
     @cached_property
     def description(self):
         return self.description_obj.build()
+
+    @cached_property
+    def part_of_speech(self):
+        return self.paradigma.part_of_speech
 
     @cached_property
     def root_description(self):
