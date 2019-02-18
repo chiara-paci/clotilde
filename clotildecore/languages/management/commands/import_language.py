@@ -117,8 +117,57 @@ class Command(BaseCommand):
                                                                 tema_obj=tema,description_obj=desc,
                                                                 language=language)
 
-        # derivations
         # paradigmas
+
+        par_dict={}
+        for tarinfo in archive.getmembers():
+            if not tarinfo.name.startswith('./paradigmas/'): continue
+            fd=archive.extractfile(tarinfo)
+            data=json.loads(fd.read().decode())
+            pos=pos_dict[data["part_of_speech"]]
+            par,created=morph_models.Paradigma.objects.get_or_create(name=data["name"],
+                                                                     defaults={"language":language,
+                                                                               "part_of_speech":pos})
+            par_dict[data["name"]]=par
+            for infl in data["inflections"]:
+                desc=desc_dict[infl["description"]]
+                regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=infl["regsub"][0],
+                                                                                    replacement=infl["regsub"][1])
+                obj,created=morph_models.Inflection.objects.get_or_create(regsub=regsub,description_obj=desc)
+                obj.dict_entry=infl["dict_entry"]
+                obj.save()
+                par.inflections.add(obj)
+
+        # derivations
+
+        tarinfo=archive.getmember("./derivations.json")
+        fd=archive.extractfile(tarinfo)
+        data=json.loads(fd.read().decode())
+        for name in data:
+            regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=data[name]["regsub"][0],
+                                                                                replacement=data[name]["regsub"][1])
+            tema=tema_dict[data[name]["tema"]]
+            desc=desc_dict[data[name]["description"]]
+            r_desc=desc_dict[data[name]["root_description"]]
+            r_pos=pos_dict[data[name]["root_part_of_speech"]]
+            par=par_dict[data[name]["paradigma"]]
+            der,created=morph_models.Derivation.objects.get_or_create(name=name,language=language,
+                                                                      defaults={
+                                                                          "regsub": regsub,
+                                                                          "tema_obj": tema,
+                                                                          "description_obj": desc,
+                                                                          "root_description_obj": r_desc,
+                                                                          "root_part_of_speech": r_pos,
+                                                                          "paradigma": par,
+                                                                      })
+            der.regsub=regsub
+            der.tema_obj=tema
+            der.description_obj=desc
+            der.root_description_obj=r_desc
+            der.root_part_of_speech_obj=r_pos
+            der.paradigma=par
+            der.save()
+            
         # fusions
 
         archive.close()
