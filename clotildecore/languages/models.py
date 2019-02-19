@@ -77,7 +77,7 @@ class Language(base_models.AbstractName):
         return(self.token_regexp_set.regexp_all())
 
     def get_absolute_url(self):
-        return( "/base/language/%d" % self.id )
+        return( "/languages/language/%d" % self.id )
 
     def part_of_speech_set(self):
         return(morph_models.PartOfSpeech.objects.by_language(self))

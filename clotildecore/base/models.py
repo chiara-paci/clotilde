@@ -226,6 +226,9 @@ class Entry(models.Model):
             v="!"+v
         return "%s=%s" % (self.attribute,v)
 
+    class Meta:
+        ordering = [ "attribute","value" ]
+
 class DescriptionManager(models.Manager):
     def get_or_create_by_dict(self,name,data):
         obj,created=self.get_or_create(name=name)

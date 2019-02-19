@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %} – Root list{% endblock %}
+
+{% block centercontent %}
+
+<h1>Roots</h1>
+
+<table>
+  {% for obj in object_list %}
+  <tr>
+    <td><a href="{{ obj.get_absolute_url() }}">{{ obj.root }}⊢</a></td>
+    <td>{{ obj.part_of_speech }}</td>
+    <td>{{ obj.tema }}</td>
+    <td>{{ obj.description }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}

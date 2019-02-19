@@ -25,6 +25,9 @@ class RegexpReplacement(models.Model):
     def serialize(self):
         return [ str(self.pattern),str(self.replacement) ]
 
+    class Meta:
+        ordering = ["replacement"]
+
 class PartOfSpeech(base_models.AbstractName):
     bg_color = models.CharField(max_length=20,default="#ffff00")
     fg_color = models.CharField(max_length=20,default="#000000")
@@ -67,6 +70,12 @@ class Paradigma(base_models.AbstractName):
     part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
     language = models.ForeignKey('languages.Language',on_delete="cascade")    
     inflections = models.ManyToManyField("Inflection",blank=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def get_absolute_url(self):
+        return "/morphology/paradigma/%d/" % self.pk
 
 class Inflection(models.Model):
     dict_entry = models.BooleanField(default=False)
@@ -115,6 +124,10 @@ class Root(models.Model):
             "description": self.description_obj.name,
             "part_of_speech": self.part_of_speech.name,
         }
+
+    def get_absolute_url(self):
+        return "/morphology/root/%d/" % self.pk
+
     
 class Derivation(base_models.AbstractName):
     language = models.ForeignKey('languages.Language',on_delete="cascade")    
@@ -160,6 +173,10 @@ class Derivation(base_models.AbstractName):
     def clean(self):
         if self.language != self.paradigma.language:
             raise ValidationError(_('Paradigma and language are not compatible.'))
+
+    def get_absolute_url(self):
+        return "/morphology/derivation/%d/" % self.pk
+
 
 #class ParadigmaInflection(models.Model):
 #    paradigma = models.ForeignKey(Paradigma,on_delete="cascade")    

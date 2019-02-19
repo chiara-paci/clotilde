@@ -62,8 +62,8 @@ admin.site.register(models.Derivation,DerivationAdmin)
 class RootAdmin(admin.ModelAdmin):
     save_as=True
     list_filter=["part_of_speech"]
-    list_display=["root","language","part_of_speech","tema","description_obj"]
-    list_editable=["description_obj"]
+    list_display=["root","language","part_of_speech","tema_obj","description_obj"]
+    #list_editable=["description_obj","tema_obj","part_of_speech"]
 
 admin.site.register(models.Root,RootAdmin)
 
@@ -80,6 +80,7 @@ admin.site.register(models.Fusion,FusionAdmin)
 class FusionRuleAdmin(admin.ModelAdmin): 
     inlines=[FusionRuleRelationInline]
     save_as=True
+    list_display=[ "name", "tema", "part_of_speech", "description", "regsub" ]
 
 admin.site.register(models.FusionRule,FusionRuleAdmin)
 

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %} – Root – {{ root }}{% endblock %}
+
+{% block centercontent %}
+
+<p class="subtitle"><a href="{{ root.language.get_absolute_url() }}">{{ root.language }}</a></p>
+<h1>{{ root }}</h1>
+
+<section>
+  <h3>Tema</h3>
+  {{ root.tema.html()|safe }}
+  <h3>Description</h3>
+  {{ root.description.html()|safe }}
+</section>
+
+{% for stem in root.stem_set.all() %}
+<section>
+  <h2>{{ stem.stem }}–</h2>
+  <p><i>{{ stem.part_of_speech }} (<a href="{{ stem.derivation.get_absolute_url() }}">{{ stem.derivation }}</a>)</p></i>
+  <p>{{ stem.description.html()|safe }}</p>
+  <p><a href="{{ stem.paradigma.get_absolute_url() }}">{{ stem.paradigma }}</a></p>
+
+</section>
+{% endfor %}
+
+
+
+
+{% endblock %}

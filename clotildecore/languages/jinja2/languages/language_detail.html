@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %} – Language – {{ language }}{% endblock %}
+
+{% block centercontent %}
+
+<h1>{{ language }}</h1>
+
+<ul>
+  <li><a href="{{ language.get_absolute_url() }}/roots/">Roots</a></li>
+  <li><a href="{{ language.get_absolute_url() }}/paradigmas/">Paradigmas</a></li>
+  <li><a href="{{ language.get_absolute_url() }}/derivations/">Derivations</a></li>
+  <li><a href="{{ language.get_absolute_url() }}/fusions/">Fusions</a></li>
+</ul>
+
+{% endblock %}

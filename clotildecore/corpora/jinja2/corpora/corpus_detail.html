@@ -4,9 +4,9 @@
 
 {% block centercontent %}
 
+<p class="subtitle"><a href="{{ corpus.language.get_absolute_url() }}">{{ corpus.language }}</a></p>
 <h1>{{ corpus }}</h1>
 
-<p class="subtitle">{{ corpus.language }}</p>
 
 <p>{{ corpus.description }}</p>
 <table class="index">
