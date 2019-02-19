@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Clotilde – {{ title }}}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" 
+      integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" 
+      crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css?family=Cabin+Sketch|Fredericka+the+Great|Kranky|Open+Sans" rel="stylesheet"> 
+
+<link rel="stylesheet" type="text/css" href="/assets/css/clotilde.css">
+
+</head>
+
+<body>
+
+  <header>
+    <h1>Clotilde</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/corpora/">Corpora</a>
+      <a href="/tools/">Tools</a>
+      <a href="/tools/helper_italiano/">Helper Italiano</a>
+      <a href="/admin/">Admin</a>
+    </nav>
+  </header>
+  
+  <main>
+    <nav>
+      {% include navigation.html  %}
+    </nav>
+    
+    <article>
+      {{ content }}
+    </article>
+  </main>
+  
+  <footer>
+    © Costruttori di Mondi 2019
+  </footer>
+
+  </body>
+
+</html>

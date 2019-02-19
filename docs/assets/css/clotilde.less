@@ -1,0 +1,209 @@
+/*** base objects (default) ***/
+@import "clotilde-colors.less";
+
+body {
+    font-family: 'Open Sans', Helvetica, Arial, 'FreeSans', sans-serif;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background-color: @color-primary-1;
+    color: @textforecolor;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    align-content: stretch;
+
+}
+
+math {
+    font-family: 'Open Sans', Helvetica, Arial, 'FreeSans', sans-serif;
+}
+
+header {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background-color: @color-primary-2;
+
+    order: 1;
+    flex-grow: 0;
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    align-content: space-between;
+
+    nav {
+	order: 2;
+	flex-grow: 0;
+	flex-shrink: 0;
+
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: stretch;
+	align-content: stretch;
+
+	font-size: .9em;
+
+	a {
+	    background-color: @color-primary-4;
+	    color: @color-primary-2;
+	    margin-left: .5em;
+	    margin-right: .5em;
+	    border-radius: 1em;
+	    padding-left: 1em;
+	    padding-right: 1em;
+	    text-decoration: none;
+	}
+
+	a.selected, 
+	a:active, 
+	a:hover {
+	    background-color: @color-primary-3;
+	    color: @color-primary-4;
+	}
+	bottom: 0;
+	left: 0;
+	height: 30px;
+	line-height: 30px;
+	padding: 0;
+	padding-bottom: 3pt;
+	padding-top: 3pt;
+	margin-left: 5%;
+	margin-right: 5%;
+    }
+
+
+    h1 {
+	order: 1;
+	flex-grow: 1;
+	flex-shrink: 0;
+
+	margin: 0;
+	font-size: 200%;
+	color: @color-primary-2;
+	text-shadow: 1px 1px 2px @color-dark-4;
+	letter-spacing: 20px;
+	text-align: left;
+	padding: 0;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	/*    
+          font-family: 'Cabin Sketch', cursive;
+          font-family: 'Fredericka the Great', cursive;
+          font-family: 'Kranky', cursive;
+          font-family: 'Open Sans', sans-serif;
+       */
+	//font: 36pt 'Fredericka the Great', cursive;
+	font: 40pt 'Kranky', cursive;
+	//font: 36pt 'Cabin Sketch', cursive;
+	margin-left: 5%;
+	margin-right: 5%;
+    }
+    
+    
+}
+
+footer {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+
+    min-height: 3em;
+    border-top: 1px solid @color-primary-0;
+
+    font-size: .8em;
+    color: @color-primary-0;
+
+    order: 3;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+main {
+    order: 2;
+
+    margin: .5em;
+
+    article {
+	background: white;
+	padding: 1em;
+	min-height: 800px;
+	margin-left: 5%;
+	margin-right: 5%;
+	text-align: justify;
+	line-height: 2em;
+	p {
+	    text-indent: 1em;
+	    padding: 0;
+	    margin-top: 0;
+	    margin-bottom: 0;
+	    padding-top: 0;
+	    padding-bottom: 0;
+	}
+    }
+
+    aside {
+	font-size: .8em;
+	padding: .5em;
+	border: 1px solid @color-dark-0;
+	float: right;
+    }
+
+    a { 
+	color: @color-primary-4;;
+	text-decoration: none;
+    }
+
+    a:active, a:hover {
+		  color: lighten(@color-primary-2,30%);
+		  background-color: @color-primary-4;
+	      }
+
+
+    h1 { font-size: 200%; }
+    h2 { font-size: 150%; }
+    h3 { font-size: 120%; }
+    h4 { font-size: 100%; }
+    h5 { font-size: 100%; }
+
+    h1, h2, h3, h4, h5, p.subtitle {
+	color: @color-dark-0;
+    }
+
+    h1 {
+	border-bottom: 1px solid @color-dark-0;
+	border-top: 1px solid @color-dark-0;
+	text-align: center;
+    }
+
+    h2 {
+	border-bottom: 1px solid @color-dark-0;
+    }
+
+    p.subtitle {
+	padding: 0;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 1em;
+	text-align: right;
+	text-indent: 0;
+	line-height: 1em;
+	font-size: 80%;
+    }
+
+}
+
