@@ -1,0 +1,10 @@
+---
+title: Table of contents
+layout: default
+---
+
+<ul>
+{% for o in site.data.outline %}
+<li><a href={{ o.url }}>{{ o.order }}. {{ o.toc }}</a></li>
+{% endfor %}
+</ul>
