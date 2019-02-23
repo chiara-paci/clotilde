@@ -1,0 +1,243 @@
+---
+title: Tabelle morfologiche
+layout: default
+url: /page/tabelle-morfologiche
+---
+<a name='temimorph'></a>
+<p>Anche in questo caso, come meccanismo base abbiamo usato le espressioni regolari, elencate nella tabella delle sostituzioni (\vedi \figura{fig:regexpreplacement}).\label{page:regexpreplacement} Ogni sostituzione è definita da due campi, un'espressione regolare ({\it pattern}) e la stringa che definisce la sostituzione ({\it replacement}).</p>
+<figure>\myfig{Morfologia: sostituzioni basate su espressioni</figure>
+<p>regolari. A lato degli esempi.}{\input{immagini/regexpreplacement.tex} \noindent\begin{scriptsize}</p>
+<table>[b]{*{2}{>{\tt}l}lll}
+ \multicolumn{1}{l}{\it pattern}& \multicolumn{1}{l}{\it replacement}\\ (.*) & \textbackslash 1iamo & (am) & (am)iamo & amiamo\\ (.*)([bcdfglmnpqrstvz]) &\textbackslash 1\textbackslash 2\textbackslash 2ia & (sa)(p) & (sa)(p)(p)ia  & sappia\\
+</table>
+<p>\end{scriptsize}</pre></p>
+<p>}{fig:regexpreplacement}</p>
+<p>Una radice tematica è l'unione di una radice lessicale e di una regola di derivazione, mentre una parola è l'unione di una radice tematica con una regola di flessione (per la composizione vedi \sezione{sec:composizione}). Per rappresentarle sono sufficienti tre tabelle, quella delle radici lessicali ({\it root}), quella delle regole di derivazione ({\it derivation}) e quella delle regole di flessione ({\it inflection}): le tabelle delle radici tematiche ({\it stem}) e delle parole ({\it word}) possono essere calcolate in base alle caratteristiche delle altre tre. Per questioni di prestazione, è prevista anche una tabella di cache ({\it wordcache}), che è quella usata dalla componente di analisi dei testi.</p>
+<figure>\myfig{Morfologia: relazioni tra radici lessicali ({\it root}), radici</figure>
+<p>tematiche ({\it stem}) e parole ({\it word}). In colore più chiaro le tabelle calcolate.}{\input{immagini/words.tex}}{fig:words}</p>
+<p>Una tabella a parte è quella delle non-parole ({\it notword}), ossia un elenco di token che non devono essere analizzati morfologicamente. Questa tabella comprende spazi, tabulazioni, a capo, punteggiatura, ecc. (\vedi \figura{fig:notword}).</p>
+<figure>\myfig[t]{Morfologia: non-parole. A lato degli esempi.}{\begin{scriptsize}</figure>
+<table>[b]{l>{\tt}l}
+ spazio & \\ punto & . \\ punto interrogativo & ?\\ virgola & ,\\ new line & \textbackslash n\\
+</table>
+<p>\end{scriptsize} \input{immagini/notword.tex}}{fig:notword}</pre></p>
+<h2>Derivazione</h2>
+<a name='derivazione'></a>
+<figure>\myfig{Morfologia: radici.}{\input{immagini/root.tex}}{fig:root}</figure>
+<p>Perché una regola di derivazione $d$ e una radice lessicale $r$ possano dar vita a una radice tematica $s$ devono essere compatibili, ossia dev'essere possibile applicare $d$ a $r$. Le caratteristiche che definiscono la compatibilità sono state divise in tre parti: la categoria (verbale, nominale, ecc.), il tema e la descrizione della radice.</p>
+<p>La categoria di $r$, $r.{pos}$, è definita dal campo {\it part of speech} e dev'essere uguale al campo {\it root part of speech} di $d$, $d.{rpos}$:</p>
+<pre>\begin{lingmeq}
+ r.{pos} = d.{rpos}\,.\end{lingmeq}</pre>
+<p>Entrambi sono un collegamento alla tabella {\it partofspeech}, dove l'utente definisce le parti del discorso che gli interessano.</p>
+<p>Il tema è una versione semplificata di descrizione, dove gli attributi possono essere associati solo a valori costanti e rappresentano tipi di derivazioni possibili (\vedi \figura{fig:root}). Perché il tema di $r$, $r.tema$, sia compatibile con quello di $d$, $d.tema$, bisogna che:</p>
+<pre>\begin{lingmeq}
+ d.tema\spzmsussunto r.tema\,.\end{lingmeq}</pre>
+<p>Ad esempio, il tema della radice lessicale `\spzradless{bell}' può essere descritto come:</p>
+<pre>\begin{lingmeq}
+ \left[\begin{array}{lll} \text{base}&=&\text{-o}\\ \text{nome di qualità}&=&\text{-ezza}\\\end{array}\right]</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent mentre quello di `\spzradless{amic}':</p>
+<pre>\begin{lingmeq}
+ \left[\begin{array}{lll} \text{base}&=&\text{-o}\\ \text{nome di qualità}&=&\text{-izia}\\\end{array}\right]</pre>
+<p>\end{lingmeq}</pre></p>
+<p>La regola di derivazione che ricava le radici tematiche `\spzradtema{bell}' e `\spzradtema{amic}', avrà come tema:</p>
+<pre>\begin{lingmeq}
+ \left[\begin{array}{lll} \text{base}&=&\text{-o}\\\end{array}\right]</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent mentre quella che ricava `\spzradtema{bellezz}' avrà:</p>
+<pre>\begin{lingmeq}
+ \left[\begin{array}{lll} \text{nome di qualità}&=&\text{-ezza}\\\end{array}\right]</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent e quella che ricava `\spzradtema{amicizi}':</p>
+<pre>\begin{lingmeq}
+ \left[\begin{array}{lll} \text{nome di qualità}&=&\text{-izia}\\\end{array}\right]</pre>
+<p>\end{lingmeq}</pre></p>
+<p>Infine è necessario che la descrizione di $r$, $r.desc$, sussuma quella richiesta per la radice da $d$, $d.{rdesc}$ (campo {\it root description}):</p>
+<pre>\begin{lingmeq}
+ d.{rdesc}\spzmsussunto r.desc\,.\end{lingmeq}</pre>
+<p>Ad esempio, se la radice lessicale `\spzradless{poet}' ha i seguenti parametri:</p>
+<pre>\begin{lingmeq}
+ \left\{\begin{array}{lll} \text{categoria} & = & \text{nome} \\ \text{tema} & = & \left[\begin{array}{lll} \text{base}&=&\text{-a}\\ \text{femminile}&=&\text{-essa}\\\end{array}\right]\\</pre>
+<p>\text{descrizione} & = & \left[\begin{array}{lll} \text{genere}&=&\text{maschile}\\\end{array}\right]\\</pre></p>
+<p>\end{array}\right\}</pre></p>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent è compatibile con i seguenti parametri di una derivazione che genera nomi maschili in -a:</p>
+<pre>\begin{lingmeq}
+ \left\{\begin{array}{lll} \text{categoria della radice} & = & \text{nome} \\ \text{tema} & = & \left[\begin{array}{lll} \text{base}&=&\text{-a}\\\end{array}\right]\\</pre>
+<p>\text{descrizione della radice} & = & \left[\begin{array}{lll} \text{genere}&=&\text{maschile}\\\end{array}\right]\\</pre></p>
+<p>\end{array}\right\}</pre></p>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent o con i seguenti parametri di una derivazione che genera nomi femminili in -essa:</p>
+<pre>\begin{lingmeq}
+ \left\{\begin{array}{lll} \text{categoria della radice} & = & \text{nome} \\ \text{tema} & = & \left[\begin{array}{lll} \text{femminile}&=&\text{-essa}\\\end{array}\right]\\</pre>
+<p>\text{descrizione della radice} & = & [] \\\end{array}\right\}</pre></p>
+<p>\end{lingmeq}</pre></p>
+<figure>\myfig{Morfologia: derivazione.}{\input{immagini/derivation.tex}}{fig:derivation}</figure>
+<p>Oltre ai parametri necessari a selezionare le radici, una regola di derivazione contiene anche:</p>
+<ul>
+<li>
+ una sostituzione basata su un'espressione regolare $d.{regsub}$ ({\it regsub}) che indica come modificare la radice lessicale per ottenere quella tematica (\vedi \pagina{page:regexpreplacement} e \figura{fig:regexpreplacement});
+</li>
+<li>
+ una descrizione $d.desc$ ({\it description});
+</li>
+<li>
+ un paradigma $d.paradigma$ ({\it paradigma}), che contiene le regole di flessione che si applicano alla radice tematica risultante (\vedi \sezione{sec:flessione}).
+</li>
+</ul>
+<p>La componente che genera la tabella delle radici tematiche ({\it stem}) fa un prodotto cartesiano tra le radici e le derivazioni, registrando solo quelle compatibili. Una radice tematica è rappresentata solo da un collegamento a una radice lessicale e a una regola di derivazione. Le sue proprietà discendono da quella della derivazione, in particolare:</p>
+<ul>
+<li>
+ la descrizione è l'unificazione tra quella della radice e quella della derivazione;
+</li>
+<li>
+ il paradigma è quello della derivazione;
+</li>
+<li>
+ la parte del discorso è quella del paradigma;
+</li>
+<li>
+ la forma è il risultato dell'applicazione della sostituzione della derivazione (campo {\it regsub} della tabella {\it derivation}) alla radice lessicale (campo {\it root} della tabella {\it root}).
+</li>
+</ul>
+<p>Riassumendo, date la radice lessicale $r$:</p>
+<pre>\begin{lingmeq}
+ r=\left\{\begin{array}{lr} r.{root} & \text{(radice)}\\ r.{pos} & \text{(categoria)}\\ r.tema & \text{(tema)}\\ r.desc & \text{(descrizione)}\\\end{array}\right.</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent e la regola di derivazione $d$:</p>
+<pre>\begin{lingmeq}
+ d=\left\{\begin{array}{lr} d.{rpos} & \text{(categoria della radice)}\\ d.tema & \text{(tema)}\\ d.{rdesc} & \text{(descrizione della radice)}\\ d.desc & \text{(descrizione)}\\ d.{regsub} & \text{(sostituzione)}\\ d.paradigma & \text{(paradigma)}\\\end{array}\right.,</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent $d$ è applicabile a $r$ se e solo se:</p>
+<pre>\begin{lingmeq}
+<pre>\begin{array}{rcl}
+ d.{rpos}&=&r.{pos}\\ d.tema&\spzmsussunto&r.tema\\ d.{rdesc}&\spzmsussunto&r.desc\\\end{array}</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent e il risultato è:</p>
+<pre>\begin{lingmeq}
+ r \stackrel{d}{\spzlessder} s = \left\{
+<pre>\begin{array}{lll}
+ s.stem &=& d.regsub \spzmregsub r.root\\ s.tema &=& r.tema \\ s.desc &=& r.desc \spzmunify d.desc \\ s.paradigma &=& d.paradigma \\ s.pos &=& d.paradigma.pos \\\end{array}</pre>
+<p>\right.\end{lingmeq}</pre></p>
+<h2>Flessione</h2>
+<a name='flessione'></a>
+<figure>\myfig{Morfologia: flessione.}{\input{immagini/inflectionrule.tex}}{fig:inflectionrule}</figure>
+<p>Una volta associato, tramite una derivazione, un paradigma a una radice tematica, per ottenere le parole è sufficiente applicare tutte le regole di flessione contenute nel paradigma (\vedi \figura{fig:inflectionrule}), ossia, registrare nella tabella {\it word} i riferimenti alle radici tematiche e alle regole di flessione.</p>
+<p>Una regola di flessione $i$ contiene:</p>
+<ul>
+<li>
+ una sostituzione basata su un'espressione regolare $i.{regsub}$ ({\it regsub}) che indica come modificare la radice tematica per ottenere una parola (\vedi \pagina{page:regexpreplacement} e \figura{fig:regexpreplacement});
+</li>
+<li>
+ una descrizione $i.desc$ ({\it description});
+</li>
+<li>
+ un campo booleano $i.vocediz$ ({\it dict entry}), che indica se la parola risultante è una voce del dizionario per la sua radice tematica.
+</li>
+</ul>
+<p>Le proprietà di una parola discendono sia da quelle della radice tematica, che da quelle della regola di flessione, in particolare:</p>
+<ul>
+<li>
+ la descrizione è un'unione delle due descrizioni;
+</li>
+<li>
+ la parte del discorso è quella della radice tematica;
+</li>
+<li>
+ la forma è il risultato dell'applicazione della sostituzione della flessione (campo {\it regsub} della tabella {\it inflection}) alla radice tematica.
+</li>
+</ul>
+<p>Quindi, date la radice tematica $s$:</p>
+<pre>\begin{lingmeq}
+ s=\left\{\begin{array}{lr} s.{stem} & \text{(radice)}\\ s.desc & \text{(descrizione)}\\ s.{pos} & \text{(parte del discorso)}\\ s.paradigma & \text{(paradigma)}\\ s.tema & \text{(tema)}\\\end{array}\right.</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent e la regola di flessione $i$:</p>
+<pre>\begin{lingmeq}
+ i=\left\{\begin{array}{lr} i.desc & \text{(descrizione)}\\ i.{regsub} & \text{(sostituzione)}\\ i.vocediz & \text{(è voce del dizionario?)}\\\end{array}\right.,</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent $i$ è applicabile a $s$ se e solo se:</p>
+<pre>\begin{lingmeq}
+ i \in s.paradigma\end{lingmeq}</pre>
+<p>\noindent e il risultato è:</p>
+<pre>\begin{lingmeq}
+ s \stackrel{i}{\spzder} w = \left\{
+<pre>\begin{array}{lll}
+ w.word &=& i.regsub \spzmregsub s.stem\\ w.desc &=& s.desc \spzmunify i.desc \\ w.vocediz &=& s.vocediz \\ w.tema &=& s.tema \\ w.pos &=& s.pos \\\end{array}</pre>
+<p>\right.\end{lingmeq}</pre></p>
+<p>La componente che aggiorna le parole si preoccupa anche di precalcolarle (tramite derivazione e flessione) e di inserirle nella tabella di cache ({\it wordcache}), assieme a un riferimento uno a uno verso la tabella delle parole ({\it word}).</p>
+<h2>Composizione</h2>
+<a name='composizione'></a>
+<p>La composizione è una situazione particolare: ad ogni parola composta, che appare come un singolo token nell'analisi morfologica, corrispondono più parole, che vengono passate al livello successivo come fossero parole distinte. Ossia, mentre la parola `casa' al termine dell'analisi morfologica darà il singolo token `casa', la parola composta `del' produrrà due token, `di' e `il'.</p>
+<p>Una parola composta $c$ si ottiene applicando una composizione $f$ a una sequenza parole $(w_1,..,w_n)$, specificate in un certo ordine (\vedi \figura{fig:fusedwords}):</p>
+<pre>\begin{lingmeq}
+ (w_1,\cdots,w_N) \stackrel{f}{\spzmcompder} c.\end{lingmeq}</pre>
+<figure>\myfig[t]{Morfologia: relazione tra parole ({\it word}) e parole composte</figure>
+<p>({\it fusedword}). In colore più chiaro le tabelle calcolate e in grigio le tabelle di relazione per relazioni molti a molti (in questo caso calcolate).}{\input{immagini/fusedwords.tex}}{fig:fusedwords}</p>
+<p>Una composizione è formata da più regole di composizione $f_n$, ognuna delle quali si applica alla corrispondente parola $w_n$ (\vedi \figura{fig:fusion}):</p>
+<pre>\begin{lingmeq}
+ \left(
+<pre>\begin{array}{ccc}
+ w_1 & \stackrel{f_1}{\spzmcompder} & c_1\\ w_2 & \stackrel{f_2}{\spzmcompder} & c_2\\ \vdots &\vdots &\vdots \\ w_N & \stackrel{f_N}{\spzmcompder} & c_N \\\end{array}\right).</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent La parola composta è ottenuta poi per concatenazione:</p>
+<pre>\begin{lingmeq}
+ c=\spzmconcat_{n=1}^{N}c_n.\end{lingmeq}</pre>
+<figure>\myfig{Morfologia: composizione. In grigio le tabelle di relazione per</figure>
+<p>relazioni molti a molti.}{\input{immagini/fusion.tex}}{fig:fusion}</p>
+<p>La compatibilità tra una parola $w_n$ e una regola $f_n$ è del tutto analoga a quella tra una radice lessicale e una derivazione.</p>
+<p>Quindi, data una lista di parole $(w_1,\cdots,w_N)$, in cui ogni $w_n$ è:</p>
+<pre>\begin{lingmeq}
+ w_n=\left\{\begin{array}{lr} w_n.{word} & \text{(parola)}\\ w_n.desc & \text{(descrizione)}\\ w_n.{pos} & \text{(parte del discorso)}\\ w_n.vocediz & \text{(è voce del dizionario?)}\\ w_n.tema & \text{(tema)}\\\end{array}\right.</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent e una composizione $f=(f_1,\cdots,f_M)$, in cui ogni $f_n$ è:</p>
+<pre>\begin{lingmeq}
+ f_n=\left\{\begin{array}{lr} f_n.{regsub} & \text{(sostituzione)}\\ f_n.desc & \text{(descrizione)}\\ f_n.tema & \text{(tema)}\\ f_n.pos & \text{(parte del discorso)}\\\end{array}\right.,</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent $f$ è applicabile a $(w_1,\cdots,w_N)$ se e solo se $N=M$ e per ogni $n$:</p>
+<pre>\begin{lingmeq}
+<pre>\begin{array}{rcl}
+ f_n.{pos}&=&w_n.{pos}\\ f_n.tema&\spzmsussunto&w_n.tema\\ f_n.{desc}&\spzmsussunto&w_n.desc\\\end{array}</pre>
+<p>\end{lingmeq}</pre></p>
+<p>\noindent e il risultato è:</p>
+<pre>\begin{lingmeq}
+ (w_1,\cdots,w_N) \stackrel{f}{\spzmcompder} c = \left\{
+<pre>\begin{array}{lll}
+ c.comp &=& \displaystyle\spzmconcat_{n=1}^{N} f_n.regsub \spzmregsub w_n.word\\ c.words &=& (w_1,\cdots,w_N) \\ c.desc &=& (w_1.desc,\cdots,w_N.desc) \\ c.pos &=& (w_1.pos,\cdots,w_N.pos) \\\end{array}</pre>
+<p>\right.\end{lingmeq}</pre></p>
+<h2>Il parsing morfologico</h2>
+<p>Il parsing, di cui un esempio di output è in \tabella{tab:esmorph}, viene eseguito ricercando ogni token prodotto dal parsing preliminare (\vedi \sezione{sec:parsing}) nelle tabelle:</p>
+<ol>
+<li>
+ delle non-parole ({\it notword});
+</li>
+<li>
+ delle parole ({\it wordcache});
+</li>
+<li>
+ delle parole composte ({\it fusedwordcache}).
+</li>
+</ol>
+<p>A parte nel caso delle non-parole, in cui esiste una sola tabella, e ogni oggetto produce un solo token, l'analisi viene eseguita risalendo le relazioni che partono dagli oggetti di cache (\vedi \figura{fig:words} e \figura{fig:fusedwords}), in modo da ricostruire i parametri delle parole da analizzare come visto nelle sezioni precedenti.</p>
+<p>Per ogni token $p$, può succedere che:</p>
+<ol>
+<li>
+ $p$ non sia trovato in nessuna tabella: verrà segnalato all'utente la mancanza di regole per quella parola;
+</li>
+<li>
+ $p$ corrisponda a un solo record della tabella {\it wordcache} (il caso di `panchina' in \tabella{tab:esmorph}): produrrà un token;
+</li>
+<li>
+ $p$ corrisponda a più record, tutti dalla tabella {\it wordcache} (il caso di `la' in \tabella{tab:esmorph}): produrrà un solo token, ma ci saranno due possibili risultati di analisi (segnalando quindi un'ambiguità che dovrà essere risolta nei passaggi successivi);
+</li>
+<li>
+ $p$ corrisponda a un solo record della tabella {\it fusedwordcache} (il caso di `della' in \tabella{tab:esmorph}): produrrà più token, ma un solo risultato;
+</li>
+<li>
+ $p$ corrisponda a più record, almeno uno dei quali della tabella {\it fusedwordcache} (il caso di `dell\textquotesingle' in \tabella{tab:esmorph}): produrrà più token e più risultati.
+</li>
+</ol>
+<p>\tabula[p]{Esempio di analisi morfologica della frase {\it la panchina della fermata dell'autobus}. Gli articoli determinativi sono rappresentati come forme flesse della radice `\spzradtema{il}', con regole di sostituzione banali (ad esempio, per il femminile `la' la regola è: pattern={\tt (.*)}, replacement={\tt la}). Da notare che non interpreta correttamente `fermata': questo perché nella grammatica definita esiste la derivazione che genera il verbo `\spzradtema{ferm}' a partire dalla radice lessicale `\spzradless{ferm}', ma non quella che genera il nome `\spzradtema{fermat}' dalla stessa radice.}{tab:esmorph}{</p>
+<pre>\begin{scriptsize}\begin{tabular}{>{\it}l|l|ll|l|lll|}
+ {\it parola} & \multicolumn{3}{l|}{\it parte del discorso} & {\it radice tematica} & \multicolumn{3}{l|}{\it descrizione} \\ \hline la &\multicolumn{3}{l|}{articolo} & \spzradtema{il} &	definitezza&=&definito\\ &\multicolumn{3}{l|}{}&&numero&=&singolare\\ &\multicolumn{3}{l|}{}&&genere&=&femminile \\ \cline{2-8} &\multicolumn{3}{l|}{pronome}  & \spzradtema{lei} & 	categoria&=&personale\\ &\multicolumn{3}{l|}{}&&persona&=&III\\ &\multicolumn{3}{l|}{}&&genere&=&femminile\\ &\multicolumn{3}{l|}{}&&numero&=&singolare \\ &\multicolumn{3}{l|}{}&&caso&=&accusativo (debole)\\ \hline &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\ \hline panchina& \multicolumn{3}{l|}{nome}& \spzradtema{panchin} &	genere&=&femminile \\ &\multicolumn{3}{l|}{}&&numero&=&singolare\\ \hline &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\ \hline della&composta&preposizione&di&\spzradtema{di} &&&\\ \cline{3-8} &&articolo&la&\spzradtema{il}& definitezza&=&definito\\ &&&&& numero&=&singolare\\ &&&&& genere&=&femminile \\ \hline &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\ \hline fermata &\multicolumn{3}{l|}{verbo}&	ferm- &genere&=&femminile\\ &\multicolumn{3}{l|}{}&&numero&=&singolare\\ &\multicolumn{3}{l|}{}&&deverbale&=&aggettivo verbale\\ &\multicolumn{3}{l|}{}&&tempo&=&passato\\ &\multicolumn{3}{l|}{}&&modo&=&participio\\ \hline &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\ \hline dell'&composta&preposizione&di&\spzradtema{di} &&&\\ \cline{3-8} &&articolo&l'&\spzradtema{il}& definitezza&=&definito\\ &&&&& numero&=&singolare\\ &&&&& genere&=&maschile \\ \cline{2-8} &composta &preposizione&di&\spzradtema{di}&&&\\ \cline{3-8} &&articolo&l'&\spzradtema{il}& definitezza&=&definito\\ &&&&& numero&=&singolare\\ &&&&& genere&=&femminile \\ \hline &\multicolumn{3}{l|}{non parola}&\multicolumn{4}{l|}{spazio}\\ \hline autobus &\multicolumn{3}{l|}{nome}&autobus-&genere&=&maschile\\ &\multicolumn{3}{l|}{}&&numero&=&singolare\\ \cline{2-8} &\multicolumn{3}{l|}{nome}&autobus-&genere&=&maschile\\ &\multicolumn{3}{l|}{}&&numero&=&plurale\\ \hline
+\end{scriptsize}}</table>
+<p>\afterpage\clearpage</p>

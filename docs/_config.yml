@@ -1,0 +1,8 @@
+repository: chiara-paci/clotilde
+baseurl: ""
+url: http://127.0.0.1:4000
+exclude: [elaborazione,old]
+
+collections:
+  documents:
+    output: true

@@ -1,0 +1,11 @@
+---
+title: Convenzioni
+layout: default
+---
+<table>
+{% for d in site.data.convenzioni %}
+<tr>
+  <td>{{ d.symbol }}</td><td>{{ d.description }}</td>
+</tr>
+{% endfor %}
+</table>

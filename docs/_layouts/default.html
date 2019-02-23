@@ -18,11 +18,9 @@
   <header>
     <h1>Clotilde</h1>
     <nav>
-      <a href="/">Home</a>
-      <a href="/corpora/">Corpora</a>
-      <a href="/tools/">Tools</a>
-      <a href="/tools/helper_italiano/">Helper Italiano</a>
-      <a href="/admin/">Admin</a>
+      {% for u in site.data.navigation %}
+      <a href="{{ u.url }}">{{ u.label }}</a>
+      {% endfor %}
     </nav>
   </header>
   

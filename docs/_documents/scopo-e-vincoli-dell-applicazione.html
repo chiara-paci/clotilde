@@ -1,0 +1,49 @@
+---
+title: Scopo e vincoli dell'applicazione
+layout: default
+label: sec_scopo
+url: /page/scopo-e-vincoli-dell-applicazione
+---
+<p>L'applicazione agisce in modo supervisionato:</p>
+<ol>
+<li>
+ l'utente definisce le regole base di parsing, stabilendo come individuare le parole e cosa delimita i periodi;
+</li>
+<li>
+ l'utente trascrive un documento come testo senza tag, a parte quelli di formattazione (allineato a destra o sinistra, sottolineato, ecc.); i tag di formattazione sono definiti dal programma;
+</li>
+<li>
+ l'utente imposta delle regole grammaticali e inserisce informazioni sul lessico;
+</li>
+<li>
+ il programma analizza il testo, riportando se e come le regole vengono verificate dal testo;
+</li>
+<li>
+ l'utente aggiusta le regole finché non sono conformi al testo, dopodiché passa al documento successivo.
+</li>
+</ol>
+<p>Il programma finale dovrà essere in grado di:</p>
+<ul>
+<li>
+ dato un insieme di documenti, individuare quali regole lo riguardano (e solo quelle) e quali parti non corrispondono a nessuna regola;
+</li>
+<li>
+ data una regola o un vocabolo, rintracciare in quali documenti vengono usati e riportare esempi di uso;
+</li>
+<li>
+ stilare una grammatica e un dizionario di un insieme di documenti;
+</li>
+<li>
+ raccogliere dati per più lingue.
+</li>
+</ul>
+<p>I testi devono essere forniti in modo omogeneo e pulito al programma: rimane compito dell'utente sistemarli in modo che siano analizzabili, per esempio introducendo degli spazi o dei segni di interpunzione per quelle lingue che non li prevedono. L'utente è libero di scegliere cosa o come inserire, ma al minimo devono essere forniti al programma (\vedi \sezione{sec:parsing}):</p>
+<ul>
+<li>
+ uno o più delimitatori di periodo;
+</li>
+<li>
+ regole univoche su come separare le parole.
+</li>
+</ul>
+<p>Regole grammaticali e lessico vengono desunte dai documenti, ma spesso sono integrate da uno studio collaterale su materiale di riferimento (dizionari, grammatiche, altri documenti, precedenti ricerche, ecc.): l'utente può quindi inserire più regole di quelle necessarie (per esempio, può introdurre l'intero paradigma di un verbo anche se nel documento compare una sola voce). In questo caso, nell'output finale il programma escluderà tutto quello che non trova riscontro nei documenti.</p>

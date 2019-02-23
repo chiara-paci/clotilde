@@ -1,0 +1,13 @@
+---
+title: Documents
+layout: default
+---
+
+<ul>
+{% for img in site.documents %}
+
+<li>
+<a href="{{ img.url }}">{{ img.title }}</a>
+</li>
+
+{% endfor %}
