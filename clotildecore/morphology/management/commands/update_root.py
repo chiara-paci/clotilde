@@ -29,19 +29,30 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            'name',
+            'language',
             help='name of language',
+        )
+        parser.add_argument(
+            'root',
+            help='root',
         )
 
     def handle(self, *args, **options):
-        language_name = options["name"]
+        language_name = options["language"]
+        root_name = options["root"]
         language=lang_models.Language.objects.get(name=language_name)
 
         models.FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
         models.FusedWord.objects.filter(fusion__language=language).delete()
 
+        root_list=models.Root.objects.filter(language=language,root=root_name)
+
+        queryset_word=models.Word.objects.filter(stem__root__language=language,
+                                                 stem__root__in=root_list)
+        queryset_stem=models.Stem.objects.filter(root__language=language,
+                                                 root__in=root_list)
+
         # phase 1. stems
-        root_list=models.Root.objects.filter(language=language)
         der_list=models.Derivation.objects.filter(language=language)
         ok=[]
         for root in root_list:
@@ -52,12 +63,13 @@ class Command(BaseCommand):
                 stem,created=models.Stem.objects.get_or_create(root=root,derivation=der)
                 print("S",stem)
                 ok.append(stem.pk)
-        models.Word.objects.exclude(stem__pk__in=ok).filter(stem__root__language=language).delete()
-        models.Stem.objects.exclude(pk__in=ok).filter(root__language=language).delete()
-
+        queryset_word.exclude(stem__pk__in=ok).delete()
+        # models.Stem.objects.filter(root__language=language,
+        #                            root__in=root_list).exclude(pk__in=ok).delete()
+        queryset_stem.exclude(pk__in=ok).delete()
  
         # phase 2. words
-        stem_list=models.Stem.objects.filter(root__language=language)
+        stem_list=queryset_stem.all() #models.Stem.objects.filter(root__language=language,root__in=root_list)
         par_list=models.Paradigma.objects.filter(language=language)
  
         ok=[]
@@ -68,8 +80,10 @@ class Command(BaseCommand):
                 word.save()
                 print("W",word)
                 ok.append(word.pk)
-        models.Word.objects.exclude(pk__in=ok).filter(stem__root__language=language).delete()
+        queryset_word.exclude(pk__in=ok).delete()
 
         # phase 3. fused words
 
         models.FusedWord.objects.rebuild(language)
+
+

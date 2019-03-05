@@ -1,0 +1,54 @@
+{% extends "corpora/text_detail.html" %}
+
+{% block applicationmenu %}
+
+<a href='{{ url("helpers:italiano") }}'>Italiano</a>
+<a href='{{ url("helpers:italiano_verbi") }}'>Inserimento paradigmi verbali</a>
+
+{% endblock %}
+
+{% block output %}
+<select id="helper">
+<option value="nome_proprio">Nome proprio</option>
+<option value="verbo">Verbo</option>
+<option value="nome">Nome</option>
+<option value="aggettivo">Aggettivo</option>
+</select>
+
+<form>
+<table id="data">
+</table>
+</form>
+
+{{ super() }}
+{% endblock %}
+
+{% block script %}
+
+function Helper(name) {
+    this.name=name;
+}
+Helper.prototype = {
+    add_table: function(){}
+}
+
+function NomeProprioHelper() {
+    Helper.call(this,"Nome proprio");
+}
+
+NomeProprioHelper.prototype = Object.create(Panel.prototype);
+QueuesPanel.prototype.constructor = QueuesPanel;
+
+
+var helpers = {
+    "verbo": "",
+    "nome_proprio": "",
+    "nome": "",
+    "aggettivo": ""
+}
+
+$("#helper").change(function(event){
+    console.log($(this).val());
+});
+
+{% endblock script %}

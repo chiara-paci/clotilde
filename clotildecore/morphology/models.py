@@ -11,6 +11,18 @@ from base import models as base_models
 from languages import models as lang_models
 from base import descriptions
 
+def combine(list_of_list):
+    if len(list_of_list)==0: return []
+    if len(list_of_list)==1: 
+        return [ [x] for x in list_of_list[0] ]
+    A=list_of_list[0]
+    B=combine(list_of_list[1:])
+    ret=[]
+    for x in A:
+        for y in B:
+            ret.append( [x]+y )
+    return ret
+
 class RegexpReplacement(models.Model):
     pattern=models.CharField(max_length=1024)
     replacement=models.CharField(max_length=1024)
@@ -181,9 +193,11 @@ class Derivation(base_models.AbstractName):
 #class ParadigmaInflection(models.Model):
 #    paradigma = models.ForeignKey(Paradigma,on_delete="cascade")    
 #    inflection = models.ForeignKey(Inflection,on_delete="cascade")    
+
     
 class Fusion(base_models.AbstractName):
     language = models.ForeignKey('languages.Language',on_delete="cascade")    
+    #objects=FusionManager()
 
 class FusionRule(base_models.AbstractName):
     regsub = models.ForeignKey(RegexpReplacement,on_delete="cascade")    
@@ -300,16 +314,58 @@ class Word(models.Model):
     @cached_property
     def language(self): return self.stem.language
 
+
+class FusedWordManager(models.Manager):
+    def rebuild(self,language):
+        FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
+        self.filter(fusion__language=language).delete()
+
+        fusion_list=Fusion.objects.filter(language=language)
+        ok=[]
+        for fusion in fusion_list:
+            comp=[]
+            abort=False
+            for rel in fusion.fusionrulerelation_set.all().order_by("order"):
+                rule=rel.fusion_rule
+                word_list=Word.objects.filter(stem__derivation__paradigma__part_of_speech=rule.part_of_speech)
+                w_comp=[]
+                for w in word_list:
+                    if not (rule.tema <= w.tema): continue
+                    if not (rule.description <= w.description): continue
+                    w_comp.append(w)
+                if not w_comp:
+                    abort=True
+                    break
+                comp.append( w_comp )
+            if abort: continue
+
+            comp=combine(comp)
+            for w_list in comp:
+                fword=FusedWord(fusion=fusion)
+                fword.save()
+                n=0
+                for w in w_list:
+                    fwrel=FusedWordRelation(fused_word=fword,word=w,order=n)
+                    fwrel.full_clean()
+                    fwrel.save()
+                    n+=1
+                fword.full_clean()
+                fword.save()
+                print("F",fword)
+
+
 class FusedWord(models.Model):
     fusion = models.ForeignKey(Fusion,on_delete="cascade")    
     cache = models.CharField(max_length=1024,db_index=True,editable=False)
+
+    objects=FusedWordManager()
 
     def clean(self):
         S=""
         n=0
         for word in [ rel.word for rel in self.fusedwordrelation_set.all() ]:
             rule=self.rules[n]
-            print("   ",word,rule)
+            #print("   ",word,rule)
             S+=rule.regsub.apply(word.cache)
             n+=1
         self.cache=S

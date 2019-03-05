@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView,DetailView
 from django import forms
 from django.shortcuts import render,redirect
 
@@ -10,7 +10,22 @@ from morphology  import models as morph_models
 from languages  import models as lang_models
 from base  import models as base_models
 
+from corpora  import models as corp_models
+from corpora  import views as corp_views
+
 # Create your views here.
+
+class ItalianoView(TemplateView):
+    template_name="helpers/italiano/index.html"
+ 
+    def get_context_data(self,**kwargs):
+        context=TemplateView.get_context_data(self,**kwargs)
+        language=lang_models.Language.objects.get(name="italiano")
+        context["language"]=language
+        return context
+
+class ItalianoTextCollectorView(corp_views.TextMorphologicalParserView):
+    template_name="helpers/italiano/text_collector.html"
 
 class ItalianoVerbiView(TemplateView):
     template_name="helpers/italiano/verbi.html"

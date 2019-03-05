@@ -10,7 +10,7 @@
 
 <p>{{ corpus.description }}</p>
 <table class="index">
-  <tr><th colspan="2">&nbsp;</th><th>author</th><th>length</th></tr>
+  <tr><th></th><th></th><th>length</th></tr>
   {% for l in corpus.text_set.all() %}
   <tr>
     <td class="info">{{ l.author }}</td>

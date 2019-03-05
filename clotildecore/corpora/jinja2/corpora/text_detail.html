@@ -17,6 +17,10 @@
 
 {% block centercontent %}
 
+<p class="subtitle">
+  <a href="{{ text.corpus.get_absolute_url() }}">{{ text.corpus }}</a>
+  <a href="{{ text.corpus.language.get_absolute_url() }}">{{ text.corpus.language }}</a>
+</p>
 <h1>{{ text }}</h1>
 <p class="subtitle">{{ text.author }}, {{ text.length() }} characters</p>
 

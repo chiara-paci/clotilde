@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block centercontent %}
+
+<h1>Italiano</h1>
+
+<p><a href='{{ url("helpers:italiano_verbi") }}'>Inserimento paradigmi verbali</a></p>
+
+<h2>Corpus</h2>
+
+{% for corpus in language.corpus_set.all() %}
+<p>{{ corpus }}:</p>
+<ul>
+{% for text in corpus.text_set.all() %}
+<li><a href='{{ url("helpers:italiano_textcollector",kwargs={"pk": text.pk}) }}'>{{ text }}</a></li>
+{% endfor %}
+</ul>
+{% endfor %}
+
+{% endblock centercontent %}
+
