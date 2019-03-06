@@ -89,6 +89,14 @@ class Paradigma(base_models.AbstractName):
     def get_absolute_url(self):
         return "/morphology/paradigma/%d/" % self.pk
 
+    @cached_property
+    def count_roots(self):
+        return self.root_set.count()
+
+    @cached_property
+    def count_derivations(self):
+        return self.derivation_set.count()
+
 class Inflection(models.Model):
     dict_entry = models.BooleanField(default=False)
     regsub = models.ForeignKey(RegexpReplacement,on_delete="cascade")    
@@ -111,12 +119,64 @@ class Inflection(models.Model):
             "description": self.description_obj.name
         }
 
+class RootManager(models.Manager):
+    def update_derived_tables(self,language,root_names=[]):
+        if not root_names:
+            root_list=self.filter(language=language)
+            queryset_word=Word.objects.filter(stem__root__language=language)
+            queryset_stem=Stem.objects.filter(root__language=language)
+        else:
+            root_list=self.filter(language=language,root__in=root_names)
+            queryset_word=Word.objects.filter(stem__root__language=language,
+                                                     stem__root__in=root_list)
+            queryset_stem=Stem.objects.filter(root__language=language,
+                                                     root__in=root_list)
+
+        FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
+        FusedWord.objects.filter(fusion__language=language).delete()
+
+        # phase 1. stems
+        der_list=Derivation.objects.filter(language=language)
+        ok=[]
+        for root in root_list:
+            for der in der_list:
+                if root.part_of_speech != der.root_part_of_speech: continue
+                if not (der.tema <= root.tema): continue
+                if not (der.root_description <= root.description): continue
+                stem,created=Stem.objects.get_or_create(root=root,derivation=der)
+                print("S",stem)
+                ok.append(stem.pk)
+        queryset_word.exclude(stem__pk__in=ok).delete()
+        queryset_stem.exclude(pk__in=ok).delete()
+ 
+        # phase 2. words
+        stem_list=queryset_stem.all()
+        par_list=Paradigma.objects.filter(language=language)
+ 
+        ok=[]
+        for stem in stem_list:
+            for infl in stem.paradigma.inflections.all():
+                word,created=Word.objects.get_or_create(stem=stem,inflection=infl)
+                word.clean()
+                word.save()
+                print("W",word)
+                ok.append(word.pk)
+        queryset_word.exclude(pk__in=ok).delete()
+
+        # phase 3. fused words
+
+        FusedWord.objects.rebuild(language)
+
+        
+
 class Root(models.Model):
     root=models.CharField(max_length=1024)
     language = models.ForeignKey('languages.Language',on_delete="cascade")    
     tema_obj = models.ForeignKey(Tema,on_delete="cascade")    
     part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
     description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
+
+    objects=RootManager()
 
     def __str__(self):
         return "%s (%s)" % (self.root,self.part_of_speech)

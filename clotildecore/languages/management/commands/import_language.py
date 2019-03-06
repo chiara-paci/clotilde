@@ -221,7 +221,12 @@ class Command(BaseCommand):
             morph_models.FusionRuleRelation.objects.filter(fusion=fusion).exclude(pk__in=ok).delete()
 
 
+        morph_models.FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
+        morph_models.FusedWord.objects.filter(fusion__language=language).delete()
         morph_models.Fusion.objects.filter(language=language).exclude(pk__in=fusion_ok).delete()
+
+        morph_models.Word.objects.filter(stem__root__language=language).exclude(stem__root__pk__in=root_ok).delete()
+        morph_models.Stem.objects.filter(root__language=language).exclude(root__pk__in=root_ok).delete()
         morph_models.Root.objects.filter(language=language).exclude(pk__in=root_ok).delete()
         morph_models.Derivation.objects.filter(language=language).exclude(pk__in=der_ok).delete()
         morph_models.Paradigma.objects.filter(language=language).exclude(pk__in=par_ok).delete()

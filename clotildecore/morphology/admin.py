@@ -28,6 +28,9 @@ class ParadigmaInflectionInline(admin.TabularInline):
     extra = 0
 
 class ParadigmaAdmin(admin.ModelAdmin):
+    list_display=["name","part_of_speech"]
+    list_filter=["part_of_speech"]
+    list_editable=["part_of_speech"]
     inlines=[ParadigmaInflectionInline]
     exclude=["inflections"]
     save_as=True
@@ -54,7 +57,10 @@ class InflectionAdmin(admin.ModelAdmin):
 admin.site.register(models.Inflection,InflectionAdmin)
 
 class DerivationAdmin(admin.ModelAdmin):
-    list_display = [ "name", "tema", "root_part_of_speech", "root_description", "part_of_speech", "description", "regsub", "paradigma" ]
+    list_display = [ "name", "tema", "root_part_of_speech", "root_description", 
+                     "part_of_speech", "description", "regsub", "paradigma" ]
+    list_filter = [ "root_part_of_speech"]
+    list_editable = [ "root_part_of_speech" ]
     save_as=True
 
 admin.site.register(models.Derivation,DerivationAdmin)
@@ -63,7 +69,7 @@ class RootAdmin(admin.ModelAdmin):
     save_as=True
     list_filter=["part_of_speech"]
     list_display=["root","language","part_of_speech","tema_obj","description_obj"]
-    #list_editable=["description_obj","tema_obj","part_of_speech"]
+    list_editable=["description_obj","tema_obj","part_of_speech"]
 
 admin.site.register(models.Root,RootAdmin)
 

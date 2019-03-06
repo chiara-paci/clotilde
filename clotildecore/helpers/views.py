@@ -27,6 +27,17 @@ class ItalianoView(TemplateView):
 class ItalianoTextCollectorView(corp_views.TextMorphologicalParserView):
     template_name="helpers/italiano/text_collector.html"
 
+    class BaseForm(forms.Form):
+        remove = forms.BooleanField(required=False)
+
+    BaseFormset=forms.formset_factory(BaseForm,extra=0,can_delete=False,can_order=False,
+                                      max_num=5, min_num=2)
+
+    def get_context_data(self,**kwargs):
+        context=corp_views.TextMorphologicalParserView.get_context_data(self,**kwargs)
+        context["formset"]=self.BaseFormset()
+        return context
+
 class ItalianoVerbiView(TemplateView):
     template_name="helpers/italiano/verbi.html"
 

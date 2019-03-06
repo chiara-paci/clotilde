@@ -1,27 +1,10 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-import re,time
-import tarfile,json,io
-import os,pwd,grp
-
 from django.core.management.base import BaseCommand
-from django.core.exceptions import ObjectDoesNotExist
 
 from morphology import models
 from languages import models as lang_models
-
-def combine(list_of_list):
-    if len(list_of_list)==0: return []
-    if len(list_of_list)==1: 
-        return [ [x] for x in list_of_list[0] ]
-    A=list_of_list[0]
-    B=combine(list_of_list[1:])
-    ret=[]
-    for x in A:
-        for y in B:
-            ret.append( [x]+y )
-    return ret
 
 class Command(BaseCommand):
     requires_migrations_checks = True
