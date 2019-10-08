@@ -32,14 +32,16 @@ class TokenWord(tokens.Token):
                               alpha_token.text,word.description)
         self.word=word
         self.style=(word.part_of_speech.name,self.label,
-                    word.part_of_speech.bg_color,word.part_of_speech.fg_color)
+                    word.part_of_speech.bg_color,
+                    word.part_of_speech.fg_color)
 
 class TokenFusedWord(tokens.Token):
     def __init__(self,alpha_token,fused_word):
         tokens.Token.__init__(self,"fused",
                               alpha_token.text,descriptions.Description())
         self.word_list=fused_word.words
-        self.style=[ (pos.name,functions.slugify(pos.name),pos.bg_color,pos.fg_color) for pos in fused_word.part_of_speech ]
+        self.style=[ (pos.name,functions.slugify(pos.name),
+                      pos.bg_color,pos.fg_color) for pos in fused_word.part_of_speech ]
 
 
 class TokenMultipleWord(tokens.Token):

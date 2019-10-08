@@ -84,12 +84,14 @@ class TokenRegexpSetManager(models.Manager):
         for rexp in D["regexps"]:
             t_rexp,created=TokenRegexp.objects.get_or_create(name=rexp["name"],
                                                              regexp=rexp["regexp"])
+            if "final" not in rexp: rexp["final"]=False
             tr,created=TokenRegexpSetThrough.objects.get_or_create(token_regexp=t_rexp,
                                                                    token_regexp_set=reg_set,
                                                                    defaults={
                                                                        "bg_color": rexp["bg_color"],
                                                                        "fg_color": rexp["fg_color"],
                                                                        "order": rexp["order"],
+                                                                       "final": rexp["final"],
                                                                        "disabled": rexp["disabled"],
                                                                    })
         return reg_set
@@ -102,16 +104,16 @@ class TokenRegexpSet(AbstractName):
 
     def regexp_all(self):
         regs=[ r'\[/?'+x+r'\]' for x in tokens.MARKERS ]
-        regs+=[ rexp_t for (name,label,bg,fg,rexp,rexp_t) in self.regexp_objects ]
+        regs+=[ rexp_t for (name,label,bg,fg,final,rexp,rexp_t) in self.regexp_objects ]
         t="|".join(regs)
         t="("+t+")"
         return(t)
 
     def _f(self,t):
-        for (name,label,bg,fg,rexp,rexp_t) in self.regexp_objects:
+        for (name,label,bg,fg,final,rexp,rexp_t) in self.regexp_objects:
             print("==%s==" % t,[ord(x) for x in t])
             if rexp.match(t):
-                return tokens.TokenBase(label,t)
+                return tokens.TokenBase(label,t,final=final)
         if t[0]=='[':
             if t[1]=="/":
                 m=t[2:-1]
@@ -133,7 +135,7 @@ class TokenRegexpSet(AbstractName):
             name=rel.token_regexp.name
             regexp=rel.token_regexp.regexp
             objs.append( (name,name.lower().replace(' ',''),
-                          rel.bg_color,rel.fg_color,
+                          rel.bg_color,rel.fg_color,rel.final,
                           re.compile('^'+regexp+'$'),regexp) )
         return(objs)
 
@@ -153,6 +155,7 @@ class TokenRegexpSetThrough(models.Model):
     bg_color = models.CharField(max_length=20,default="#ffff00")
     fg_color = models.CharField(max_length=20,default="#000000")
     order = models.IntegerField()
+    final = models.BooleanField(default=False)
     disabled = models.BooleanField()
 
     class Meta:
@@ -178,6 +181,7 @@ class TokenRegexpSetThrough(models.Model):
             "regexp": self.token_regexp.regexp,
             "bg_color": self.bg_color,
             "fg_color": self.fg_color,
+            "final": self.final,
             "order": self.order,
             "disabled": self.disabled
         }

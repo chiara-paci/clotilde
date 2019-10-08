@@ -24,10 +24,11 @@ def replace_newline(S,repl,preserve=False):
     return(S)
 
 class Token(object):
-    def __init__(self,label,text,description):
+    def __init__(self,label,text,description,final=False):
         self.label=label
         self.text=self._clean(text)
         self.description=description
+        self.final=final
 
     def _clean(self,t):
         t=t.replace('\xa0'," ") # non breaking space
@@ -58,8 +59,10 @@ class Token(object):
     def __ne__(self,other): return not self.__eq__(other)
 
 class TokenBase(Token):
-    def __init__(self,label,text):
-        Token.__init__(self,label,text,descriptions.Description(base=label))
+    def __init__(self,label,text,final=False):
+        Token.__init__(self,label,text,
+                       descriptions.Description(base=label),
+                       final=final)
 
 class TokenMarker(TokenBase):
     def __init__(self,marker,pos):
