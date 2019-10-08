@@ -42,7 +42,7 @@ class ItalianoVerbiView(TemplateView):
     template_name="helpers/italiano/verbi.html"
 
     class FiniteForm(forms.Form):
-        pattern = forms.CharField(initial="(.*)")
+        pattern = forms.CharField(initial="(.+)")
         replacement = forms.CharField(initial=r"\1")
         person = forms.ChoiceField( choices=[( "prima singolare", "prima singolare" ),
                                              ( "seconda singolare", "seconda singolare" ),
@@ -52,11 +52,11 @@ class ItalianoVerbiView(TemplateView):
                                              ( "terza plurale", "terza plurale" )] )
 
     class InfiniteForm(forms.Form):
-        pattern = forms.CharField(initial="(.*)")
+        pattern = forms.CharField(initial="(.+)")
         replacement = forms.CharField(initial=r"\1")
 
     class ParticipeForm(forms.Form):
-        pattern = forms.CharField(initial="(.*)")
+        pattern = forms.CharField(initial="(.+)")
         replacement = forms.CharField(initial=r"\1")
         gennum = forms.ChoiceField( choices=[( "maschile singolare", "maschile singolare" ),
                                              ( "femminile singolare", "femminile singolare" ),

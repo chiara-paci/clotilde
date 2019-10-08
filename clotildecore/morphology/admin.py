@@ -2,11 +2,18 @@ from django.contrib import admin
 
 from . import models
 
-admin.site.register(models.RegexpReplacement)
 admin.site.register(models.TemaArgument)
 admin.site.register(models.TemaValue)
 admin.site.register(models.TemaEntry)
 admin.site.register(models.FusionRuleRelation)
+
+class RegexpReplacementAdmin(admin.ModelAdmin):
+    list_display = [ "__str__", "pattern", "replacement" ]
+    list_editable = [ "pattern", "replacement" ]
+    list_filter = [ "pattern", "replacement" ]
+
+admin.site.register(models.RegexpReplacement,RegexpReplacementAdmin)
+
 
 class TemaEntryInline(admin.TabularInline):
     model = models.TemaEntry

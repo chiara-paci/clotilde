@@ -128,9 +128,9 @@ class RootManager(models.Manager):
         else:
             root_list=self.filter(language=language,root__in=root_names)
             queryset_word=Word.objects.filter(stem__root__language=language,
-                                                     stem__root__in=root_list)
+                                              stem__root__in=root_list)
             queryset_stem=Stem.objects.filter(root__language=language,
-                                                     root__in=root_list)
+                                              root__in=root_list)
 
         FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
         FusedWord.objects.filter(fusion__language=language).delete()
@@ -139,6 +139,7 @@ class RootManager(models.Manager):
         der_list=Derivation.objects.filter(language=language)
         ok=[]
         for root in root_list:
+            print("R",root)
             for der in der_list:
                 if root.part_of_speech != der.root_part_of_speech: continue
                 if not (der.tema <= root.tema): continue
@@ -288,6 +289,9 @@ class FusionRuleRelation(models.Model):
     fusion_rule = models.ForeignKey(FusionRule,on_delete="cascade")    
     order = models.IntegerField()
 
+    def __str__(self):
+        return "%s/%s(%d)" % (self.fusion,self.fusion_rule,self.order) 
+
     class Meta:
         ordering = [ "order" ]
 
@@ -423,10 +427,12 @@ class FusedWord(models.Model):
     def clean(self):
         S=""
         n=0
-        for word in [ rel.word for rel in self.fusedwordrelation_set.all() ]:
+        for word in [ rel.word for rel in self.fusedwordrelation_set.all().order_by("order") ]:
             rule=self.rules[n]
             #print("   ",word,rule)
-            S+=rule.regsub.apply(word.cache)
+            res=rule.regsub.apply(word.cache)
+            print("        W %10s %20s %10s" % (word.cache,rule.regsub,res) )
+            S+=res
             n+=1
         self.cache=S
 
@@ -434,11 +440,11 @@ class FusedWord(models.Model):
 
     @cached_property
     def rules(self):
-        return [ rel.fusion_rule for rel in self.fusion.fusionrulerelation_set.all() ]
+        return [ rel.fusion_rule for rel in self.fusion.fusionrulerelation_set.all().order_by("order") ]
 
     @cached_property
     def words(self):
-        return [ rel.word for rel in self.fusedwordrelation_set.all() ]
+        return [ rel.word for rel in self.fusedwordrelation_set.all().order_by("order") ]
         
     @cached_property
     def description(self): return [ w.description for w in self.words ]

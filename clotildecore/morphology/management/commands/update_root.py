@@ -18,11 +18,12 @@ class Command(BaseCommand):
         parser.add_argument(
             'root',
             help='root',
+            nargs='+'
         )
 
     def handle(self, *args, **options):
         language_name = options["language"]
-        root_name = options["root"]
+        root_list = options["root"]
         language=lang_models.Language.objects.get(name=language_name)
-        models.Root.objects.update_derived_tables(language,root_names=[root_name])
+        models.Root.objects.update_derived_tables(language,root_names=root_list)
 
