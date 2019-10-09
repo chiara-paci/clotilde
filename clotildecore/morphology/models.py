@@ -53,7 +53,17 @@ class PartOfSpeech(base_models.AbstractName):
 class TemaArgument(base_models.AbstractName): pass
 class TemaValue(base_models.AbstractName): pass
 
+class TemaManager(models.Manager):
+    def by_part_of_speech(self,part_of_speech):
+        if type(part_of_speech) is str:
+            pos=PartOfSpeech.objects.filter(name=part_of_speech)[0]
+        else:
+            pos=part_of_speech
+        return Derivation.objects.filter(root_part_of_speech=pos).values("tema_obj")
+
 class Tema(base_models.AbstractName):
+    objects = TemaManager()
+    
     def build(self):
         kwargs={ str(e.argument): str(e.value) for e in self.temaentry_set.all() }
         return descriptions.Description(**kwargs)
@@ -416,7 +426,6 @@ class FusedWordManager(models.Manager):
                 fword.full_clean()
                 fword.save()
                 print("F",fword)
-
 
 class FusedWord(models.Model):
     fusion = models.ForeignKey(Fusion,on_delete="cascade")    

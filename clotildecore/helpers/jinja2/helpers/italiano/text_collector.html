@@ -8,11 +8,18 @@
 {% endblock %}
 
 {% block output %}
-<select id="helper">
-</select>
+<select id="helper"></select>
 
-<form id="helper_data" method="POST">
+
+
+<form id="helper_data" method="POST" action="">
     {{ csrf_input }}
+    {% for key in formsets %}
+    <section class="management" id="management_{{ key }}" hidden="hidden">
+    {{ formsets[key].management_form }}
+    </section>
+    {% endfor %}
+
     <input type="hidden" name="form-TOTAL_FORMS" value="0" 
 	   id="id_form-TOTAL_FORMS">
     <input type="hidden" name="form-INITIAL_FORMS" value="0" 
@@ -21,9 +28,12 @@
 	   id="id_form-MIN_NUM_FORMS">
     <input type="hidden" name="form-MAX_NUM_FORMS" value="0" 
 	   id="id_form-MAX_NUM_FORMS">
+    <input type="submit" value="add"/>
 
-    <table>
+    <table id="helper_table">
     </table>
+
+    <input type="submit" value="add"/>
 </form>
 
 {{ super() }}
@@ -31,34 +41,48 @@
 
 {% block script %}
 
-function Helper(name) {
+function Helper(label,name,template) {
+    this.label=label;
     this.name=name;
     this.num_cols=1;
     this._num_rows=0;
+    this._template=template;
 }
+
 Helper.prototype = {
+    /*
     _header: function(){
 	return "<thead><tr><th colspan='"+this.num_cols+"'>"+this.name+"</th></tr></thead>";
     },
+    */
     _row: function(word){
 	var word_input;
-	word_input='<input type="text" name="form-"'+this._num_rows.toString();+'"-root"';
-	word_input+=' id="id_form-"'+this._num_rows.toString()+'"-root" value="'+word+'">';
-	return "<tbody><tr><td>"+this._num_rows.toString()+"</td><td>"+word_input+"</td></tr></tbody>";
+
+	word_input=this._template.replace(/0/g,this._num_rows.toString());
+	
+	// word_input='<input type="text" name="form-"'+this._num_rows.toString();+'"-root"';
+	// word_input+=' id="id_form-"'+this._num_rows.toString()+'"-root" value="'+word+'">';
+	// return "<tbody><tr><td>"+this._num_rows.toString()+"</td><td>"+word_input+"</td></tr></tbody>";
+
+	return "<tbody><tr>"+word_input+"</tr></tbody>";
+	
     },
     _set_management: function(selector,num){
-	$("#id_form-TOTAL_FORMS").val(num);
-	$("#id_form-INITIAL_FORMS").val(num);
-	$("#id_form-MIN_NUM_FORMS").val(num);
-	$("#id_form-MAX_NUM_FORMS").val(num);
+	$("#management_"+this.label).children().val(num);
+	/*
+	$("#id_"+this.label+"-TOTAL_FORMS").val(num);
+	$("#id_"+this.label+"-INITIAL_FORMS").val(num);
+	$("#id_"+this.label+"-MIN_NUM_FORMS").val(num);
+	$("#id_"+this.label+"-MAX_NUM_FORMS").val(num);
+	*/
     },
     init_form: function(selector){
-	var table=$(selector+" table");
-	table.html("");
-	table.append(this._header());
+	//var table=$(selector+" table");
+	//table.html("");
+	//table.append(this._header());
 	this._set_management(selector,0);
 	this._num_rows=0;
-	return table;
+	//return table;
     },
     add_word: function(selector,word){
 	var table=$(selector+" table");
@@ -70,56 +94,27 @@ Helper.prototype = {
     }
 }
 
-function NomeProprioHelper() {
-    Helper.call(this,"Nome proprio");
-    this.num_cols=2;
-}
-
-function VerboHelper() {
-    Helper.call(this,"Verbo");
-}
-
-function NomeHelper() {
-    Helper.call(this,"Nome");
-}
-
-function AggettivoHelper() {
-    Helper.call(this,"Aggettivo");
-}
-
-NomeProprioHelper.prototype = Object.create(Helper.prototype);
-NomeProprioHelper.prototype.constructor = NomeProprioHelper;
-NomeHelper.prototype = Object.create(Helper.prototype);
-NomeHelper.prototype.constructor = NomeHelper;
-AggettivoHelper.prototype = Object.create(Helper.prototype);
-AggettivoHelper.prototype.constructor = AggettivoHelper;
-VerboHelper.prototype = Object.create(Helper.prototype);
-VerboHelper.prototype.constructor = VerboHelper;
-
-NomeProprioHelper.prototype.init_form = function(selector){
-    var table=Helper.prototype.init_form.apply(this,[selector]); //(this, arguments);
-    table.children("thead").append("<tr><th>root</th><th>genere</th></tr>");
-};
 
 
 var HELPERS = {
-    "nome_proprio": new NomeProprioHelper(),
-    "verbo": new VerboHelper(),
-    "nome": new NomeHelper(),
-    "aggettivo": new AggettivoHelper()
-}
-
-HELPERS["nome_proprio"].init_form("#helper_data");
+    {% for key in formsets %}
+    "{{ key }}": new Helper("{{ key }}","{{ key }}",'{{ formsets[key][0] }}'){% if not loop.last %},{% endif %}
+    {% endfor %}
+};
 
 for(k in HELPERS){
     $('#helper').append('<option value="'+k+'">'+HELPERS[k].name+'</option>');
+    HELPERS[k].init_form("#helper_data");
     console.log(k);
 }
 
+/*
 $("#helper").change(function(event){
     var helper=HELPERS[$(this).val()];
     helper.init_form("#helper_data");
 });
+
+*/
 
 $(".not-found-morph").css("cursor","pointer");
 

@@ -1,8 +1,10 @@
 from django.shortcuts import render
 
-from django.views.generic import TemplateView,DetailView
+from django.views.generic import TemplateView,DetailView,View
+from django.views.generic.detail import SingleObjectMixin
 from django import forms
 from django.shortcuts import render,redirect
+from django.urls import reverse
 
 import collections
 
@@ -24,19 +26,125 @@ class ItalianoView(TemplateView):
         context["language"]=language
         return context
 
-class ItalianoTextCollectorView(corp_views.TextMorphologicalParserView):
-    template_name="helpers/italiano/text_collector.html"
+    
+# class ItalianoTextCollectorView(corp_views.TextMorphologicalParserView):
+#     template_name="helpers/italiano/text_collector.html"
 
-    class BaseForm(forms.Form):
-        remove = forms.BooleanField(required=False)
+#     class BaseForm(forms.Form):
+#         root = forms.CharField()
+#         remove = forms.BooleanField(required=False)
 
-    BaseFormset=forms.formset_factory(BaseForm,extra=0,can_delete=False,can_order=False,
-                                      max_num=5, min_num=2)
+#     def _form_pos_decorator(self,C,part_of_speech):
+#         part_of_speech=morph_models.PartOfSpeech.objects.filter(name=part_of_speech)[0]
+#         qset=morph_models.Tema.objects.by_part_of_speech(part_of_speech)
+#         class DecoratedForm(C):
+#             tema = forms.ModelChoiceField(queryset=qset,empty_label=None)
+#         return DecoratedForm
 
-    def get_context_data(self,**kwargs):
-        context=corp_views.TextMorphologicalParserView.get_context_data(self,**kwargs)
-        context["formset"]=self.BaseFormset()
-        return context
+#     def _formset_factory(self,part_of_speech):
+#         return forms.formset_factory(self._form_pos_decorator(self.BaseForm,part_of_speech),
+#                                      extra=0,can_delete=False,can_order=False,
+#                                      max_num=5, min_num=1)
+        
+#     def get_context_data(self,**kwargs):
+#         VerboBaseFormset     = self._formset_factory("verbo")
+#         NomeBaseFormset      = self._formset_factory("nome")
+#         AggettivoBaseFormset = self._formset_factory("aggettivo")
+#         # NomeProprioBaseFormset
+
+#         context=corp_views.TextMorphologicalParserView.get_context_data(self,**kwargs)
+#         context["formset_verbo"]     = VerboBaseFormset(prefix="verbo")
+#         context["formset_nome"]      = NomeBaseFormset(prefix="nome")
+#         context["formset_aggettivo"] = AggettivoBaseFormset(prefix="aggettivo")
+#         return context
+
+#     def post(self,request,*args,**kwargs):
+#         print("POST",self.request.path_info)
+#         # "helpers:italiano_textcollector", pk=...
+#         return redirect(self.request.path_info)
+
+#class DelegateAbstractView(View):
+
+class ItalianoTextCollectorView(View,SingleObjectMixin):
+    model=corp_models.Text
+
+    class InnerViewMixin(object):
+        class BaseForm(forms.Form):
+            root = forms.CharField()
+            #remove = forms.BooleanField(required=False)
+
+            def as_table(self):
+                "Return this form rendered as HTML <tr>s -- excluding the <table></table>."
+                ret=self._html_output(
+                    normal_row='<td>%(label)s</td><td>%(errors)s%(field)s%(help_text)s</td>',
+                    error_row='<td colspan="2">%s</td>',
+                    row_ender='</td>',
+                    help_text_html='<br><span class="helptext">%s</span>',
+                    errors_on_separate_row=False,
+                )
+                return ret.replace("\n","")
+
+        def _form_pos_decorator(self,C,part_of_speech):
+            part_of_speech=morph_models.PartOfSpeech.objects.filter(name=part_of_speech)[0]
+            qset=morph_models.Tema.objects.by_part_of_speech(part_of_speech)
+            class DecoratedForm(C):
+                tema = forms.ModelChoiceField(queryset=qset,empty_label=None)
+            return DecoratedForm
+
+        def _formset_factory(self,part_of_speech):
+            return forms.formset_factory(self._form_pos_decorator(self.BaseForm,part_of_speech),
+                                         extra=0,can_delete=False,can_order=False,
+                                         max_num=1, min_num=1)
+    
+    class InnerGetView(corp_views.TextMorphologicalParserView,InnerViewMixin):
+        template_name="helpers/italiano/text_collector.html"
+
+        def get_context_data(self,**kwargs):
+            context=corp_views.TextMorphologicalParserView.get_context_data(self,**kwargs)
+            VerboBaseFormset     = self._formset_factory("verbo")
+            NomeBaseFormset      = self._formset_factory("nome")
+            AggettivoBaseFormset = self._formset_factory("aggettivo")
+            context["formsets"]={
+                "verbo":     VerboBaseFormset(prefix="verbo"),
+                "nome":      NomeBaseFormset(prefix="nome"),
+                "aggettivo": AggettivoBaseFormset(prefix="aggettivo")
+            }
+            return context
+
+    class InnerPostView(View,InnerViewMixin):
+        success_url = None
+        
+        def post(self,request,*args,**kwargs):
+            # form = self.form_class(data=request.POST,files=request.FILES)
+            # if form.is_valid():
+            #     self.object=form.save(owner=request.user)
+            #     response=JsonResponse({},status=201)
+            #     response["Location"]=self.object.get_absolute_url()
+            #     return response
+            # response=JsonResponse({ "errors": "invalid data" },status=400)
+            # return response
+            print("POST",self.request.path_info)
+            # "helpers:italiano_textcollector", pk=...
+            return redirect(self.success_url) 
+
+    def get(self,request, *args, **kwargs):
+        view=self.InnerGetView.as_view()
+        response=view(request,*args,**kwargs)
+        return response
+
+    def post(self,request, *args, **kwargs):
+        obj=self.get_object()
+        success_url=reverse("helpers:italiano_textcollector", kwargs={'pk': obj.pk})
+        view=self.InnerPostView.as_view(success_url=success_url)
+        response=view(request,*args,**kwargs)
+        return response
+
+    
+
+
+
+    
+        
 
 class ItalianoVerbiView(TemplateView):
     template_name="helpers/italiano/verbi.html"
