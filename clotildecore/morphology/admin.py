@@ -14,14 +14,19 @@ class RegexpReplacementAdmin(admin.ModelAdmin):
 
 admin.site.register(models.RegexpReplacement,RegexpReplacementAdmin)
 
-
 class TemaEntryInline(admin.TabularInline):
     model = models.TemaEntry
     extra = 0
 
+class DerivationInline(admin.TabularInline):
+    model = models.Derivation
+    extra = 0
+
+    
 class TemaAdmin(admin.ModelAdmin):
-    inlines=[TemaEntryInline]
+    inlines=[TemaEntryInline] #,DerivationInline]
     list_display=[ "name", "build", "num_roots","num_derivations","num_fusion_rules" ]
+    save_as=True
 
 admin.site.register(models.Tema,TemaAdmin)
 
@@ -56,8 +61,8 @@ class WordAdmin(admin.ModelAdmin):
 admin.site.register(models.Word,WordAdmin)
 
 class InflectionAdmin(admin.ModelAdmin):
-    list_filter=["paradigma","description_obj"]
-    list_display=["regsub","description","description_obj"]
+    list_filter=["dict_entry","paradigma","description_obj"]
+    list_display=["regsub","dict_entry","description","description_obj"]
     inlines=[ParadigmaInflectionInline]
     save_as=True
 

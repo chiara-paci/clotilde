@@ -1,10 +1,12 @@
 from django.shortcuts import render
+from django.utils.translation import ugettext as _
 
 from django.views.generic import TemplateView,DetailView,View
 from django.views.generic.detail import SingleObjectMixin
 from django import forms
 from django.shortcuts import render,redirect
 from django.urls import reverse
+from django.forms.formsets import  ORDERING_FIELD_NAME,DELETION_FIELD_NAME
 
 import collections
 
@@ -70,8 +72,7 @@ class ItalianoTextCollectorView(View,SingleObjectMixin):
 
     class InnerViewMixin(object):
         class BaseForm(forms.Form):
-            root = forms.CharField()
-            #remove = forms.BooleanField(required=False)
+            root = forms.CharField(widget=forms.TextInput(attrs={'class':'field_root'}))
 
             def as_table(self):
                 "Return this form rendered as HTML <tr>s -- excluding the <table></table>."
@@ -84,8 +85,31 @@ class ItalianoTextCollectorView(View,SingleObjectMixin):
                 )
                 return ret.replace("\n","")
 
+        class BaseFormSet(forms.BaseFormSet):
+
+            def add_fields(self, form, index):
+                """A hook for adding extra fields on to each form instance."""
+                w_delete=forms.CheckboxInput(attrs={"class":"field_delete"})
+                w_order=forms.NumberInput(attrs={"class":"field_order"})
+                if self.can_order:
+                    # Only pre-fill the ordering field for initial forms.
+                    if index is not None and index < self.initial_form_count():
+                        form.fields[ORDERING_FIELD_NAME] = forms.IntegerField(label=_(u'Order'),
+                                                                              initial=index+1,
+                                                                              required=False,
+                                                                              widget=w_order)
+                    else:
+                        form.fields[ORDERING_FIELD_NAME] = forms.IntegerField(label=_(u'Order'),
+                                                                              required=False,
+                                                                              widget=w_order)
+
+
+                if self.can_delete:
+                    form.fields[DELETION_FIELD_NAME] = forms.BooleanField(label=_(u'Delete'), required=False,
+                                                                          widget=w_delete)
+
         def _form_pos_decorator(self,C,part_of_speech):
-            part_of_speech=morph_models.PartOfSpeech.objects.filter(name=part_of_speech)[0]
+            #part_of_speech=morph_models.PartOfSpeech.objects.get(name=part_of_speech)
             qset=morph_models.Tema.objects.by_part_of_speech(part_of_speech)
             class DecoratedForm(C):
                 tema = forms.ModelChoiceField(queryset=qset,empty_label=None)
@@ -93,7 +117,8 @@ class ItalianoTextCollectorView(View,SingleObjectMixin):
 
         def _formset_factory(self,part_of_speech):
             return forms.formset_factory(self._form_pos_decorator(self.BaseForm,part_of_speech),
-                                         extra=0,can_delete=False,can_order=False,
+                                         formset=self.BaseFormSet,
+                                         extra=0,can_delete=True,can_order=False,
                                          max_num=1, min_num=1)
     
     class InnerGetView(corp_views.TextMorphologicalParserView,InnerViewMixin):
@@ -105,27 +130,71 @@ class ItalianoTextCollectorView(View,SingleObjectMixin):
             NomeBaseFormset      = self._formset_factory("nome")
             AggettivoBaseFormset = self._formset_factory("aggettivo")
             context["formsets"]={
-                "verbo":     VerboBaseFormset(prefix="verbo"),
                 "nome":      NomeBaseFormset(prefix="nome"),
+                "verbo":     VerboBaseFormset(prefix="verbo"),
                 "aggettivo": AggettivoBaseFormset(prefix="aggettivo")
             }
             return context
 
-    class InnerPostView(View,InnerViewMixin):
+    class InnerPostView(corp_views.TextMorphologicalParserView,InnerViewMixin):
+        template_name="helpers/italiano/text_collector.html"
         success_url = None
-        
+
+        class Creator(object):
+            description="vuota"
+            
+            def __init__(self,part_of_speech):
+                self._part_of_speech=morph_models.PartOfSpeech.objects.get(name=part_of_speech)
+                self._language=lang_models.Language.objects.get(name="italiano")
+                self._description=base_models.Description.objects.get(name=self.description)
+
+            def __call__(self,cleaned_data):
+                root=cleaned_data["root"]
+                tema=cleaned_data["tema"]
+                obj,created=morph_models.Root.objects.get_or_create(root=root,tema_obj=tema,
+                                                                    language=self._language,
+                                                                    part_of_speech=self._part_of_speech,
+                                                                    description_obj=self._description)
+                if not created: return obj
+                obj.update_derived()
+                return obj
+
+        creators={
+            "nome": Creator("nome"),
+            "verbo": Creator("verbo"),
+            "aggettivo": Creator("aggettivo"),
+        }
+            
         def post(self,request,*args,**kwargs):
-            # form = self.form_class(data=request.POST,files=request.FILES)
-            # if form.is_valid():
-            #     self.object=form.save(owner=request.user)
-            #     response=JsonResponse({},status=201)
-            #     response["Location"]=self.object.get_absolute_url()
-            #     return response
-            # response=JsonResponse({ "errors": "invalid data" },status=400)
-            # return response
-            print("POST",self.request.path_info)
-            # "helpers:italiano_textcollector", pk=...
-            return redirect(self.success_url) 
+            self.object=self.get_object()
+            VerboBaseFormset     = self._formset_factory("verbo")
+            NomeBaseFormset      = self._formset_factory("nome")
+            AggettivoBaseFormset = self._formset_factory("aggettivo")
+
+            formsets = {
+                "nome":      NomeBaseFormset(request.POST, request.FILES,prefix="nome"),
+                "verbo":     VerboBaseFormset(request.POST, request.FILES,prefix="verbo"),
+                "aggettivo": AggettivoBaseFormset(request.POST, request.FILES,prefix="aggettivo"),
+            }
+
+            for k in [ "nome","verbo","aggettivo" ]:
+                if not formsets[k].is_valid():
+                    context=self.get_context_data()
+                    context["formsets"]=formsets
+                    print("formset",k,request.POST)
+                    return render(request,self.template_name,context)
+                for form in formsets[k]:
+                    if not form.is_valid():
+                        context=self.get_context_data()
+                        context["formsets"]=formsets
+                        print("formset",k,"form",form)
+                        return render(request,self.template_name,context)
+
+            for k in [ "nome","verbo","aggettivo" ]:
+                for form in formsets[k]:
+                    if form.cleaned_data[DELETION_FIELD_NAME]: continue
+                    self.creators[k]( form.cleaned_data )
+            return redirect(self.success_url)
 
     def get(self,request, *args, **kwargs):
         view=self.InnerGetView.as_view()

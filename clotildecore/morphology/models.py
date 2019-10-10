@@ -38,7 +38,7 @@ class RegexpReplacement(models.Model):
         return [ str(self.pattern),str(self.replacement) ]
 
     class Meta:
-        ordering = ["replacement"]
+        ordering = ["pattern","replacement"]
 
 class PartOfSpeech(base_models.AbstractName):
     bg_color = models.CharField(max_length=20,default="#ffff00")
@@ -59,7 +59,8 @@ class TemaManager(models.Manager):
             pos=PartOfSpeech.objects.filter(name=part_of_speech)[0]
         else:
             pos=part_of_speech
-        return Derivation.objects.filter(root_part_of_speech=pos).values("tema_obj")
+        der_qset=Derivation.objects.filter(root_part_of_speech=pos).values("tema_obj")
+        return self.filter(pk__in=[ x["tema_obj"] for x in der_qset ])
 
 class Tema(base_models.AbstractName):
     objects = TemaManager()
@@ -110,7 +111,10 @@ class Paradigma(base_models.AbstractName):
 class Inflection(models.Model):
     dict_entry = models.BooleanField(default=False)
     regsub = models.ForeignKey(RegexpReplacement,on_delete="cascade")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
+    description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")
+
+    class Meta:
+        ordering = ["regsub"]
 
     @cached_property
     def description(self):
@@ -130,7 +134,7 @@ class Inflection(models.Model):
         }
 
 class RootManager(models.Manager):
-    def update_derived_tables(self,language,root_names=[]):
+    def update_derived_tables(self,language,root_names=[],fused=True):
         if not root_names:
             root_list=self.filter(language=language)
             queryset_word=Word.objects.filter(stem__root__language=language)
@@ -142,8 +146,9 @@ class RootManager(models.Manager):
             queryset_stem=Stem.objects.filter(root__language=language,
                                               root__in=root_list)
 
-        FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
-        FusedWord.objects.filter(fusion__language=language).delete()
+        if fused:
+            FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
+            FusedWord.objects.filter(fusion__language=language).delete()
 
         # phase 1. stems
         der_list=Derivation.objects.filter(language=language)
@@ -162,7 +167,7 @@ class RootManager(models.Manager):
  
         # phase 2. words
         stem_list=queryset_stem.all()
-        par_list=Paradigma.objects.filter(language=language)
+        #par_list=Paradigma.objects.filter(language=language)
  
         ok=[]
         for stem in stem_list:
@@ -176,7 +181,8 @@ class RootManager(models.Manager):
 
         # phase 3. fused words
 
-        FusedWord.objects.rebuild(language)
+        if fused:
+            FusedWord.objects.rebuild(language)
 
         
 
@@ -211,6 +217,39 @@ class Root(models.Model):
     def get_absolute_url(self):
         return "/morphology/root/%d/" % self.pk
 
+    def update_derived(self):
+        queryset_word=Word.objects.filter(stem__root=self)
+        queryset_stem=Stem.objects.filter(root=self)
+
+        # phase 1. stems
+        der_list=Derivation.objects.filter(language=self.language,
+                                           root_part_of_speech=self.part_of_speech)
+        ok=[]
+        for der in der_list:
+            if not (der.tema <= self.tema): continue
+            if not (der.root_description <= self.description): continue
+            stem,created=Stem.objects.get_or_create(root=self,derivation=der)
+            print("S",stem)
+            ok.append(stem.pk)
+        queryset_word.exclude(stem__pk__in=ok).delete()
+        queryset_stem.exclude(pk__in=ok).delete()
+ 
+        # phase 2. words
+        stem_list=queryset_stem.all()
+        ok=[]
+        for stem in stem_list:
+            for infl in stem.paradigma.inflections.all():
+                word,created=Word.objects.get_or_create(stem=stem,inflection=infl)
+                word.clean()
+                word.save()
+                print("W",word)
+                ok.append(word.pk)
+        queryset_word.exclude(pk__in=ok).delete()
+
+        # phase 3. fused words
+
+        #FusedWord.objects.rebuild(language)
+    
     
 class Derivation(base_models.AbstractName):
     language = models.ForeignKey('languages.Language',on_delete="cascade")    

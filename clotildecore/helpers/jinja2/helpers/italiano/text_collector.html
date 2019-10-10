@@ -17,18 +17,10 @@
     {% for key in formsets %}
     <section class="management" id="management_{{ key }}" hidden="hidden">
     {{ formsets[key].management_form }}
-    </section>
+</section>
+    {{ formsets[key].errors }}
     {% endfor %}
 
-    <input type="hidden" name="form-TOTAL_FORMS" value="0" 
-	   id="id_form-TOTAL_FORMS">
-    <input type="hidden" name="form-INITIAL_FORMS" value="0" 
-	   id="id_form-INITIAL_FORMS">
-    <input type="hidden" name="form-MIN_NUM_FORMS" value="0" 
-	   id="id_form-MIN_NUM_FORMS">
-    <input type="hidden" name="form-MAX_NUM_FORMS" value="0" 
-	   id="id_form-MAX_NUM_FORMS">
-    <input type="submit" value="add"/>
 
     <table id="helper_table">
     </table>
@@ -57,32 +49,22 @@ Helper.prototype = {
     */
     _row: function(word){
 	var word_input;
-
-	word_input=this._template.replace(/0/g,this._num_rows.toString());
-	
-	// word_input='<input type="text" name="form-"'+this._num_rows.toString();+'"-root"';
-	// word_input+=' id="id_form-"'+this._num_rows.toString()+'"-root" value="'+word+'">';
-	// return "<tbody><tr><td>"+this._num_rows.toString()+"</td><td>"+word_input+"</td></tr></tbody>";
-
-	return "<tbody><tr>"+word_input+"</tr></tbody>";
-	
+	var html="";
+	var elem;
+	word_input=this._template.replace(/-0-/g,"-"+this._num_rows.toString()+"-");
+	html+="<td>"+this.label+"</td>";
+	//html+="<td>("+this._num_rows.toString()+")</td>";
+	html+=word_input;
+	elem=$( "<tbody><tr>"+html+"</tr></tbody>" );
+	elem.find(".field_root").val(word);
+	return elem;
     },
     _set_management: function(selector,num){
 	$("#management_"+this.label).children().val(num);
-	/*
-	$("#id_"+this.label+"-TOTAL_FORMS").val(num);
-	$("#id_"+this.label+"-INITIAL_FORMS").val(num);
-	$("#id_"+this.label+"-MIN_NUM_FORMS").val(num);
-	$("#id_"+this.label+"-MAX_NUM_FORMS").val(num);
-	*/
     },
     init_form: function(selector){
-	//var table=$(selector+" table");
-	//table.html("");
-	//table.append(this._header());
 	this._set_management(selector,0);
 	this._num_rows=0;
-	//return table;
     },
     add_word: function(selector,word){
 	var table=$(selector+" table");
