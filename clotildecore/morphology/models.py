@@ -122,8 +122,8 @@ class Inflection(models.Model):
 
     def __str__(self):
         if not self.dict_entry:
-            return "%s [%s]" % (self.regsub,self.description)
-        return "%s [%s] [DICT]" % (self.regsub,self.description)
+            return "%s [%s]" % (self.regsub,self.description_obj)
+        return "%s [%s] [DICT]" % (self.regsub,self.description_obj)
         
 
     def serialize(self):
@@ -154,13 +154,13 @@ class RootManager(models.Manager):
         der_list=Derivation.objects.filter(language=language)
         ok=[]
         for root in root_list:
-            print("R",root)
+            print("R",root,"(%s)" % root.part_of_speech)
             for der in der_list:
                 if root.part_of_speech != der.root_part_of_speech: continue
                 if not (der.tema <= root.tema): continue
                 if not (der.root_description <= root.description): continue
                 stem,created=Stem.objects.get_or_create(root=root,derivation=der)
-                print("S",stem)
+                print("    S",stem,"(%s)" % stem.part_of_speech)
                 ok.append(stem.pk)
         queryset_word.exclude(stem__pk__in=ok).delete()
         queryset_stem.exclude(pk__in=ok).delete()
@@ -171,11 +171,12 @@ class RootManager(models.Manager):
  
         ok=[]
         for stem in stem_list:
+            print("    S",stem,"(%s)" % stem.part_of_speech)
             for infl in stem.paradigma.inflections.all():
                 word,created=Word.objects.get_or_create(stem=stem,inflection=infl)
                 word.clean()
                 word.save()
-                print("W",word)
+                print("        W",word)
                 ok.append(word.pk)
         queryset_word.exclude(pk__in=ok).delete()
 
