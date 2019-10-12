@@ -3,7 +3,7 @@ import json
 
 class TokenNotFoundMorph(tokens.TokenBase):
     def __init__(self,alpha_token):
-        tokens.TokenBase.__init__(self,"not-found-morph",alpha_token.text)
+        tokens.TokenBase.__init__(self,"not-found-morph",alpha_token.text,True)
         self._alpha_token=alpha_token
 
 def factory(alpha_token,word_list):

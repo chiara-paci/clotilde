@@ -72,6 +72,7 @@ class CaseSet(AbstractName):
 ALPHA=u'a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ'
 class TokenRegexp(AbstractName):
     regexp = models.CharField(max_length=2048,default=r'['+ALPHA+r']+')
+    #invariant = models.BooleanField()
 
     def __str__(self):
         return "%s(%d)" % (self.name,self.pk)
@@ -135,6 +136,7 @@ class TokenRegexpSet(AbstractName):
             if rel.disabled: continue
             name=rel.token_regexp.name
             regexp=rel.token_regexp.regexp
+            #invariant=rel.token_regexp.invariant
             objs.append( (name,name.lower().replace(' ',''),
                           rel.bg_color,rel.fg_color,rel.final,
                           re.compile('^'+regexp+'$'),regexp) )

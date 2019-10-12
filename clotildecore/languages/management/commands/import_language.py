@@ -142,9 +142,17 @@ class Command(BaseCommand):
             ok=[]
             for infl in data["inflections"]:
                 desc=desc_dict[infl["description"]]
-                regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=infl["regsub"][0],
-                                                                                    replacement=infl["regsub"][1])
-                obj,created=morph_models.Inflection.objects.get_or_create(regsub=regsub,description_obj=desc)
+                try:
+                    regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=infl["regsub"][0],
+                                                                                        replacement=infl["regsub"][1])
+                except Exception as e:
+                    print(infl["regsub"])
+                    raise e
+                try:
+                    obj,created=morph_models.Inflection.objects.get_or_create(regsub=regsub,description_obj=desc)
+                except Exception as e:
+                    print(regsub,desc)
+                    raise e
                 obj.dict_entry=infl["dict_entry"]
                 obj.save()
                 par.inflections.add(obj)

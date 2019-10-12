@@ -32,7 +32,8 @@ class Language(base_models.AbstractName):
         return style_list,token_list
 
     def morph_tokenize(self,text):
-        rexp_list,token_list=self.token_regexp_set.tokenize(text)
+        #rexp_list,token_list=self.token_regexp_set.tokenize(text)
+        style_list,token_list=self.alpha_tokenize(text)
 
         t_list=list(set([ t.text.lower() for t in filter(lambda x: isinstance(x,base_tokens.TokenBase),
                                                          token_list) ]))

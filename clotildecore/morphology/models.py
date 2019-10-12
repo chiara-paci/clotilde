@@ -27,6 +27,9 @@ class RegexpReplacement(models.Model):
     pattern=models.CharField(max_length=1024)
     replacement=models.CharField(max_length=1024)
 
+    class Meta:
+        ordering = ["pattern","replacement"]
+
     def __str__(self):
         return "%s => %s" % (self.pattern,self.replacement)
 

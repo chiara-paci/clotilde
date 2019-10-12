@@ -64,6 +64,7 @@ class TokenBase(Token):
                        descriptions.Description(base=label),
                        final=final)
 
+
 class TokenMarker(TokenBase):
     def __init__(self,marker,pos):
         self._marker=marker
@@ -79,7 +80,7 @@ class TokenMarker(TokenBase):
             label="not-found"
         else:
             label="marker"
-        TokenBase.__init__(self,label,text)
+        TokenBase.__init__(self,label,text,True)
 
     def _clean(self,t): return t
 
@@ -91,4 +92,4 @@ class TokenMarker(TokenBase):
 
 class TokenNotFound(TokenBase):
     def __init__(self,text):
-        TokenBase.__init__(self,"not-found",text)
+        TokenBase.__init__(self,"not-found",text,True)
