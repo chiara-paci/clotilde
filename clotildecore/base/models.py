@@ -157,6 +157,7 @@ class TokenRegexpSetThrough(models.Model):
     bg_color = models.CharField(max_length=20,default="#ffff00")
     fg_color = models.CharField(max_length=20,default="#000000")
     order = models.IntegerField()
+    final = models.BooleanField(default=False)
     disabled = models.BooleanField()
 
     class Meta:
