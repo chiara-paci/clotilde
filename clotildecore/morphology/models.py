@@ -41,7 +41,7 @@ class RegexpReplacement(models.Model):
         return [ str(self.pattern),str(self.replacement) ]
 
     class Meta:
-        ordering = ["replacement"]
+        ordering = ["pattern","replacement"]
 
 class PartOfSpeech(base_models.AbstractName):
     bg_color = models.CharField(max_length=20,default="#ffff00")
@@ -56,7 +56,18 @@ class PartOfSpeech(base_models.AbstractName):
 class TemaArgument(base_models.AbstractName): pass
 class TemaValue(base_models.AbstractName): pass
 
+class TemaManager(models.Manager):
+    def by_part_of_speech(self,part_of_speech):
+        if type(part_of_speech) is str:
+            pos=PartOfSpeech.objects.filter(name=part_of_speech)[0]
+        else:
+            pos=part_of_speech
+        der_qset=Derivation.objects.filter(root_part_of_speech=pos).values("tema_obj")
+        return self.filter(pk__in=[ x["tema_obj"] for x in der_qset ])
+
 class Tema(base_models.AbstractName):
+    objects = TemaManager()
+    
     def build(self):
         kwargs={ str(e.argument): str(e.value) for e in self.temaentry_set.all() }
         return descriptions.Description(**kwargs)
@@ -103,7 +114,10 @@ class Paradigma(base_models.AbstractName):
 class Inflection(models.Model):
     dict_entry = models.BooleanField(default=False)
     regsub = models.ForeignKey(RegexpReplacement,on_delete="cascade")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
+    description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")
+
+    class Meta:
+        ordering = ["regsub"]
 
     @cached_property
     def description(self):
@@ -111,8 +125,8 @@ class Inflection(models.Model):
 
     def __str__(self):
         if not self.dict_entry:
-            return "%s [%s]" % (self.regsub,self.description)
-        return "%s [%s] [DICT]" % (self.regsub,self.description)
+            return "%s [%s]" % (self.regsub,self.description_obj)
+        return "%s [%s] [DICT]" % (self.regsub,self.description_obj)
         
 
     def serialize(self):
@@ -123,7 +137,7 @@ class Inflection(models.Model):
         }
 
 class RootManager(models.Manager):
-    def update_derived_tables(self,language,root_names=[]):
+    def update_derived_tables(self,language,root_names=[],fused=True):
         if not root_names:
             root_list=self.filter(language=language)
             queryset_word=Word.objects.filter(stem__root__language=language)
@@ -131,44 +145,48 @@ class RootManager(models.Manager):
         else:
             root_list=self.filter(language=language,root__in=root_names)
             queryset_word=Word.objects.filter(stem__root__language=language,
-                                                     stem__root__in=root_list)
+                                              stem__root__in=root_list)
             queryset_stem=Stem.objects.filter(root__language=language,
-                                                     root__in=root_list)
+                                              root__in=root_list)
 
-        FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
-        FusedWord.objects.filter(fusion__language=language).delete()
+        if fused:
+            FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
+            FusedWord.objects.filter(fusion__language=language).delete()
 
         # phase 1. stems
         der_list=Derivation.objects.filter(language=language)
         ok=[]
         for root in root_list:
+            print("R",root,"(%s)" % root.part_of_speech)
             for der in der_list:
                 if root.part_of_speech != der.root_part_of_speech: continue
                 if not (der.tema <= root.tema): continue
                 if not (der.root_description <= root.description): continue
                 stem,created=Stem.objects.get_or_create(root=root,derivation=der)
-                print("S",stem)
+                print("    S",stem,"(%s)" % stem.part_of_speech)
                 ok.append(stem.pk)
         queryset_word.exclude(stem__pk__in=ok).delete()
         queryset_stem.exclude(pk__in=ok).delete()
  
         # phase 2. words
         stem_list=queryset_stem.all()
-        par_list=Paradigma.objects.filter(language=language)
+        #par_list=Paradigma.objects.filter(language=language)
  
         ok=[]
         for stem in stem_list:
+            print("    S",stem,"(%s)" % stem.part_of_speech)
             for infl in stem.paradigma.inflections.all():
                 word,created=Word.objects.get_or_create(stem=stem,inflection=infl)
                 word.clean()
                 word.save()
-                print("W",word)
+                print("        W",word)
                 ok.append(word.pk)
         queryset_word.exclude(pk__in=ok).delete()
 
         # phase 3. fused words
 
-        FusedWord.objects.rebuild(language)
+        if fused:
+            FusedWord.objects.rebuild(language)
 
         
 
@@ -203,6 +221,39 @@ class Root(models.Model):
     def get_absolute_url(self):
         return "/morphology/root/%d/" % self.pk
 
+    def update_derived(self):
+        queryset_word=Word.objects.filter(stem__root=self)
+        queryset_stem=Stem.objects.filter(root=self)
+
+        # phase 1. stems
+        der_list=Derivation.objects.filter(language=self.language,
+                                           root_part_of_speech=self.part_of_speech)
+        ok=[]
+        for der in der_list:
+            if not (der.tema <= self.tema): continue
+            if not (der.root_description <= self.description): continue
+            stem,created=Stem.objects.get_or_create(root=self,derivation=der)
+            print("S",stem)
+            ok.append(stem.pk)
+        queryset_word.exclude(stem__pk__in=ok).delete()
+        queryset_stem.exclude(pk__in=ok).delete()
+ 
+        # phase 2. words
+        stem_list=queryset_stem.all()
+        ok=[]
+        for stem in stem_list:
+            for infl in stem.paradigma.inflections.all():
+                word,created=Word.objects.get_or_create(stem=stem,inflection=infl)
+                word.clean()
+                word.save()
+                print("W",word)
+                ok.append(word.pk)
+        queryset_word.exclude(pk__in=ok).delete()
+
+        # phase 3. fused words
+
+        #FusedWord.objects.rebuild(language)
+    
     
 class Derivation(base_models.AbstractName):
     language = models.ForeignKey('languages.Language',on_delete="cascade")    
@@ -290,6 +341,9 @@ class FusionRuleRelation(models.Model):
     fusion = models.ForeignKey(Fusion,on_delete="cascade")    
     fusion_rule = models.ForeignKey(FusionRule,on_delete="cascade")    
     order = models.IntegerField()
+
+    def __str__(self):
+        return "%s/%s(%d)" % (self.fusion,self.fusion_rule,self.order) 
 
     class Meta:
         ordering = [ "order" ]
@@ -416,7 +470,6 @@ class FusedWordManager(models.Manager):
                 fword.save()
                 print("F",fword)
 
-
 class FusedWord(models.Model):
     fusion = models.ForeignKey(Fusion,on_delete="cascade")    
     cache = models.CharField(max_length=1024,db_index=True,editable=False)
@@ -426,10 +479,12 @@ class FusedWord(models.Model):
     def clean(self):
         S=""
         n=0
-        for word in [ rel.word for rel in self.fusedwordrelation_set.all() ]:
+        for word in [ rel.word for rel in self.fusedwordrelation_set.all().order_by("order") ]:
             rule=self.rules[n]
             #print("   ",word,rule)
-            S+=rule.regsub.apply(word.cache)
+            res=rule.regsub.apply(word.cache)
+            print("        W %10s %20s %10s" % (word.cache,rule.regsub,res) )
+            S+=res
             n+=1
         self.cache=S
 
@@ -437,11 +492,11 @@ class FusedWord(models.Model):
 
     @cached_property
     def rules(self):
-        return [ rel.fusion_rule for rel in self.fusion.fusionrulerelation_set.all() ]
+        return [ rel.fusion_rule for rel in self.fusion.fusionrulerelation_set.all().order_by("order") ]
 
     @cached_property
     def words(self):
-        return [ rel.word for rel in self.fusedwordrelation_set.all() ]
+        return [ rel.word for rel in self.fusedwordrelation_set.all().order_by("order") ]
         
     @cached_property
     def description(self): return [ w.description for w in self.words ]

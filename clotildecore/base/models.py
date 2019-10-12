@@ -14,6 +14,7 @@ class AbstractName(models.Model):
 
     class Meta:
         abstract = True
+        ordering = [ "name" ]
 
     def __str__(self): return(self.name)
 
@@ -71,7 +72,7 @@ class CaseSet(AbstractName):
 ALPHA=u'a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ'
 class TokenRegexp(AbstractName):
     regexp = models.CharField(max_length=2048,default=r'['+ALPHA+r']+')
-    invariant = models.BooleanField()
+    #invariant = models.BooleanField()
 
     def __str__(self):
         return "%s(%d)" % (self.name,self.pk)
@@ -83,16 +84,16 @@ class TokenRegexpSetManager(models.Manager):
     def de_serialize(self,D):
         reg_set,created=self.get_or_create(name=D["name"])
         for rexp in D["regexps"]:
-            invariant=True
-            if "invariant" in rexp: invariant=rexp["invariant"]
             t_rexp,created=TokenRegexp.objects.get_or_create(name=rexp["name"],
-                                                             regexp=rexp["regexp"],defaults={"invariant":invariant})
+                                                             regexp=rexp["regexp"])
+            if "final" not in rexp: rexp["final"]=False
             tr,created=TokenRegexpSetThrough.objects.get_or_create(token_regexp=t_rexp,
                                                                    token_regexp_set=reg_set,
                                                                    defaults={
                                                                        "bg_color": rexp["bg_color"],
                                                                        "fg_color": rexp["fg_color"],
                                                                        "order": rexp["order"],
+                                                                       "final": rexp["final"],
                                                                        "disabled": rexp["disabled"],
                                                                    })
         return reg_set
@@ -105,16 +106,16 @@ class TokenRegexpSet(AbstractName):
 
     def regexp_all(self):
         regs=[ r'\[/?'+x+r'\]' for x in tokens.MARKERS ]
-        regs+=[ rexp_t for (name,label,bg,fg,rexp,rexp_t,invariant) in self.regexp_objects ]
+        regs+=[ rexp_t for (name,label,bg,fg,final,rexp,rexp_t) in self.regexp_objects ]
         t="|".join(regs)
         t="("+t+")"
         return(t)
 
     def _f(self,t):
-        for (name,label,bg,fg,rexp,rexp_t,invariant) in self.regexp_objects:
-            print("==%s==" % t,[ord(x) for x in t])
+        for (name,label,bg,fg,final,rexp,rexp_t) in self.regexp_objects:
+            #print("==%s==" % t,[ord(x) for x in t])
             if rexp.match(t):
-                return tokens.TokenBase(label,t,invariant)
+                return tokens.TokenBase(label,t,final=final)
         if t[0]=='[':
             if t[1]=="/":
                 m=t[2:-1]
@@ -135,10 +136,10 @@ class TokenRegexpSet(AbstractName):
             if rel.disabled: continue
             name=rel.token_regexp.name
             regexp=rel.token_regexp.regexp
-            invariant=rel.token_regexp.invariant
+            #invariant=rel.token_regexp.invariant
             objs.append( (name,name.lower().replace(' ',''),
-                          rel.bg_color,rel.fg_color,
-                          re.compile('^'+regexp+'$'),regexp,invariant) )
+                          rel.bg_color,rel.fg_color,rel.final,
+                          re.compile('^'+regexp+'$'),regexp) )
         return(objs)
 
     def has_regexp(self,obj):
@@ -181,9 +182,9 @@ class TokenRegexpSetThrough(models.Model):
         return {
             "name": self.token_regexp.name,
             "regexp": self.token_regexp.regexp,
-            "invariant": self.token_regexp.invariant,
             "bg_color": self.bg_color,
             "fg_color": self.fg_color,
+            "final": self.final,
             "order": self.order,
             "disabled": self.disabled
         }

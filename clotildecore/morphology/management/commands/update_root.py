@@ -18,11 +18,18 @@ class Command(BaseCommand):
         parser.add_argument(
             'root',
             help='root',
+            nargs='+'
+        )
+        parser.add_argument(
+            '--no_fused',
+            help='no fused',
+            action="store_true"
         )
 
     def handle(self, *args, **options):
         language_name = options["language"]
-        root_name = options["root"]
+        root_list = options["root"]
         language=lang_models.Language.objects.get(name=language_name)
-        models.Root.objects.update_derived_tables(language,root_names=[root_name])
+        models.Root.objects.update_derived_tables(language,root_names=root_list,
+                                                  fused=not options["no_fused"])
 

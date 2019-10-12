@@ -27,7 +27,7 @@ class Language(base_models.AbstractName):
 
     def alpha_tokenize(self,text):
         rexp_list,token_list=self.token_regexp_set.tokenize(text)
-        style_list=[ (name+": "+rexp_t,label,bg,fg) for name,label,bg,fg,rexp,rexp_t,invariant in rexp_list ]
+        style_list=[ (name+": "+rexp_t,label,bg,fg) for name,label,bg,fg,final,rexp,rexp_t in rexp_list ]
         style_list.append( ("not matched","not-found","#900000","#ffffff") )
         return style_list,token_list
 
@@ -35,7 +35,8 @@ class Language(base_models.AbstractName):
         #rexp_list,token_list=self.token_regexp_set.tokenize(text)
         style_list,token_list=self.alpha_tokenize(text)
 
-        t_list=list(set([ t.text.lower() for t in filter(lambda x: isinstance(x,base_tokens.TokenBase),token_list) ]))
+        t_list=list(set([ t.text.lower() for t in filter(lambda x: isinstance(x,base_tokens.TokenBase),
+                                                         token_list) ]))
 
         non_words={}
         for w in NonWord.objects.filter(language=self,word__in=t_list):
@@ -51,14 +52,16 @@ class Language(base_models.AbstractName):
             words[w.cache].append( ("fused_word",w) )
 
         morph_list=[]
-        #style_list=[]
+        style_list=[]
+        final_label_list=set()
         for t in token_list:
             if not type(t) is base_tokens.TokenBase:
                 morph_list.append(t)
                 continue
-            if t.invariant:
+            if t.final:
                 morph_list.append(t)
-                continue                
+                final_label_list.add(t.label)
+                continue
             if t.text.lower() in non_words: 
                 morph_list.append( tokens.TokenNonWord(t) )
                 continue
@@ -69,11 +72,15 @@ class Language(base_models.AbstractName):
             style_list+=s_list
             morph_list.append(token)
 
+        final_style_list=[ (name+": "+rexp_t,label,bg,fg)
+                           for name,label,bg,fg,final,rexp,rexp_t in rexp_list if label in final_label_list ]
+            
         style_list.append( ("non word","non-word","#f0f0f0","#909090") )
         style_list.append( ("marker","marker","#e0e0e0","#909090") )
         style_list.append( ("not matched (alpha)","not-found","#900000","#ffffff") )
         style_list.append( ("not matched (morphology)","not-found-morph","#c00000","#ffffff") )
         style_list=list(set(style_list))
+        style_list+=final_style_list
         return style_list,morph_list
         
 
