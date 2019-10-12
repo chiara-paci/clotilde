@@ -15,8 +15,8 @@ class CaseSetAdmin(admin.ModelAdmin):
 admin.site.register(models.CaseSet,CaseSetAdmin)
 
 class TokenRegexpAdmin(admin.ModelAdmin):
-    list_display=['name','regexp',"set_number"]
-    list_editable=['regexp']
+    list_display=['name',"invariant",'regexp',"set_number"]
+    list_editable=['regexp',"invariant"]
 
 admin.site.register(models.TokenRegexp,TokenRegexpAdmin)
 

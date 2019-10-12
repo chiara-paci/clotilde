@@ -27,12 +27,13 @@ class Language(base_models.AbstractName):
 
     def alpha_tokenize(self,text):
         rexp_list,token_list=self.token_regexp_set.tokenize(text)
-        style_list=[ (name+": "+rexp_t,label,bg,fg) for name,label,bg,fg,rexp,rexp_t in rexp_list ]
+        style_list=[ (name+": "+rexp_t,label,bg,fg) for name,label,bg,fg,rexp,rexp_t,invariant in rexp_list ]
         style_list.append( ("not matched","not-found","#900000","#ffffff") )
         return style_list,token_list
 
     def morph_tokenize(self,text):
-        rexp_list,token_list=self.token_regexp_set.tokenize(text)
+        #rexp_list,token_list=self.token_regexp_set.tokenize(text)
+        style_list,token_list=self.alpha_tokenize(text)
 
         t_list=list(set([ t.text.lower() for t in filter(lambda x: isinstance(x,base_tokens.TokenBase),token_list) ]))
 
@@ -50,11 +51,14 @@ class Language(base_models.AbstractName):
             words[w.cache].append( ("fused_word",w) )
 
         morph_list=[]
-        style_list=[]
+        #style_list=[]
         for t in token_list:
             if not type(t) is base_tokens.TokenBase:
                 morph_list.append(t)
                 continue
+            if t.invariant:
+                morph_list.append(t)
+                continue                
             if t.text.lower() in non_words: 
                 morph_list.append( tokens.TokenNonWord(t) )
                 continue

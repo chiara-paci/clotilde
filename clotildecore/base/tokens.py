@@ -58,8 +58,9 @@ class Token(object):
     def __ne__(self,other): return not self.__eq__(other)
 
 class TokenBase(Token):
-    def __init__(self,label,text):
+    def __init__(self,label,text,invariant):
         Token.__init__(self,label,text,descriptions.Description(base=label))
+        self.invariant=invariant
 
 class TokenMarker(TokenBase):
     def __init__(self,marker,pos):
@@ -76,7 +77,7 @@ class TokenMarker(TokenBase):
             label="not-found"
         else:
             label="marker"
-        TokenBase.__init__(self,label,text)
+        TokenBase.__init__(self,label,text,True)
 
     def _clean(self,t): return t
 
@@ -88,4 +89,4 @@ class TokenMarker(TokenBase):
 
 class TokenNotFound(TokenBase):
     def __init__(self,text):
-        TokenBase.__init__(self,"not-found",text)
+        TokenBase.__init__(self,"not-found",text,True)
