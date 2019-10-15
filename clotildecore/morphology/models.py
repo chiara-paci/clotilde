@@ -86,7 +86,7 @@ class Tema(base_models.AbstractName):
         return descriptions.Tema(**kwargs)
 
     def serialize(self):
-        return (self.name,self._multidict( [ (str(e.argument), str(e.value)) for e in self.temaentry_set.all() ]) )
+        return (self.name, [ (str(e.argument), str(e.value)) for e in self.temaentry_set.all() ] ) 
 
     def num_roots(self):
         return self.root_set.all().count()
