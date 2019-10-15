@@ -5,39 +5,6 @@ from django.utils.html import format_html
 
 from . import models
 
-admin.site.register(models.TemaArgument)
-admin.site.register(models.TemaValue)
-admin.site.register(models.TemaEntry)
-admin.site.register(models.FusionRuleRelation)
-
-class RegexpReplacementAdmin(admin.ModelAdmin):
-    list_display = [ "__str__", "pattern", "replacement" ]
-    list_editable = [ "pattern", "replacement" ]
-    list_filter = [ "pattern", "replacement" ]
-
-admin.site.register(models.RegexpReplacement,RegexpReplacementAdmin)
-
-class TemaEntryInline(admin.TabularInline):
-    model = models.TemaEntry
-    extra = 0
-
-class DerivationInline(admin.TabularInline):
-    model = models.Derivation
-    extra = 0
-
-    
-class TemaAdmin(admin.ModelAdmin):
-    inlines=[TemaEntryInline] #,DerivationInline]
-    list_display=[ "name", "build", "num_roots","num_derivations","num_fusion_rules" ]
-    save_as=True
-
-admin.site.register(models.Tema,TemaAdmin)
-
-class StemAdmin(admin.ModelAdmin):
-    list_display=["stem","part_of_speech","root","derivation","tema","paradigma"]
-
-admin.site.register(models.Stem,StemAdmin)
-
 def build_static_iterator(obj_list):
     class ModelChoiceIterator:
         def __init__(self, field):
@@ -66,6 +33,48 @@ def build_static_iterator(obj_list):
             return (self.field.prepare_value(obj), self.field.label_from_instance(obj))
 
     return ModelChoiceIterator
+
+admin.site.register(models.TemaArgument)
+admin.site.register(models.TemaValue)
+admin.site.register(models.FusionRuleRelation)
+
+class RegexpReplacementAdmin(admin.ModelAdmin):
+    list_display = [ "__str__", "pattern", "replacement" ]
+    list_editable = [ "pattern", "replacement" ]
+    list_filter = [ "pattern", "replacement" ]
+
+admin.site.register(models.RegexpReplacement,RegexpReplacementAdmin)
+
+class TemaEntryInline(admin.TabularInline):
+    model = models.TemaEntry
+    extra = 0
+
+class DerivationInline(admin.TabularInline):
+    model = models.Derivation
+    extra = 0
+
+class RootInline(admin.TabularInline):
+    model = models.Root
+    extra = 0
+    
+class TemaAdmin(admin.ModelAdmin):
+    inlines=[TemaEntryInline,DerivationInline,RootInline]
+    list_display=[ "name", "build", "num_roots","num_derivations","num_fusion_rules" ]
+    save_as=True
+
+admin.site.register(models.Tema,TemaAdmin)
+
+class TemaEntryAdmin(admin.ModelAdmin):
+    list_display=["__str__","tema"]
+
+admin.site.register(models.TemaEntry,TemaEntryAdmin)
+
+
+class StemAdmin(admin.ModelAdmin):
+    list_display=["stem","part_of_speech","root","derivation","tema","paradigma"]
+
+admin.site.register(models.Stem,StemAdmin)
+
         
 class ParadigmaInflectionInline(admin.TabularInline):
     model = models.Paradigma.inflections.through
@@ -107,10 +116,15 @@ class WordAdmin(admin.ModelAdmin):
     
 admin.site.register(models.Word,WordAdmin)
 
+
+class WordInline(admin.TabularInline):
+    model = models.Word
+    extra = 0
+
 class InflectionAdmin(admin.ModelAdmin):
     list_filter=["dict_entry","paradigma","description_obj"]
     list_display=["regsub","dict_entry","description","description_obj"]
-    inlines=[ParadigmaInflectionInline]
+    inlines=[ParadigmaInflectionInline,WordInline]
     save_as=True
 
 admin.site.register(models.Inflection,InflectionAdmin)
@@ -128,7 +142,7 @@ class RootAdmin(admin.ModelAdmin):
     save_as=True
     list_filter=["part_of_speech"]
     list_display=["root","language","part_of_speech","tema_obj","description_obj"]
-    list_editable=["description_obj","tema_obj","part_of_speech"]
+    #list_editable=["description_obj","tema_obj","part_of_speech"]
 
 admin.site.register(models.Root,RootAdmin)
 
@@ -145,7 +159,8 @@ admin.site.register(models.Fusion,FusionAdmin)
 class FusionRuleAdmin(admin.ModelAdmin): 
     inlines=[FusionRuleRelationInline]
     save_as=True
-    list_display=[ "name", "tema", "part_of_speech", "description", "regsub" ]
+    list_display=[ "name", "tema", "part_of_speech", "description","description_obj", "regsub" ]
+    list_editable=["description_obj"]
 
 admin.site.register(models.FusionRule,FusionRuleAdmin)
 

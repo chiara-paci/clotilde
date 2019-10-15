@@ -57,7 +57,6 @@ admin.site.register(models.TokenRegexpSet,TokenRegexpSetAdmin)
 
 admin.site.register(models.Attribute)
 admin.site.register(models.Value)
-admin.site.register(models.Entry)
 admin.site.register(models.SubDescription)
 
 class DescriptionEntryInline(admin.TabularInline):
@@ -72,8 +71,15 @@ class DescriptionAdmin(admin.ModelAdmin):
     exclude = [ "entries","subdescriptions"]
     inlines=[DescriptionEntryInline,DescriptionSubDescriptionInline]
     list_display=[ "name","_build" ]
+    save_as=True
 
     def _build(self,obj):
         return "[%s]" % obj.build()
 
 admin.site.register(models.Description,DescriptionAdmin)
+
+class EntryAdmin(admin.ModelAdmin):
+    inlines=[DescriptionEntryInline]
+    
+
+admin.site.register(models.Entry,EntryAdmin)

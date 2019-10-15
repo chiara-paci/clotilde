@@ -7,7 +7,7 @@ from django.utils.functional import cached_property
 
 import re
 
-from . import tokens,descriptions
+from . import tokens,descriptions,functions
 
 class AbstractName(models.Model):
     name = models.CharField(max_length=1024,unique=True)
@@ -84,18 +84,17 @@ class TokenRegexpSetManager(models.Manager):
     def de_serialize(self,D):
         reg_set,created=self.get_or_create(name=D["name"])
         for rexp in D["regexps"]:
-            t_rexp,created=TokenRegexp.objects.get_or_create(name=rexp["name"],
-                                                             regexp=rexp["regexp"])
+            t_rexp,created=TokenRegexp.objects.get_or_create(name=rexp["name"],regexp=rexp["regexp"])
             if "final" not in rexp: rexp["final"]=False
-            tr,created=TokenRegexpSetThrough.objects.get_or_create(token_regexp=t_rexp,
-                                                                   token_regexp_set=reg_set,
-                                                                   defaults={
-                                                                       "bg_color": rexp["bg_color"],
-                                                                       "fg_color": rexp["fg_color"],
-                                                                       "order": rexp["order"],
-                                                                       "final": rexp["final"],
-                                                                       "disabled": rexp["disabled"],
-                                                                   })
+            tr,created=TokenRegexpSetThrough.objects.update_or_create(token_regexp=t_rexp,
+                                                                      token_regexp_set=reg_set,
+                                                                      defaults={
+                                                                          "bg_color": rexp["bg_color"],
+                                                                          "fg_color": rexp["fg_color"],
+                                                                          "order":    rexp["order"],
+                                                                          "final":    rexp["final"],
+                                                                          "disabled": rexp["disabled"],
+                                                                      })
         return reg_set
 
 class TokenRegexpSet(AbstractName):
@@ -191,8 +190,8 @@ class TokenRegexpSetThrough(models.Model):
 
 class AlphabeticOrderManager(models.Manager):
     def de_serialize(self,D):
-        obj,created=self.get_or_create(name=D["name"],
-                                       defaults={"order":D["order"]})
+        obj,created=self.update_or_create(name=D["name"],
+                                          defaults={"order":D["order"]})
         obj.order=D["order"]
         obj.save()
         return obj
@@ -237,34 +236,48 @@ class Entry(models.Model):
         ordering = [ "attribute","value" ]
 
 class DescriptionManager(models.Manager):
+
+    def _create_entry(self,key,edata): 
+        if type(edata) in [list,set]:
+            entries=[]
+            subdescriptions=[]
+            for d in edata:
+                e,s=self._create_entry(key,d)
+                entries+=e
+                subdescriptions+=e
+            return entries,subdescriptions
+
+        if type(edata) is dict:
+            t=key.split(":")
+            attr,created=Attribute.objects.get_or_create(name=t[0])
+            if len(t)==1:
+                subname=t[0]
+            else:
+                subname=t[1]
+            subdesc,created=self.get_or_create_by_dict(subname,edata)
+            entry,created=SubDescription.objects.get_or_create(attribute=attr,value=subdesc)
+            return [],[entry]
+
+        attr,created=Attribute.objects.get_or_create(name=key)
+
+        if type(edata) is tuple:
+            value,created=Value.objects.get_or_create(string=edata[0])
+            entry,created=Entry.objects.get_or_create(attribute=attr,value=value,negate=edata[1])
+            return [entry],[]
+
+        value,created=Value.objects.get_or_create(string=edata)
+        entry,created=Entry.objects.get_or_create(attribute=attr,value=value) #,negate=False)
+        return [entry],[]
+
     def get_or_create_by_dict(self,name,data):
         obj,created=self.get_or_create(name=name)
         if not created: return obj,False
 
         for k in data:
-            if type(data[k]) not in [dict,tuple]:
-                attr,created=Attribute.objects.get_or_create(name=k)
-                value,created=Value.objects.get_or_create(string=data[k])
-                entry,created=Entry.objects.get_or_create(attribute=attr,value=value) #,negate=False)
-                obj.entries.add(entry)
-                continue
-            if type(data[k]) is tuple:
-                attr,created=Attribute.objects.get_or_create(name=k)
-                value,created=Value.objects.get_or_create(string=data[k][0])
-                entry,created=Entry.objects.get_or_create(attribute=attr,value=value,negate=data[k][1])
-                obj.entries.add(entry)
-                continue
-            t=k.split(":")
-            if len(t)==1:
-                attr=t[0]
-                name=t[0]
-            else:
-                attr=t[0]
-                name=t[1]
-            subdesc,created=self.get_or_create_by_dict(name,data[k])
-            entry,created=SubDescription.objects.get_or_create(attribute=attr,value=subdesc)
-            obj.subdescriptions.add(entry)
-                
+            entries,subdescriptions=self._create_entry(k,data[k])
+            for e in entries: obj.entries.add(e)
+            for e in subdescriptions: obj.subdescriptions.add(e)
+
         return obj,True
     
 class Description(AbstractName): 
@@ -275,13 +288,17 @@ class Description(AbstractName):
     class Meta:
         ordering = [ "name" ]
 
+
     def build(self):
-        kwargs={ str(e.attribute): str(e.value) for e in self.entries.all() }
-        kwargsb={ str(e.attribute): e.value.build() for e in self.subdescriptions.all() }
-        return descriptions.Description(**kwargs,**kwargsb)
+        args=[ (str(e.attribute), ( str(e.value),e.negate) ) for e in self.entries.all() ]
+        argsb=[ (str(e.attribute), e.value.build()) for e in self.subdescriptions.all() ]
+        kwargs=dict(args+argsb)
+        #kwargs={ str(e.attribute): str(e.value) for e in self.entries.all() }
+        #kwargsb={ str(e.attribute): e.value.build() for e in self.subdescriptions.all() }
+        return descriptions.Description(**kwargs)
 
     def serialize(self):
-        kwargs=[ (str(e.attribute), str(e.value)) for e in self.entries.all() ]
+        kwargs=[ (str(e.attribute), ( str(e.value), e.negate ) ) for e in self.entries.all() ]
         kwargsb=[ e.serialize() for e in self.subdescriptions.all() ]
         return (self.name,dict(kwargs+kwargsb))
     

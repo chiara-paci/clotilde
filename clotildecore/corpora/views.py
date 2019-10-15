@@ -68,8 +68,9 @@ class TextMorphologicalTokenView(TextAlphaTokenView):
     phase = "morphological_token"
     template_name = "corpora/text_tokens_morphology.html"
 
+    ## nell'ordine in cui appaiono nel testo sarebbe meglio
     def build_token_list(self):
         style_list,tokens=self.object.corpus.language.morph_tokenize(self.object.text)
-        tokens=list(set(tokens))
-        tokens.sort()
+        #tokens=list(set(tokens))
+        #tokens.sort()
         return style_list,tokens

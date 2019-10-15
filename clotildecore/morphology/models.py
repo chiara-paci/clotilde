@@ -9,7 +9,7 @@ import re
 
 from base import models as base_models
 from languages import models as lang_models
-from base import descriptions
+from base import descriptions,functions
 
 def combine(list_of_list):
     if len(list_of_list)==0: return []
@@ -65,15 +65,28 @@ class TemaManager(models.Manager):
         der_qset=Derivation.objects.filter(root_part_of_speech=pos).values("tema_obj")
         return self.filter(pk__in=[ x["tema_obj"] for x in der_qset ])
 
+
+
 class Tema(base_models.AbstractName):
     objects = TemaManager()
+
+    def _multidict(self,tlist):
+        D={}
+        for k,v in tlist:
+            if k not in D: 
+                D[k]=v
+                continue
+            if type(D[k]) is not set:
+                D[k]=set( [D[k]] )
+            D[k].add(v)
+        return D
     
     def build(self):
-        kwargs={ str(e.argument): str(e.value) for e in self.temaentry_set.all() }
-        return descriptions.Description(**kwargs)
+        kwargs=self._multidict( [ (str(e.argument), str(e.value)) for e in self.temaentry_set.all() ])
+        return descriptions.Tema(**kwargs)
 
     def serialize(self):
-        return (self.name,{ str(e.argument): str(e.value) for e in self.temaentry_set.all() })
+        return (self.name,self._multidict( [ (str(e.argument), str(e.value)) for e in self.temaentry_set.all() ]) )
 
     def num_roots(self):
         return self.root_set.all().count()
@@ -91,6 +104,12 @@ class TemaEntry(models.Model):
     tema = models.ForeignKey(Tema,on_delete="cascade")    
     argument = models.ForeignKey(TemaArgument,on_delete="cascade")    
     value = models.ForeignKey(TemaValue,on_delete="cascade")    
+
+    def __str__(self):
+        return "%s=%s" % (str(self.argument),str(self.value))
+
+    class Meta:
+        ordering=["argument","value"]
 
 class Paradigma(base_models.AbstractName):
     part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
@@ -125,8 +144,8 @@ class Inflection(models.Model):
 
     def __str__(self):
         if not self.dict_entry:
-            return "%s [%s]" % (self.regsub,self.description_obj)
-        return "%s [%s] [DICT]" % (self.regsub,self.description_obj)
+            return "%s [%s]" % (self.regsub,self.description)
+        return "%s [%s] [DICT]" % (self.regsub,self.description)
         
 
     def serialize(self):
@@ -137,6 +156,11 @@ class Inflection(models.Model):
         }
 
 class RootManager(models.Manager):
+    def clean_derived_tables(self,language,root_names): 
+        root_list=self.filter(language=language,root__in=root_names)
+        Word.objects.filter(stem__root__in=root_list).delete()
+        Stem.objects.filter(root__in=root_list).delete()
+
     def update_derived_tables(self,language,root_names=[],fused=True):
         if not root_names:
             root_list=self.filter(language=language)
@@ -163,7 +187,6 @@ class RootManager(models.Manager):
                 if not (der.tema <= root.tema): continue
                 if not (der.root_description <= root.description): continue
                 stem,created=Stem.objects.get_or_create(root=root,derivation=der)
-                print("    S",stem,"(%s)" % stem.part_of_speech)
                 ok.append(stem.pk)
         queryset_word.exclude(stem__pk__in=ok).delete()
         queryset_stem.exclude(pk__in=ok).delete()
@@ -198,6 +221,9 @@ class Root(models.Model):
     description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
 
     objects=RootManager()
+
+    class Meta:
+        ordering = ["root"]
 
     def __str__(self):
         return "%s (%s)" % (self.root,self.part_of_speech)
@@ -261,8 +287,8 @@ class Derivation(base_models.AbstractName):
     tema_obj = models.ForeignKey(Tema,on_delete="cascade")    
     description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
     root_description_obj = models.ForeignKey(base_models.Description,
-                                         on_delete="cascade",
-                                         related_name="root_derivation_set")    
+                                             on_delete="cascade",
+                                             related_name="root_derivation_set")    
     root_part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
     paradigma = models.ForeignKey(Paradigma,on_delete="cascade")    
 
@@ -391,11 +417,14 @@ class Stem(models.Model):
     @cached_property
     def part_of_speech(self): return self.derivation.paradigma.part_of_speech
     
+class WordManager(models.Manager): pass
 
 class Word(models.Model):
     stem = models.ForeignKey(Stem,on_delete="cascade")    
     inflection = models.ForeignKey(Inflection,on_delete="cascade")    
     cache=models.CharField(max_length=1024,db_index=True,editable=False)
+
+    objects=WordManager()
 
     class Meta:
         ordering = [ "cache" ]
@@ -414,7 +443,7 @@ class Word(models.Model):
             sdesc=self.stem.description
             return idesc+sdesc
         except descriptions.FailedUnification as e:
-            return str(e)
+            return descriptions.Description(failed=str(e))
 
     @cached_property
     def tema(self): return self.stem.tema
@@ -433,19 +462,57 @@ class Word(models.Model):
 
 
 class FusedWordManager(models.Manager):
-    def rebuild(self,language):
-        FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
-        self.filter(fusion__language=language).delete()
 
-        fusion_list=Fusion.objects.filter(language=language)
+
+    def _reduce_word_list(self,part_of_speech,tema,description):
+        """ This function is just a performance booster, not a perfect filter,
+            and retrieves more words than  necessary (but still not all
+            words).
+        """
+
+        qset=Word.objects.filter(stem__derivation__paradigma__part_of_speech=part_of_speech)        
+        for arg in tema:
+            if tema[arg] not in [list,set]:
+                qtentry=TemaEntry.objects.filter(argument__name=arg,value__name=tema[arg])
+                qset=qset.filter(stem__root__tema_obj__in=[x["tema"] for x in qtentry.values("tema")])
+                continue
+            for val in tema[arg]:
+                qtentry=TemaEntry.objects.filter(argument__name=arg,value__name=val)
+                qset=qset.filter(stem__root__tema_obj__in=[x["tema"] for x in qtentry.values("tema")])
+
+        for arg in description:
+            if isinstance(description[arg],descriptions.Description): continue
+            if type(description[arg]) is tuple:
+                if description[arg][1]: continue
+                val=description[arg][0]
+            else:
+                val=description[arg]
+            qentry=base_models.Entry.objects.filter( models.Q(attribute__name=arg,value__string=val,negate=False) )
+            desc_list=[x["description"] for x in  qentry.values("description")] 
+            query= models.Q(stem__derivation__description_obj__in=desc_list) | \
+                models.Q(stem__root__description_obj__in=desc_list) | \
+                models.Q(inflection__description_obj__in=desc_list) 
+            qset=qset.filter(query)
+        return qset
+
+    def rebuild(self,language,fusion_list):
+        # FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
+        # self.filter(fusion__language=language).delete()
+        # fusion_list=Fusion.objects.filter(language=language)
+
+        FusedWordRelation.objects.filter(fused_word__fusion__in=fusion_list).delete()
+        self.filter(fusion__in=fusion_list).delete()
+
         ok=[]
         for fusion in fusion_list:
+            print(fusion)
             comp=[]
             abort=False
             for rel in fusion.fusionrulerelation_set.all().order_by("order"):
                 rule=rel.fusion_rule
-                word_list=Word.objects.filter(stem__derivation__paradigma__part_of_speech=rule.part_of_speech)
+                word_list=self._reduce_word_list(rule.part_of_speech,rule.tema,rule.description) #   Word.objects.filter(stem__derivation__paradigma__part_of_speech=rule.part_of_speech)
                 w_comp=[]
+                print("    rule %s: tema=%s, description=%s" % (rule,str(rule.tema),str(rule.description) ) )
                 for w in word_list:
                     if not (rule.tema <= w.tema): continue
                     if not (rule.description <= w.description): continue
@@ -458,6 +525,7 @@ class FusedWordManager(models.Manager):
 
             comp=combine(comp)
             for w_list in comp:
+                print("    F:",w_list)
                 fword=FusedWord(fusion=fusion)
                 fword.save()
                 n=0
@@ -468,7 +536,7 @@ class FusedWordManager(models.Manager):
                     n+=1
                 fword.full_clean()
                 fword.save()
-                print("F",fword)
+                print("        = %20s" % fword)
 
 class FusedWord(models.Model):
     fusion = models.ForeignKey(Fusion,on_delete="cascade")    
@@ -483,7 +551,7 @@ class FusedWord(models.Model):
             rule=self.rules[n]
             #print("   ",word,rule)
             res=rule.regsub.apply(word.cache)
-            print("        W %10s %20s %10s" % (word.cache,rule.regsub,res) )
+            print("        W %20s %20s %20s" % (word.cache,rule.regsub,res) )
             S+=res
             n+=1
         self.cache=S

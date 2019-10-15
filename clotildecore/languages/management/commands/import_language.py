@@ -49,21 +49,21 @@ class Command(BaseCommand):
         trexp_set=base_models.TokenRegexpSet.objects.de_serialize(index["token_regexp_set"])
         period=base_models.TokenRegexp.objects.get(name=index["period_sep"])
 
-        language,created=models.Language.objects.get_or_create(name=index["name"],
-                                                               token_regexp_set = trexp_set,
-                                                               case_set = case_set,
-                                                               alphabetic_order = alphabetic_order,
-                                                               defaults={
-                                                                   "period_sep": period,
-                                                               })
+        language,created=models.Language.objects.update_or_create(name=index["name"],
+                                                                  token_regexp_set = trexp_set,
+                                                                  case_set = case_set,
+                                                                  alphabetic_order = alphabetic_order,
+                                                                  defaults={
+                                                                      "period_sep": period,
+                                                                  })
         
         ## non-words
         m_non_words=archive.getmember("./non_words.json")
         fd=archive.extractfile(m_non_words)
         non_words=json.loads(fd.read().decode())
         for k in non_words:
-            w,created=models.NonWord.objects.get_or_create(language=language,word=non_words[k],
-                                                           defaults={"name": k})
+            w,created=models.NonWord.objects.update_or_create(language=language,word=non_words[k],
+                                                              defaults={"name": k})
             w.name=k
             w.save()
 
@@ -76,8 +76,8 @@ class Command(BaseCommand):
         fd=archive.extractfile(tarinfo)
         data=json.loads(fd.read().decode())
         for name in data:
-            pos,created=morph_models.PartOfSpeech.objects.get_or_create(name=name,
-                                                                        defaults=data[name])
+            pos,created=morph_models.PartOfSpeech.objects.update_or_create(name=name,
+                                                                           defaults=data[name])
             pos_dict[name]=pos
 
         # descriptions
@@ -122,7 +122,8 @@ class Command(BaseCommand):
             desc=desc_dict[root["description"]]
             val=root["root"]
             obj,created=morph_models.Root.objects.get_or_create(root=val,part_of_speech=pos,
-                                                                tema_obj=tema,description_obj=desc,
+                                                                tema_obj=tema,
+                                                                description_obj=desc,
                                                                 language=language)
             root_ok.append(obj.pk)
 
@@ -134,17 +135,17 @@ class Command(BaseCommand):
             fd=archive.extractfile(tarinfo)
             data=json.loads(fd.read().decode())
             pos=pos_dict[data["part_of_speech"]]
-            par,created=morph_models.Paradigma.objects.get_or_create(name=data["name"],
-                                                                     defaults={"language":language,
-                                                                               "part_of_speech":pos})
+            par,created=morph_models.Paradigma.objects.update_or_create(name=data["name"],
+                                                                        defaults={"language":language,
+                                                                                  "part_of_speech":pos})
             par_ok.append(par.pk)
             par_dict[data["name"]]=par
             ok=[]
             for infl in data["inflections"]:
                 desc=desc_dict[infl["description"]]
                 try:
-                    regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=infl["regsub"][0],
-                                                                                        replacement=infl["regsub"][1])
+                    regsub,created=morph_models.RegexpReplacement.objects.update_or_create(pattern=infl["regsub"][0],
+                                                                                           replacement=infl["regsub"][1])
                 except Exception as e:
                     print(infl["regsub"])
                     raise e
@@ -172,26 +173,18 @@ class Command(BaseCommand):
             r_desc=desc_dict[data[name]["root_description"]]
             r_pos=pos_dict[data[name]["root_part_of_speech"]]
             par=par_dict[data[name]["paradigma"]]
-            der,created=morph_models.Derivation.objects.get_or_create(name=name,language=language,
-                                                                      defaults={
-                                                                          "regsub": regsub,
-                                                                          "tema_obj": tema,
-                                                                          "description_obj": desc,
-                                                                          "root_description_obj": r_desc,
-                                                                          "root_part_of_speech": r_pos,
-                                                                          "paradigma": par,
-                                                                      })
-            der.regsub=regsub
-            der.tema_obj=tema
-            der.description_obj=desc
-            der.root_description_obj=r_desc
-            der.root_part_of_speech_obj=r_pos
-            der.paradigma=par
-            der.save()
+            der,created=morph_models.Derivation.objects.update_or_create(name=name,language=language,
+                                                                         defaults={
+                                                                             "regsub": regsub,
+                                                                             "tema_obj": tema,
+                                                                             "description_obj": desc,
+                                                                             "root_description_obj": r_desc,
+                                                                             "root_part_of_speech": r_pos,
+                                                                             "paradigma": par,
+                                                                         })
             der_ok.append(der.pk)
             
         # fusions
-
         tarinfo=archive.getmember("./fusions.json")
         fd=archive.extractfile(tarinfo)
         data=json.loads(fd.read().decode())
@@ -209,18 +202,13 @@ class Command(BaseCommand):
                 desc=desc_dict[rule["description"]]
                 pos=pos_dict[rule["part_of_speech"]]
                 
-                frule,created=morph_models.FusionRule.objects.get_or_create(name=rule["name"],
-                                                                            defaults={
-                                                                                "tema_obj": tema,
-                                                                                "part_of_speech": pos,
-                                                                                "description_obj": desc,
-                                                                                "regsub": regsub
-                                                                            })
-                frule.tema_obj=tema
-                frule.part_of_speech=pos
-                frule.description_obj=desc
-                frule.regsub=regsub
-                frule.save()
+                frule,created=morph_models.FusionRule.objects.update_or_create(name=rule["name"],
+                                                                               defaults={
+                                                                                   "tema_obj": tema,
+                                                                                   "part_of_speech": pos,
+                                                                                   "description_obj": desc,
+                                                                                   "regsub": regsub
+                                                                               })
                 rel,created=morph_models.FusionRuleRelation.objects.get_or_create(fusion_rule=frule,
                                                                                   fusion=fusion,order=n)
                 n+=1
@@ -232,7 +220,6 @@ class Command(BaseCommand):
         morph_models.FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
         morph_models.FusedWord.objects.filter(fusion__language=language).delete()
         morph_models.Fusion.objects.filter(language=language).exclude(pk__in=fusion_ok).delete()
-
         morph_models.Word.objects.filter(stem__root__language=language).exclude(stem__root__pk__in=root_ok).delete()
         morph_models.Stem.objects.filter(root__language=language).exclude(root__pk__in=root_ok).delete()
         morph_models.Root.objects.filter(language=language).exclude(pk__in=root_ok).delete()

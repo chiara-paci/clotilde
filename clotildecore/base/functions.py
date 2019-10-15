@@ -3,3 +3,4 @@ def slugify(text):
     T=T.replace("-","")
     T=T.replace("/","_")
     return T
+
