@@ -48,7 +48,7 @@ class BaseDescription(collections.abc.MutableMapping):
 class Description(BaseDescription):
 
     def _str_value(self,val):
-        if type(val) in [tuple]:
+        if type(val) in [tuple,list]:
             if not val[1]:
                 return str(val[0])
             return '!%s' % str(val[0])
@@ -184,7 +184,7 @@ class Tema(BaseDescription):
         o_k.sort()
         if s_k!=o_k: return False
         for k in s_k:
-            if self._cfr(self[k],other[k])==0: return False
+            if self._cfr(self[k],other[k])!=0: return False
         return True
 
     def _cfr(self,a,b):

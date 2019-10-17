@@ -57,8 +57,16 @@ class RootInline(admin.TabularInline):
     model = models.Root
     extra = 0
     
+class StemInline(admin.TabularInline):
+    model = models.Stem
+    extra = 0
+    
+class FusionRuleInline(admin.TabularInline):
+    model = models.FusionRule
+    extra = 0
+    
 class TemaAdmin(admin.ModelAdmin):
-    inlines=[TemaEntryInline,DerivationInline,RootInline]
+    inlines=[TemaEntryInline,DerivationInline,RootInline,FusionRuleInline]
     list_display=[ "name", "build", "num_roots","num_derivations","num_fusion_rules" ]
     save_as=True
 
@@ -135,6 +143,7 @@ class DerivationAdmin(admin.ModelAdmin):
     list_filter = [ "root_part_of_speech"]
     list_editable = [ "root_part_of_speech" ]
     save_as=True
+    inlines=[StemInline]
 
 admin.site.register(models.Derivation,DerivationAdmin)
 

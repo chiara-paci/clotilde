@@ -43,6 +43,15 @@ class RegexpReplacement(models.Model):
     class Meta:
         ordering = ["pattern","replacement"]
 
+    @cached_property
+    def num_inflections(self): return self.inflection_set.count()
+
+    @cached_property
+    def num_derivations(self): return self.derivation_set.count()
+
+    @cached_property
+    def num_fusion_rules(self): return self.fusionrule_set.count()
+
 class PartOfSpeech(base_models.AbstractName):
     bg_color = models.CharField(max_length=20,default="#ffff00")
     fg_color = models.CharField(max_length=20,default="#000000")

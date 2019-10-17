@@ -89,9 +89,17 @@ class Command(BaseCommand):
             ok=[]
             desc_dict[name]=desc
             for k in data[name]:
+                if type(data[name][k]) is list:
+                    s_val=data[name][k][0]
+                    negate=data[name][k][1]
+                else:
+                    s_val=data[name][k]
+                    negate=False
+                    
                 attr,created=base_models.Attribute.objects.get_or_create(name=k)
-                val,created=base_models.Value.objects.get_or_create(string=data[name][k])
-                entry,created=base_models.Entry.objects.get_or_create(attribute=attr,value=val)
+                val,created=base_models.Value.objects.get_or_create(string=s_val)
+                entry,created=base_models.Entry.objects.get_or_create(attribute=attr,value=val,
+                                                                      negate=negate)
                 ok.append(entry.pk)
                 desc.entries.add(entry)
             desc.entries.remove(*desc.entries.exclude(pk__in=ok))
@@ -143,6 +151,7 @@ class Command(BaseCommand):
             ok=[]
             for infl in data["inflections"]:
                 desc=desc_dict[infl["description"]]
+                dict_entry=infl["dict_entry"]
                 try:
                     regsub,created=morph_models.RegexpReplacement.objects.update_or_create(pattern=infl["regsub"][0],
                                                                                            replacement=infl["regsub"][1])
@@ -150,12 +159,14 @@ class Command(BaseCommand):
                     print(infl["regsub"])
                     raise e
                 try:
-                    obj,created=morph_models.Inflection.objects.get_or_create(regsub=regsub,description_obj=desc)
+                    obj,created=morph_models.Inflection.objects.get_or_create(regsub=regsub,
+                                                                              dict_entry=dict_entry,
+                                                                              description_obj=desc)
                 except Exception as e:
                     print(regsub,desc)
                     raise e
-                obj.dict_entry=infl["dict_entry"]
-                obj.save()
+                #obj.dict_entry=infl["dict_entry"]
+                #obj.save()
                 par.inflections.add(obj)
                 ok.append(obj.pk)
             par.inflections.remove(*par.inflections.exclude(pk__in=ok))

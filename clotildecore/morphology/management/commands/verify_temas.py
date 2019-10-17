@@ -1,0 +1,36 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+
+from django.core.management.base import BaseCommand
+
+from morphology import models
+from languages import models as lang_models
+
+class Command(BaseCommand):
+    requires_migrations_checks = True
+    help = 'Verify temas for language <name>'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'language',
+            help='name of language',
+        )
+
+    def handle(self, *args, **options):
+        language_name = options["language"]
+        language=lang_models.Language.objects.get(name=language_name)
+        tema_list=[ {"name": t.name,"id": t.id,"data":t.build()}
+                    for t in models.Tema.objects.all() ]
+
+        duplicates=[]
+
+        for t1 in tema_list:
+            for t2 in tema_list:
+                if t1["id"]==t2["id"]: continue
+                if t1["data"]==t2["data"]:
+                    duplicates.append( (t1,t2) )
+                    continue
+
+        for t1,t2 in duplicates:
+            print("+",t1["name"],t1["id"],t1["data"])
+            print(" ",t2["name"],t2["id"],t2["data"])
