@@ -28,45 +28,6 @@ class ItalianoView(TemplateView):
         context["language"]=language
         return context
 
-    
-# class ItalianoTextCollectorView(corp_views.TextMorphologicalParserView):
-#     template_name="helpers/italiano/text_collector.html"
-
-#     class BaseForm(forms.Form):
-#         root = forms.CharField()
-#         remove = forms.BooleanField(required=False)
-
-#     def _form_pos_decorator(self,C,part_of_speech):
-#         part_of_speech=morph_models.PartOfSpeech.objects.filter(name=part_of_speech)[0]
-#         qset=morph_models.Tema.objects.by_part_of_speech(part_of_speech)
-#         class DecoratedForm(C):
-#             tema = forms.ModelChoiceField(queryset=qset,empty_label=None)
-#         return DecoratedForm
-
-#     def _formset_factory(self,part_of_speech):
-#         return forms.formset_factory(self._form_pos_decorator(self.BaseForm,part_of_speech),
-#                                      extra=0,can_delete=False,can_order=False,
-#                                      max_num=5, min_num=1)
-        
-#     def get_context_data(self,**kwargs):
-#         VerboBaseFormset     = self._formset_factory("verbo")
-#         NomeBaseFormset      = self._formset_factory("nome")
-#         AggettivoBaseFormset = self._formset_factory("aggettivo")
-#         # NomeProprioBaseFormset
-
-#         context=corp_views.TextMorphologicalParserView.get_context_data(self,**kwargs)
-#         context["formset_verbo"]     = VerboBaseFormset(prefix="verbo")
-#         context["formset_nome"]      = NomeBaseFormset(prefix="nome")
-#         context["formset_aggettivo"] = AggettivoBaseFormset(prefix="aggettivo")
-#         return context
-
-#     def post(self,request,*args,**kwargs):
-#         print("POST",self.request.path_info)
-#         # "helpers:italiano_textcollector", pk=...
-#         return redirect(self.request.path_info)
-
-#class DelegateAbstractView(View):
-
 class ItalianoTextCollectorView(View,SingleObjectMixin):
     model=corp_models.Text
 

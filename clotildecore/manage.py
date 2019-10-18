@@ -12,4 +12,19 @@ if __name__ == '__main__':
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+
+    argv=sys.argv
+    has_port=False
+    for arg in argv:
+        if arg.endswith("manage.py"): continue
+        if arg=="runserver": continue
+        if arg.startswith("-"): 
+            continue
+        has_port=True
+        break
+    if not has_port:
+        argv.append("9000")
+
     execute_from_command_line(sys.argv)
+
+

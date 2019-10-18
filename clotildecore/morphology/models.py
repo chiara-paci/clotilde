@@ -71,7 +71,7 @@ class TemaManager(models.Manager):
             pos=PartOfSpeech.objects.filter(name=part_of_speech)[0]
         else:
             pos=part_of_speech
-        der_qset=Derivation.objects.filter(root_part_of_speech=pos).values("tema_obj")
+        der_qset=Root.objects.filter(part_of_speech=pos).values("tema_obj")
         return self.filter(pk__in=[ x["tema_obj"] for x in der_qset ])
 
 

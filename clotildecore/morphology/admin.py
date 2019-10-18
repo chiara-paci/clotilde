@@ -143,7 +143,7 @@ class DerivationAdmin(admin.ModelAdmin):
     list_filter = [ "root_part_of_speech"]
     list_editable = [ "root_part_of_speech" ]
     save_as=True
-    inlines=[StemInline]
+    #inlines=[StemInline]
 
 admin.site.register(models.Derivation,DerivationAdmin)
 
