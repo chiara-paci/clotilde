@@ -56,6 +56,8 @@ class Command(BaseCommand):
                                                                   defaults={
                                                                       "period_sep": period,
                                                                   })
+
+        print("Language", language,"OK")
         
         ## non-words
         m_non_words=archive.getmember("./non_words.json")
@@ -66,6 +68,8 @@ class Command(BaseCommand):
                                                               defaults={"name": k})
             w.name=k
             w.save()
+
+        print("Non words OK")
 
         pos_dict={}
         desc_dict={}
@@ -79,6 +83,9 @@ class Command(BaseCommand):
             pos,created=morph_models.PartOfSpeech.objects.update_or_create(name=name,
                                                                            defaults=data[name])
             pos_dict[name]=pos
+
+        print("Parts of speech OK")
+
 
         # descriptions
         tarinfo=archive.getmember("./descriptions.json")
@@ -99,10 +106,12 @@ class Command(BaseCommand):
                 attr,created=base_models.Attribute.objects.get_or_create(name=k)
                 val,created=base_models.Value.objects.get_or_create(string=s_val)
                 entry,created=base_models.Entry.objects.get_or_create(attribute=attr,value=val,
-                                                                      negate=negate)
+                                                                      negate__exact=negate, defaults={"negate":negate})
                 ok.append(entry.pk)
                 desc.entries.add(entry)
             desc.entries.remove(*desc.entries.exclude(pk__in=ok))
+
+        print("Descriptions OK")
 
         # temas
         tarinfo=archive.getmember("./temas.json")
@@ -119,6 +128,8 @@ class Command(BaseCommand):
                 ok.append(entry.pk)
             morph_models.TemaEntry.objects.filter(tema=tema).exclude(pk__in=ok).delete()
 
+        print("Temas OK")
+
         # roots
         tarinfo=archive.getmember("./roots.json")
         fd=archive.extractfile(tarinfo)
@@ -134,6 +145,8 @@ class Command(BaseCommand):
                                                                 description_obj=desc,
                                                                 language=language)
             root_ok.append(obj.pk)
+
+        print("Roots OK")
 
         # paradigmas
         par_dict={}
@@ -171,14 +184,21 @@ class Command(BaseCommand):
                 ok.append(obj.pk)
             par.inflections.remove(*par.inflections.exclude(pk__in=ok))
 
+        print("Paradigmas OK")
+
         # derivations
         tarinfo=archive.getmember("./derivations.json")
         fd=archive.extractfile(tarinfo)
         data=json.loads(fd.read().decode())
         der_ok=[]
         for name in data:
-            regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=data[name]["regsub"][0],
-                                                                                replacement=data[name]["regsub"][1])
+            try:
+                regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=data[name]["regsub"][0],
+                                                                                    replacement=data[name]["regsub"][1])
+            except Exception as e:
+                print(data[name]["regsub"])
+                raise e
+
             tema=tema_dict[data[name]["tema"]]
             desc=desc_dict[data[name]["description"]]
             r_desc=desc_dict[data[name]["root_description"]]
@@ -194,6 +214,8 @@ class Command(BaseCommand):
                                                                              "paradigma": par,
                                                                          })
             der_ok.append(der.pk)
+
+        print("Derivations OK")
             
         # fusions
         tarinfo=archive.getmember("./fusions.json")
@@ -227,6 +249,7 @@ class Command(BaseCommand):
 
             morph_models.FusionRuleRelation.objects.filter(fusion=fusion).exclude(pk__in=ok).delete()
 
+        print("Fusions OK")
 
         morph_models.FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
         morph_models.FusedWord.objects.filter(fusion__language=language).delete()

@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
+from django.db.models import Count
 
 from django.views.generic import TemplateView,DetailView,View
 from django.views.generic.detail import SingleObjectMixin
@@ -8,7 +9,7 @@ from django.shortcuts import render,redirect
 from django.urls import reverse
 from django.forms.formsets import  ORDERING_FIELD_NAME,DELETION_FIELD_NAME
 
-import collections
+import collections,re
 
 from morphology  import models as morph_models
 from languages  import models as lang_models
@@ -373,3 +374,262 @@ class ItalianoVerbiView(TemplateView):
 
 
         return redirect("/helpers/italiano/verbi/")
+
+
+class ItalianoAddRootView(TemplateView):
+    template_name="helpers/italiano/add_root.html"
+
+    class RootForm(forms.Form):
+        root = forms.CharField()
+        part_of_speech = forms.ModelChoiceField(queryset=morph_models.PartOfSpeech.objects.all(),empty_label=None)
+        base = forms.ChoiceField(choices=[ (x["value__name"],x["value__name"]) 
+                                           for x in morph_models.TemaEntry.objects.filter(argument__name="base").values("value__name").distinct().order_by("value__name") ])
+
+    class DerivatoForm(forms.Form):
+        pattern = forms.CharField(initial="(.+)")
+        replacement = forms.CharField(initial=r"\\1")
+
+        def as_table(self):
+            "Return this form rendered as HTML <tr>s -- excluding the <table></table>."
+            ret=self._html_output(
+                normal_row='<td>%(errors)s%(field)s%(help_text)s</td>',
+                error_row='<td colspan="2">%s</td>',
+                row_ender='</td>',
+                help_text_html='<br><span class="helptext">%s</span>',
+                errors_on_separate_row=False,
+            )
+            return ret.replace("\n","")
+
+
+    def _form_pos_decorator(self,C,part_of_speech):
+        qset=morph_models.Paradigma.objects.filter(part_of_speech__name=part_of_speech)
+        class DecoratedForm(C):
+            paradigma = forms.ModelChoiceField(queryset=qset,empty_label=None)
+        return DecoratedForm
+
+    def _formset_factory(self,part_of_speech):
+        return forms.formset_factory(self._form_pos_decorator(self.DerivatoForm,part_of_speech),
+                                     extra=0,can_delete=True,can_order=False,
+                                     max_num=1, min_num=1)
+
+    def get_context_data(self,**kwargs):
+        context=TemplateView.get_context_data(self,**kwargs)
+        context["form_root"]=self.RootForm(prefix="root")
+        context["formsets"]=collections.OrderedDict()
+        context["formsets"]["nome"]      = self._formset_factory("nome")(prefix="nome")
+        context["formsets"]["verbo"]     = self._formset_factory("verbo")(prefix="verbo")
+        context["formsets"]["avverbio"]  = self._formset_factory("avverbio")(prefix="avverbio")
+        context["formsets"]["aggettivo"] = self._formset_factory("aggettivo")(prefix="aggettivo")
+        return context
+
+    
+
+    class Creator(object):
+        description="vuota"
+
+        def __init__(self,part_of_speech):
+            self._part_of_speech=part_of_speech
+            self._language=lang_models.Language.objects.get(name="italiano")
+            self._vuota=base_models.Description.objects.get(name=self.description)
+
+        def _label(self,regsub,paradigma):
+            label=re.sub(r'\\[0-9]+','- -',str(regsub.replacement))
+            if label.startswith('- -'): label=label[1:]
+            if label.endswith('- -'):   label=label[:-1]
+            label=label.strip()
+
+            t=[ x.strip() for x in paradigma.name.split("-")]
+            if len(t)==1: return label
+            
+            if len(t)==2:
+                suffix=t[1]
+            else:
+                if t[1]=="c/g":
+                    suffix="".join(t[2:])
+                else:
+                    suffix="".join(t[1:])
+
+            if suffix[0]=="i":
+                if label[-1]=="i":
+                    return label+suffix[1:]
+            return label+suffix
+
+        def _build_derivation(self,root_part_of_speech,regsub,paradigma):
+            L=list( morph_models.Derivation.objects.filter(regsub=regsub,
+                                                           language=self._language,
+                                                           root_description_obj=self._vuota,
+                                                           paradigma=paradigma,
+                                                           root_part_of_speech=root_part_of_speech) )
+
+            if L: return L[0]
+            L=list( morph_models.Derivation.objects.filter(regsub=regsub,
+                                                           language=self._language,
+                                                           root_description_obj=self._vuota,
+                                                           paradigma=paradigma) )
+            if L:
+                name=L[0].name
+                if '(da' in L[0].name:
+                    name=re.sub(r'\(da .+?\)','(da %s)' % root_part_of_speech.name,name)
+                else:
+                    name+=" (da %s)" % root_part_of_speech.name
+                derivation=morph_models.Derivation.objects.create(name=name,
+                                                                  tema_obj=L[0].tema_obj,
+                                                                  regsub=regsub,
+                                                                  language=self._language,
+                                                                  root_description_obj=self._vuota,
+                                                                  description_obj=L[0].description_obj,
+                                                                  paradigma=paradigma,
+                                                                  root_part_of_speech=root_part_of_speech)
+                return derivation
+            
+            label=self._label(regsub,paradigma)
+
+            name="%s derivato in %s" % (self._part_of_speech,label)
+
+            tema_argument,created=morph_models.TemaArgument.objects.get_or_create(name="%s derivato" % self._part_of_speech)
+            tema_value,created=morph_models.TemaValue.objects.get_or_create(name=label)
+
+            L_entry=morph_models.TemaEntry.objects.filter(argument=tema_argument,value=tema_value)
+
+            if L_entry:
+                L_tema=morph_models.Tema.objects.filter(pk__in=L_entry.values("tema")).annotate(count=Count("temaentry")).filter(count=1)
+                if L_tema:
+                    tema_obj=L_tema[0]
+                    name+=" (da %s)" % root_part_of_speech.name
+                    derivation=morph_models.Derivation.objects.create(name=name,
+                                                                      tema_obj=tema_obj,
+                                                                      regsub=regsub,
+                                                                      language=self._language,
+                                                                      root_description_obj=self._vuota,
+                                                                      description_obj=self._vuota,
+                                                                      paradigma=paradigma,
+                                                                      root_part_of_speech=root_part_of_speech)
+                    return derivation
+
+            tema_obj=morph_models.Tema.objects.create(name=name)
+            t_entry=morph_models.TemaEntry.objects.create(tema=tema_obj,argument=tema_argument,value=tema_value)
+
+            name+=" (da %s)" % root_part_of_speech.name
+            derivation=morph_models.Derivation.objects.create(name=name,
+                                                              tema_obj=tema_obj,
+                                                              regsub=regsub,
+                                                              language=self._language,
+                                                              root_description_obj=self._vuota,
+                                                              description_obj=self._vuota,
+                                                              paradigma=paradigma,
+                                                              root_part_of_speech=root_part_of_speech)
+            return derivation
+
+
+        def __call__(self,root_part_of_speech,cleaned_data):
+            obj=None
+            paradigma=cleaned_data["paradigma"]
+            replacement=cleaned_data["replacement"]
+            pattern=cleaned_data["pattern"]
+            regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=pattern,replacement=replacement)
+            derivation=self._build_derivation(root_part_of_speech,regsub,paradigma)
+            return derivation.tema_obj
+
+    creators={
+        "nome": Creator("nome"),
+        "verbo": Creator("verbo"),
+        "aggettivo": Creator("aggettivo"),
+        "avverbio": Creator("avverbio"),
+    }
+
+    def _build_tema(self,entry_data):
+        qset=morph_models.Tema.objects.all()
+        for arg,val in entry_data:
+            qset=qset.filter(temaentry__argument__name=arg,temaentry__value__name=val)
+
+        L_tema=list(qset)
+        if L_tema:
+            for t in L_tema:
+                if t.temaentry_set.count() == len(entry_data): 
+                    return t
+        labels={}
+        for k,v in entry_data[1:]:
+            if k not in labels: labels[k]=[]
+            labels[k].append(v)
+        t=[ entry_data[0][1] ]
+        for k in labels:
+            val=", ".join(labels[k])
+            pre=k.replace("derivato","der.")
+            t.append( "%s %s" % (pre,val) )
+        tema_name="; ".join(t)
+
+        tema_obj=morph_models.Tema.objects.create(name=tema_name)
+        for k,v in entry_data:
+            arg,created=morph_models.TemaArgument.objects.get_or_create(name=k)
+            val,created=morph_models.TemaValue.objects.get_or_create(name=v)
+            t_entry=morph_models.TemaEntry.objects.create(tema=tema_obj,argument=arg,value=val)
+        return tema_obj
+
+    def post(self,request,*args,**kwargs):
+        form_root=self.RootForm(prefix="root",data=request.POST)
+        
+        formsets=collections.OrderedDict()
+
+        formsets["nome"]=self._formset_factory("nome")(prefix="nome",data=request.POST)
+        formsets["verbo"]=self._formset_factory("verbo")(prefix="verbo",data=request.POST)
+        formsets["aggettivo"]=self._formset_factory("aggettivo")(prefix="aggettivo",data=request.POST)
+        formsets["avverbio"]=self._formset_factory("avverbio")(prefix="avverbio",data=request.POST)
+
+        if not form_root.is_valid():
+            context=self.get_context_data()
+            context["formsets"]=formsets
+            context["form_root"]=form_root
+            print("form_root",request.POST)
+            return render(request,self.template_name,context)
+
+        for k in formsets:
+            if not formsets[k].is_valid():
+                context=self.get_context_data()
+                context["formsets"]=formsets
+                context["form_root"]=form_root
+                print("formsets",k,request.POST)
+                return render(request,self.template_name,context)
+
+        print("form_root",form_root.cleaned_data)
+
+        language=lang_models.Language.objects.get(name="italiano")
+
+        root=form_root.cleaned_data["root"]
+        root_part_of_speech=form_root.cleaned_data["part_of_speech"]
+        root_base=form_root.cleaned_data["base"]
+        root_description=base_models.Description.objects.get(name="vuota")
+
+        tema_list=[]
+
+        entry_data=[ ]
+
+        for k in formsets:
+            for form in formsets[k]:
+                if form.cleaned_data[DELETION_FIELD_NAME]: continue
+                tema=self.creators[k]( root_part_of_speech,form.cleaned_data )
+                tema_list.append(tema)
+                entry_data+=[ (x["argument__name"],x["value__name"]) for x in  tema.temaentry_set.all().values("argument__name","value__name") ]
+
+        root_obj=None
+        qset_root=morph_models.Root.objects.filter(root=root,language=language,part_of_speech=root_part_of_speech)
+        qset_root=qset_root.filter(tema_obj__temaentry__in=morph_models.TemaEntry.objects.filter(argument__name="base",value__name=root_base) )
+        if qset_root:
+            root_obj=qset_root[0]
+            entry_data+=[ (x["argument__name"],x["value__name"]) for x in root_obj.tema_obj.temaentry_set.exclude(argument__name="base").values("argument__name","value__name") ]
+        
+        entry_data=list(set(entry_data))
+        tema_obj=self._build_tema([("base",root_base) ]+entry_data)
+
+        if root_obj is None:
+            root_obj=morph_models.Root.objects.create(root=root,language=language,
+                                                      part_of_speech=root_part_of_speech,
+                                                      description_obj=root_description,
+                                                      tema_obj=tema_obj)
+        root_obj.tema_obj=tema_obj
+        root_obj.save()
+        root_obj.update_derived()
+
+
+        return redirect("/helpers/italiano/add_root/")
+
+

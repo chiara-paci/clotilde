@@ -74,8 +74,6 @@ class TemaManager(models.Manager):
         der_qset=Root.objects.filter(part_of_speech=pos).values("tema_obj")
         return self.filter(pk__in=[ x["tema_obj"] for x in der_qset ])
 
-
-
 class Tema(base_models.AbstractName):
     objects = TemaManager()
 

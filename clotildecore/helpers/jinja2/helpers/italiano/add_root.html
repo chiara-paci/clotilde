@@ -1,30 +1,42 @@
-{% extends "corpora/text_detail.html" %}
+{% extends "base.html" %}
 
 {% block applicationmenu %}
 {% include "helpers/italiano/includes/menu.html" %}
 {% endblock %}
 
-{% block output %}
-<select id="helper"></select>
+{% block centercontent %}
 
-<form id="helper_data" method="POST" action="">
+<h1>Aggiungi root</h1>
+
+<div class="helper italiano">
+
+<form method="post">
     {{ csrf_input }}
-    {% for key in formsets %}
-    <section class="management" id="management_{{ key }}" hidden="hidden">
-      {{ formsets[key].management_form }}
-    </section>
-    {{ formsets[key].errors }}
-    {% endfor %}
+    <p>root: {{ form_root.root }} part of speech: {{ form_root.part_of_speech }} base: {{ form_root.base }}</p>
+    <input type="submit" value="create"/>
 
+    <div class="helper italiano">
 
-    <table id="helper_table">
-    </table>
+      {% for key in formsets %}
+      <section>
+	<h2>{{ key }} derivato</h2>
+    <div id="management_{{ key }}" hidden>
+	  {{ formsets[key].management_form }}</div>
+	<table id="{{ key }}_table">
+	  <thead>
+	    <tr><th>regexp</th><th>replacement</th><th>paradigma</th><th>delete</th></tr>
+	  </thead>
+	</table>
 
-    <input type="submit" value="add"/>
+	<button type="button" data-target_id="#{{ key }}_table" data-helper_id="{{ key }}" class="addrow">add {{ key }}</button>
+
+      </section>
+      {% endfor %}
+
+    </div>
 </form>
 
-{{ super() }}
-{% endblock %}
+{% endblock centercontent %}
 
 {% block script %}
 
@@ -42,16 +54,13 @@ Helper.prototype = {
 	return "<thead><tr><th colspan='"+this.num_cols+"'>"+this.name+"</th></tr></thead>";
     },
     */
-    _row: function(word){
+    _row: function(){
 	var word_input;
 	var html="";
 	var elem;
 	word_input=this._template.replace(/-0-/g,"-"+this._num_rows.toString()+"-");
-	html+="<td>"+this.label+"</td>";
-	//html+="<td>("+this._num_rows.toString()+")</td>";
 	html+=word_input;
 	elem=$( "<tbody><tr>"+html+"</tr></tbody>" );
-	elem.find(".field_root").val(word);
 	return elem;
     },
     _set_management: function(selector,num){
@@ -61,9 +70,9 @@ Helper.prototype = {
 	this._set_management(selector,0);
 	this._num_rows=0;
     },
-    add_word: function(selector,word){
-	var table=$(selector+" table");
-	table.append(this._row(word));
+    add_row: function(selector){
+	var table=$(selector);
+	table.append(this._row());
 	this._num_rows+=1;
 	this._set_management(selector,this._num_rows);
 	return table;
@@ -80,10 +89,16 @@ var HELPERS = {
 };
 
 for(k in HELPERS){
-    $('#helper').append('<option value="'+k+'">'+HELPERS[k].name+'</option>');
     HELPERS[k].init_form("#helper_data");
     console.log(k);
 }
+
+$(".addrow").click(function(event){
+    event.preventDefault();
+    var selector=$(this).data("target_id");
+    var key=$(this).data("helper_id");
+    HELPERS[key].add_row(selector);
+});
 
 /*
 $("#helper").change(function(event){
@@ -92,16 +107,6 @@ $("#helper").change(function(event){
 });
 
 */
-
-$(".not-found-morph").css("cursor","pointer");
-
-$(".not-found-morph").click(function(event){
-    event.preventDefault();
-    var word=$(this).html();
-    var helper=$("#helper").val();
-    HELPERS[helper].add_word("#helper_data",word);
-});
-
 
 
 {% endblock script %}
