@@ -221,8 +221,6 @@ class RootManager(models.Manager):
         if fused:
             FusedWord.objects.rebuild(language)
 
-        
-
 class Root(models.Model):
     root=models.CharField(max_length=1024)
     language = models.ForeignKey('languages.Language',on_delete="cascade")    
