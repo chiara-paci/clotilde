@@ -3,6 +3,7 @@
 
 body {
     font-family: 'Open Sans', Helvetica, Arial, 'FreeSans', sans-serif;
+    font-size: 10pt;
     margin: 0;
     padding: 0;
     border: 0;
@@ -24,7 +25,13 @@ body {
 
 math {
     font-family: 'Open Sans', Helvetica, Arial, 'FreeSans', sans-serif;
+    font-size: 10pt;
 }
+
+.left { text-align: left; }
+.center { text-align: center; }
+.right { text-align: right; }
+.justify { text-align: justify; }
 
 header {
     margin: 0;
@@ -55,7 +62,7 @@ header {
 	align-items: stretch;
 	align-content: stretch;
 
-	font-size: .9em;
+	font-size: 1em;
 
 	a {
 	    background-color: @color-primary-4;
@@ -100,15 +107,7 @@ header {
 	padding: 0;
 	padding-top: 10px;
 	padding-bottom: 10px;
-	/*    
-          font-family: 'Cabin Sketch', cursive;
-          font-family: 'Fredericka the Great', cursive;
-          font-family: 'Kranky', cursive;
-          font-family: 'Open Sans', sans-serif;
-       */
-	//font: 36pt 'Fredericka the Great', cursive;
 	font: 40pt 'Kranky', cursive;
-	//font: 36pt 'Cabin Sketch', cursive;
 	margin-left: 5%;
 	margin-right: 5%;
     }
@@ -134,7 +133,9 @@ footer {
 
 main {
 
-    margin: 1em;
+    background-color: white;
+
+    margin: 0;
 
     order: 2;
     flex-grow: 1;
@@ -147,22 +148,26 @@ main {
 
 	display: flex;
 	flex-direction: row;
-	flex-wrap: nowrap;
+	flex-wrap: wrap;
 	justify-content: flex-start;
 	align-items: stretch;
-	align-content: stretch;
+	align-content: center;
 
 	font-size: .9em;
 
 	a {
+	    display: inline-block;
 	    background-color: @color-primary-4;
 	    color: @color-primary-2;
-	    margin-left: .5em;
-	    margin-right: .5em;
-	    border-radius: 1em;
-	    padding-left: 1em;
-	    padding-right: 1em;
+	    margin-left: .2em;
+	    margin-right: .2em;
+	    border-radius: 1.8em;
+	    padding: 0;
+	    padding-left: .7em;
+	    padding-right: .7em;
 	    text-decoration: none;
+	    height: 1.8em;
+	    line-height: 1.8em;
 	}
 
 	a.selected, 
@@ -178,8 +183,8 @@ main {
 	padding: 0;
 	padding-bottom: 3pt;
 	padding-top: 3pt;
-	margin-left: 5%;
-	margin-right: 5%;
+	margin-left: 10px;
+	margin-right: 10px;
 
     }
 
@@ -187,8 +192,10 @@ main {
 	background: white;
 	padding: 1em;
 	min-height: 800px;
-	margin-left: 5%;
-	margin-right: 5%;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+
     }
 
     aside {
@@ -196,6 +203,19 @@ main {
 	padding: .5em;
 	border: 1px solid @color-dark-0;
 	float: right;
+    }
+
+    section.collector {
+	margin: 2em;
+
+	table {
+	    width: 100%;
+
+	    select {
+		//max-width: 5em;
+		width: 100%;
+	    }
+	}
     }
 
     section.text {
@@ -218,10 +238,9 @@ main {
     }
 
     a:active, a:hover {
-		  color: lighten(@color-primary-2,30%);
-		  background-color: @color-primary-4;
-	      }
-
+	color: lighten(@color-primary-2,30%);
+	background-color: @color-primary-4;
+    }
 
     h1 { font-size: 200%; }
     h2 { font-size: 150%; }
@@ -261,6 +280,64 @@ main {
 	padding-left: .3em;
 	padding-right: .3em;
     }
+
+
+    div.blocks {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: stretch;
+	align-items: stretch;
+	align-content: stretch;
+	
+	section {
+	    flex-shrink: 0;
+	    flex-grow: 1;
+	    padding: 1em;
+	    
+	    display: flex;
+	    flex-direction: column;
+	    flex-wrap: nowrap;
+	    justify-content: stretch;
+	    align-items: stretch;
+	    align-content: stretch;
+	    
+	    border: 1px solid @color-primary-0;
+	    margin: 1em;
+
+	    h1 {
+		background-color: fade(@color-primary-0,50%);
+		border-color: @color-primary-4;
+		color: @color-primary-4;
+		font-size: 1em;
+		margin-top: 0;
+	    }
+
+	    p {
+		line-height: 1.2em;
+		padding: 0;
+		margin: 0;
+		margin-bottom: .3em;
+		
+	    }
+
+	    table {
+		width: 100%;
+		
+		thead {}
+		
+		tbody:nth-child(even) { 
+		    background-color: fade(@color-primary-0,20%);
+		};
+		
+		tbody:nth-child(odd) { 
+		    background-color: fade(@color-primary-0,10%);
+		};
+
+	    }
+	    
+	}
+    }
     
 }
 
@@ -277,7 +354,7 @@ div.helper {
     section {
 	flex-shrink: 0;
 	flex-grow: 1;
-	padding: 1em;
+	padding: .5em;
 
 	display: flex;
 	flex-direction: column;
@@ -287,12 +364,43 @@ div.helper {
 	align-content: stretch;
 
 	border: 1px solid @color-primary-0;
-	margin: 1em;
+	margin: .5em;
 
-	h2 {
-	    text-align: center;
+	h1 {
+	    background-color: fade(@color-primary-0,50%);
+	    border-color: @color-primary-4;
+	    color: @color-primary-4;
 	    font-size: 1em;
-	    border: none;
+	    margin-top: 0;
+	}
+
+	.expand {
+	    min-width: 40vw;
+	}
+
+	table {
+	    width: 100%;
+
+
+	    .entry,input[type=text] {
+		width: 10em;
+	    }
+
+	    .checkbox, input[type=checkbox] {
+		text-align: center;
+		width: 3em;
+	    }
+	    
+	    select {
+		width: 100%;
+	    }
+	    
+	    thead {
+		th {
+		    font-size: .8em;
+		    color: @color-primary-0;
+		}
+	    }
 	}
 
 	p {
@@ -310,8 +418,8 @@ div.helper {
 	    }
 	    input[type=text] {
 		flex-grow: 1;
+		flex-shrink: 1;
 	    }
-
 	    span.separator {
 		line-height: 2em;
 	    }

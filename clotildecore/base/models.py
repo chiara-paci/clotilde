@@ -212,8 +212,11 @@ class AlphabeticOrder(AbstractName):
 class Attribute(AbstractName): pass
 
 class Value(models.Model):
-    string=models.CharField(max_length=1024,db_index=True)
+    string=models.CharField(max_length=1024,db_index=True,unique=True)
     variable = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["string"]
 
     def __str__(self):
         S=self.string
@@ -234,6 +237,7 @@ class Entry(models.Model):
 
     class Meta:
         ordering = [ "attribute","value" ]
+        unique_together = [ ["attribute","value","negate"] ]
 
 class DescriptionManager(models.Manager):
 

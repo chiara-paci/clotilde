@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django import forms
-from django.db.models.query import QuerySet
+from django.db.models.query import QuerySet,Q
 from django.utils.html import format_html
 
 from . import models
 from base import models as base_models
+from base import admin as base_admin
 from languages import models as lang_models
 
 DEFAULT_LANGUAGE= lang_models.Language.objects.get(name="italiano")
@@ -92,7 +93,6 @@ class FusionRuleInline(admin.TabularInline):
     model = models.FusionRule
     extra = 0
 
-
 class TemaNameListFilter(admin.SimpleListFilter):
     title = "name"
     parameter_name = 'prefix'
@@ -103,11 +103,9 @@ class TemaNameListFilter(admin.SimpleListFilter):
             t=s.split()
             if len(t)==1: return s
             base=t[0]
-            if base=="verbi": base="verbo"
             if t[1] in ["derivato","proprio"]:
                 return base+" "+t[1]
             return base
-
 
         name_list=[ label(x["name"]) for x in models.Tema.objects.all().values("name") ] 
         name_list=list(set(name_list))
@@ -116,9 +114,9 @@ class TemaNameListFilter(admin.SimpleListFilter):
         return [ (x,x) for x in name_list ]
 
     def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(name__startswith=self.value())
-        return queryset
+        val=self.value()
+        if not val: return queryset
+        return queryset.filter(name__startswith=val)
  
 class TemaAdmin(admin.ModelAdmin):
     inlines=[TemaEntryInline,DerivationInline,RootInline,FusionRuleInline]
@@ -135,6 +133,7 @@ admin.site.register(models.TemaEntry,TemaEntryAdmin)
 
 class StemAdmin(admin.ModelAdmin):
     list_display=["stem","part_of_speech","root","derivation","tema","paradigma"]
+    list_filter=[base_admin.initial_filter_factory("cache")]
 
 admin.site.register(models.Stem,StemAdmin)
 
@@ -176,6 +175,7 @@ admin.site.register(models.PartOfSpeech,PartOfSpeechAdmin)
 
 class WordAdmin(admin.ModelAdmin):
     list_display=["cache","dict_entry","part_of_speech","stem","tema","paradigma","description"]
+    list_filter=[base_admin.initial_filter_factory("cache")]
     
 admin.site.register(models.Word,WordAdmin)
 
@@ -186,26 +186,55 @@ class WordInline(admin.TabularInline):
 
 class InflectionAdmin(admin.ModelAdmin):
     list_filter=["dict_entry","paradigma","description_obj"]
-    list_display=["regsub","dict_entry","description","description_obj"]
+    list_display=["regsub","dict_entry","description_obj","description"]
+    list_editable=["description_obj"]
     inlines=[ParadigmaInflectionInline] #,WordInline]
     save_as=True
 
 admin.site.register(models.Inflection,InflectionAdmin)
 
+class DerivationNameListFilter(admin.SimpleListFilter):
+    title = "name"
+    parameter_name = 'prefix'
+
+    def lookups(self, request, model_admin):
+        def label(s):
+            s=s.replace(";"," ")
+            t=s.split()
+            if len(t)==1: return s
+            base=t[0]
+            if t[1] in ["derivato","proprio"]:
+                return base+" "+t[1]
+            return base
+
+        name_list=[ label(x["name"]) for x in models.Derivation.objects.all().values("name") ] 
+        name_list=list(set(name_list))
+        name_list.sort()
+        
+        return [ (x,x) for x in name_list ]
+
+    def queryset(self, request, queryset):
+        val=self.value()
+        if not val: return queryset
+        return queryset.filter(name__startswith=val)
+
+
 class DerivationAdmin(admin.ModelAdmin):
     list_display = [ "name", "tema", "root_part_of_speech", "root_description", 
                      "part_of_speech", "description", "regsub", "paradigma" ]
-    list_filter = [ "root_part_of_speech","paradigma"]
+    list_filter = [ "root_part_of_speech",DerivationNameListFilter,"paradigma"]
     list_editable = [ "root_part_of_speech" ]
     save_as=True
     inlines=[StemInline]
 
 admin.site.register(models.Derivation,DerivationAdmin)
 
+
 class RootAdmin(admin.ModelAdmin):
     save_as=True
-    list_filter=["part_of_speech"]
+    list_filter=["part_of_speech",base_admin.initial_filter_factory("root")]
     list_display=["root","language","part_of_speech","tema_obj","description_obj"]
+    inlines=[StemInline]
     #list_editable=["description_obj","tema_obj","part_of_speech"]
 
     def get_form(self, request, obj=None, **kwargs):
@@ -213,7 +242,6 @@ class RootAdmin(admin.ModelAdmin):
         form.base_fields['language'].initial = DEFAULT_LANGUAGE
         form.base_fields['description_obj'].initial = DEFAULT_DESCRIPTION
         return form
-
 
 admin.site.register(models.Root,RootAdmin)
 
@@ -235,7 +263,6 @@ class FusionRuleAdmin(admin.ModelAdmin):
 
 admin.site.register(models.FusionRule,FusionRuleAdmin)
 
-
 class FusedWordRelationInline(admin.TabularInline):
     model = models.FusedWordRelation
     extra = 0
@@ -243,6 +270,7 @@ class FusedWordRelationInline(admin.TabularInline):
 class FusedWordAdmin(admin.ModelAdmin):
     list_display = [ "cache", "fusion" ]
     inlines = [FusedWordRelationInline]
+    list_filter=[base_admin.initial_filter_factory("cache"),"fusion"]
 
 admin.site.register(models.FusedWord,FusedWordAdmin)
 admin.site.register(models.FusedWordRelation)
@@ -252,7 +280,8 @@ class InflectionInline(admin.TabularInline):
     extra = 0
 
 class RegexpReplacementAdmin(admin.ModelAdmin):
-    list_display = [ "__str__", "pattern", "replacement" ]
+    list_display = [ "__str__","num_fusion_rules",
+                     "num_derivations","num_inflections", "pattern", "replacement" ]
     list_editable = [ "pattern", "replacement" ]
     list_filter = [ "pattern", "replacement" ]
     inlines=[InflectionInline,DerivationInline,FusionRuleInline]

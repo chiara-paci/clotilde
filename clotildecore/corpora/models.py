@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.db.models.functions import Length
 
 # Create your models here.
 
@@ -19,6 +20,14 @@ class Corpus(base_models.AbstractNameDesc):
 
     class Meta:
         verbose_name_plural = 'corpora'
+
+    def text_ordered_by_len(self):
+        return self.text_set.all().annotate(text_len=Length("text")).order_by("text_len")
+
+
+class TextManager(models.Manager):
+    def all_ordered_by_len(self):
+        return self.all().annotate(text_len=Length("text")).order_by("text_len")
 
 class Text(models.Model):
     corpus = models.ForeignKey(Corpus,on_delete="cascade")

@@ -39,7 +39,7 @@ class ItalianoTextCollectorView(View,SingleObjectMixin):
             def as_table(self):
                 "Return this form rendered as HTML <tr>s -- excluding the <table></table>."
                 ret=self._html_output(
-                    normal_row='<td>%(label)s</td><td>%(errors)s%(field)s%(help_text)s</td>',
+                    normal_row='<td>%(errors)s%(field)s%(help_text)s</td>',
                     error_row='<td colspan="2">%s</td>',
                     row_ender='</td>',
                     help_text_html='<br><span class="helptext">%s</span>',
@@ -181,8 +181,8 @@ class ItalianoVerbiView(TemplateView):
     template_name="helpers/italiano/verbi.html"
 
     class FiniteForm(forms.Form):
-        pattern = forms.CharField(initial="(.+)")
-        replacement = forms.CharField(initial=r"\1")
+        pattern = forms.CharField(initial="(.+)",widget=forms.TextInput(attrs={'size':10}))
+        replacement = forms.CharField(initial=r"\1",widget=forms.TextInput(attrs={'size':10}))
         person = forms.ChoiceField( choices=[( "prima singolare", "prima singolare" ),
                                              ( "seconda singolare", "seconda singolare" ),
                                              ( "terza singolare", "terza singolare" ),
@@ -191,12 +191,12 @@ class ItalianoVerbiView(TemplateView):
                                              ( "terza plurale", "terza plurale" )] )
 
     class InfiniteForm(forms.Form):
-        pattern = forms.CharField(initial="(.+)")
-        replacement = forms.CharField(initial=r"\1")
+        pattern = forms.CharField(initial="(.+)",widget=forms.TextInput(attrs={'size':10}))
+        replacement = forms.CharField(initial=r"\1",widget=forms.TextInput(attrs={'size':10}))
 
     class ParticipeForm(forms.Form):
-        pattern = forms.CharField(initial="(.+)")
-        replacement = forms.CharField(initial=r"\1")
+        pattern = forms.CharField(initial="(.+)",widget=forms.TextInput(attrs={'size':10}))
+        replacement = forms.CharField(initial=r"\1",widget=forms.TextInput(attrs={'size':10}))
         gennum = forms.ChoiceField( choices=[( "maschile singolare", "maschile singolare" ),
                                              ( "femminile singolare", "femminile singolare" ),
                                              ( "maschile plurale", "maschile plurale" ),

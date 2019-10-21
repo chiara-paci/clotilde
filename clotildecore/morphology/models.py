@@ -29,6 +29,7 @@ class RegexpReplacement(models.Model):
 
     class Meta:
         ordering = ["pattern","replacement"]
+        #unique_together = [ ["pattern","replacement"] ]
 
     def __str__(self):
         return "%s => %s" % (self.pattern,self.replacement)
@@ -194,6 +195,8 @@ class RootManager(models.Manager):
                 if not (der.tema <= root.tema): continue
                 if not (der.root_description <= root.description): continue
                 stem,created=Stem.objects.get_or_create(root=root,derivation=der)
+                stem.clean()
+                stem.save()
                 ok.append(stem.pk)
         queryset_word.exclude(stem__pk__in=ok).delete()
         queryset_stem.exclude(pk__in=ok).delete()
@@ -266,6 +269,8 @@ class Root(models.Model):
             if not (der.tema <= self.tema): continue
             if not (der.root_description <= self.description): continue
             stem,created=Stem.objects.get_or_create(root=self,derivation=der)
+            stem.clean()
+            stem.save()
             print("S",stem)
             ok.append(stem.pk)
         queryset_word.exclude(stem__pk__in=ok).delete()
@@ -384,8 +389,12 @@ class FusionRuleRelation(models.Model):
 class Stem(models.Model):
     root = models.ForeignKey(Root,on_delete="cascade")    
     derivation = models.ForeignKey(Derivation,on_delete="cascade")    
+    cache=models.CharField(max_length=1024,db_index=True,editable=False)
 
-    def __str__(self): return self.stem
+    class Meta:
+        ordering = ["cache"]
+
+    def __str__(self): return self.cache
 
     def clean(self):
         if self.root.language != self.derivation.language:
@@ -402,7 +411,9 @@ class Stem(models.Model):
             raise ValidationError(_('Root and derivation are not compatible (description).'))
         # if self.status == 'published' and self.pub_date is None:
         #     self.pub_date = datetime.date.today()
+        self.cache=self.derivation.regsub.apply(self.root.root)
 
+        
     @cached_property
     def description(self):
         ddesc=self.derivation.description
@@ -410,7 +421,7 @@ class Stem(models.Model):
         return ddesc+rdesc
 
     @cached_property
-    def stem(self): return self.derivation.regsub.apply(self.root.root)
+    def stem(self): return self.cache
 
     @cached_property
     def tema(self): return self.root.tema
@@ -502,10 +513,12 @@ class FusedWordManager(models.Manager):
             qset=qset.filter(query)
         return qset
 
-    def rebuild(self,language,fusion_list):
+    def rebuild(self,language,fusion_list=[]):
         # FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
         # self.filter(fusion__language=language).delete()
         # fusion_list=Fusion.objects.filter(language=language)
+        if not fusion_list:
+            fusion_list=Fusion.objects.filter(language=language)
 
         FusedWordRelation.objects.filter(fused_word__fusion__in=fusion_list).delete()
         self.filter(fusion__in=fusion_list).delete()

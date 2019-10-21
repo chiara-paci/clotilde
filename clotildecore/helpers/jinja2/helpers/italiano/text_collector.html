@@ -4,26 +4,27 @@
 {% include "helpers/italiano/includes/menu.html" %}
 {% endblock %}
 
-{% block output %}
-<select id="helper"></select>
+{% block applicationcontent %}
 
-<form id="helper_data" method="POST" action="">
+<section class="collector">
+  <select id="helper"></select>
+  <form id="helper_data" method="POST" action="">
     {{ csrf_input }}
     {% for key in formsets %}
-    <section class="management" id="management_{{ key }}" hidden="hidden">
+    <div class="management" id="management_{{ key }}" hidden="hidden">
       {{ formsets[key].management_form }}
-    </section>
-    {{ formsets[key].errors }}
+    </div>
+    {% if formsets[key].errors %}{{ formsets[key].errors }}{% endif %}
     {% endfor %}
-
-
+    
+    
     <table id="helper_table">
     </table>
+    
+    <input type="submit" value="insert data"/>
+  </form>
+</section>
 
-    <input type="submit" value="add"/>
-</form>
-
-{{ super() }}
 {% endblock %}
 
 {% block script %}

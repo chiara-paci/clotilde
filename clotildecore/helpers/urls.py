@@ -11,8 +11,6 @@ urlpatterns =[
     url( r'^italiano/?$',views.ItalianoView.as_view(),name="italiano"),
     url( r'^italiano/textcollector/(?P<pk>\d+)/?$',
          views.ItalianoTextCollectorView.as_view(),name="italiano_textcollector"),
-    url( r'^italiano/textcollector/(?P<pk>\d+)/(?P<pos>.+)/?$',
-         views.ItalianoTextCollectorView.as_view(),name="italiano_textcollector_pos"),
     url( r'^italiano/verbi/?$',views.ItalianoVerbiView.as_view(),name="italiano_verbi"),
     url( r'^italiano/add_root/?$',views.ItalianoAddRootView.as_view(),name="italiano_add_root"),
 ]

@@ -1,21 +1,39 @@
 {% extends "base.html" %}
 
+{% block applicationmenu %}
+{% include "helpers/italiano/includes/menu.html" %}
+{% endblock %}
+
 {% block centercontent %}
 
 <h1>Italiano</h1>
 
-<p><a href='{{ url("helpers:italiano_verbi") }}'>Inserimento paradigmi verbali</a></p>
+<div class="blocks">
 
-<h2>Corpus</h2>
+  <section>
+    <h1>Helpers</h1>
+    <p><a href='{{ url("helpers:italiano_verbi") }}'>Inserimento paradigmi verbali</a></p>
+    <p><a href='{{ url("helpers:italiano_add_root") }}'>Inserimento root</a></p>
+  </section>
 
-{% for corpus in language.corpus_set.all() %}
-<p>{{ corpus }}:</p>
-<ul>
-{% for text in corpus.text_set.all() %}
-<li><a href='{{ url("helpers:italiano_textcollector",kwargs={"pk": text.pk}) }}'>{{ text }}</a></li>
-{% endfor %}
-</ul>
-{% endfor %}
+  <section>
+    <h1>Text collectors</h1>
 
+    {% for corpus in language.corpus_set.all() %}
+    <table>
+      {% for text in corpus.text_ordered_by_len() %}
+      <tbody>
+      <tr>
+	<td><a href='{{ url("helpers:italiano_textcollector",kwargs={"pk": text.pk}) }}'>{{ text }}</a></td>
+	<td class="right">{{ text.text_len }}</td>
+      </tr>
+      </tbody>
+      {% endfor %}
+    </table>
+    {% endfor %}
+    
+  </section>
+
+</div>
 {% endblock centercontent %}
 

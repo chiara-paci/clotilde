@@ -9,16 +9,18 @@
 <h1>Paradigma verbale</h1>
 
 <form method="post">
-<p>name: {{ paradigma_form.name }} template: {{ paradigma_form.template }}</p>
 
-<input type="submit" value="create"/>
+  <section class="collector">
+    <p><input type="submit" value="create"/> {{ paradigma_form.name }} template: {{ paradigma_form.template }}</p>
+    
+  </section>
 
-<div class="helper italiano">
+  <div class="helper italiano">
     {{ csrf_input }}
     {% for modo in sections %}
     {% for tempo in sections[modo] %}
-    <section>
-      <h2>{{ modo }} {{ tempo }}</h2>
+    <section style="min-width: 40vw">
+      <h1>{{ modo }} {{ tempo }}</h1>
       
       <p>{{ sections[modo][tempo]["form"].remove }} remove</p>
       
@@ -27,9 +29,12 @@
       {% for form in sections[modo][tempo]["formset_re"] %}
       <p>
 	{% if modo == "imperativo" and loop.first %}
-	<input type="hidden" name="imperativo_presente_re-0-person" id="id_imperativo_presente_re-0-person" value="prima singolare">
-	<input type="hidden" name="imperativo_presente_re-0-pattern" value="(.*)" id="id_imperativo_presente_re-0-pattern">
-	<input type="hidden" name="imperativo_presente_re-0-replacement" value="\1a" id="id_imperativo_presente_re-0-replacement">
+	<input type="hidden" name="imperativo_presente_re-0-person" id="id_imperativo_presente_re-0-person"
+	       value="prima singolare">
+	<input type="hidden" name="imperativo_presente_re-0-pattern" value="(.*)"
+	       id="id_imperativo_presente_re-0-pattern">
+	<input type="hidden" name="imperativo_presente_re-0-replacement" value="\1a"
+	       id="id_imperativo_presente_re-0-replacement">
         {% else %}
 	{{ form.person }}
 	{{ form.pattern }}

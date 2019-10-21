@@ -6,8 +6,9 @@
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" 
       integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" 
-      crossorigin="anonymous">
-<link href="https://fonts.googleapis.com/css?family=Cabin+Sketch|Fredericka+the+Great|Kranky|Open+Sans" rel="stylesheet"> 
+      crossorigin="anonymous"/>
+<link href="https://fonts.googleapis.com/css?family=Cabin+Sketch|Fredericka+the+Great|Kranky|Open+Sans"
+      rel="stylesheet"/> 
 
 <link rel="icon" href="{{ static("image/logo-min.png") }}" type="image/png">
 
@@ -25,6 +26,7 @@
     <nav>
       <a href="/">Home</a>
       <a href="/corpora/">Corpora</a>
+      <a href="/morphology/">Morphology</a>
       <a href="/helpers/italiano/">Helper Italiano</a>
       <a href="/admin/">Admin</a>
     </nav>
@@ -40,6 +42,7 @@
     <article>
       {% block centercontent %}{% endblock %}
     </article>
+    
     {% endblock content %}
   </main>
   {% endblock main %}

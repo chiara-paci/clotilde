@@ -8,27 +8,39 @@
 
 <h1>Aggiungi root</h1>
 
-<div class="helper italiano">
-
 <form method="post">
     {{ csrf_input }}
-    <p>root: {{ form_root.root }} part of speech: {{ form_root.part_of_speech }} base: {{ form_root.base }}</p>
-    <input type="submit" value="create"/>
+
+    <section class="collector">
+
+    <p><input type="submit" value="insert root"/>
+      {{ form_root.root }} {{ form_root.part_of_speech }} base: {{ form_root.base }}</p>
+
+    <p>
+      {% for key in formsets %}
+      <button type="button" data-target_id="#{{ key }}_table" data-helper_id="{{ key }}" class="addrow">
+	add {{ key }}</button>
+      {% endfor %}
+</p>
+</section>
 
     <div class="helper italiano">
 
       {% for key in formsets %}
-      <section>
-	<h2>{{ key }} derivato</h2>
-    <div id="management_{{ key }}" hidden>
-	  {{ formsets[key].management_form }}</div>
-	<table id="{{ key }}_table">
+      <section  style="min-width: 80vw" class="addsection" id="{{ key }}_section" hidden>
+	<h1>{{ key }} derivato</h1>
+	<div id="management_{{ key }}" hidden>{{ formsets[key].management_form }}</div>
+	<table id="{{ key }}_table" data-target_show_id="#{{ key }}_section">
+	  <colgroup>
+	    <col class="entry">
+	    <col class="entry">
+	    <col class="select">
+	    <col class="checkbox">
+	  </colgroup>
 	  <thead>
 	    <tr><th>regexp</th><th>replacement</th><th>paradigma</th><th>delete</th></tr>
 	  </thead>
 	</table>
-
-	<button type="button" data-target_id="#{{ key }}_table" data-helper_id="{{ key }}" class="addrow">add {{ key }}</button>
 
       </section>
       {% endfor %}
@@ -39,6 +51,9 @@
 {% endblock centercontent %}
 
 {% block script %}
+
+$(".addsection").hide();
+
 
 function Helper(label,name,template) {
     this.label=label;
@@ -73,6 +88,8 @@ Helper.prototype = {
     add_row: function(selector){
 	var table=$(selector);
 	table.append(this._row());
+	var section=table.data("target_show_id");
+	$(section).show();
 	this._num_rows+=1;
 	this._set_management(selector,this._num_rows);
 	return table;

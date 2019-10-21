@@ -23,6 +23,7 @@
 /* http://paletton.com */
 body {
   font-family: 'Open Sans', Helvetica, Arial, 'FreeSans', sans-serif;
+  font-size: 10pt;
   margin: 0;
   padding: 0;
   border: 0;
@@ -41,6 +42,19 @@ body {
 }
 math {
   font-family: 'Open Sans', Helvetica, Arial, 'FreeSans', sans-serif;
+  font-size: 10pt;
+}
+.left {
+  text-align: left;
+}
+.center {
+  text-align: center;
+}
+.right {
+  text-align: right;
+}
+.justify {
+  text-align: justify;
 }
 header {
   margin: 0;
@@ -67,7 +81,7 @@ header nav {
   justify-content: center;
   align-items: stretch;
   align-content: stretch;
-  font-size: .9em;
+  font-size: 1em;
   bottom: 0;
   left: 0;
   height: 30px;
@@ -107,12 +121,6 @@ header h1 {
   padding: 0;
   padding-top: 10px;
   padding-bottom: 10px;
-  /*    
-          font-family: 'Cabin Sketch', cursive;
-          font-family: 'Fredericka the Great', cursive;
-          font-family: 'Kranky', cursive;
-          font-family: 'Open Sans', sans-serif;
-       */
   font: 40pt 'Kranky', cursive;
   margin-left: 5%;
   margin-right: 5%;
@@ -130,7 +138,8 @@ footer {
   flex-shrink: 0;
 }
 main {
-  margin: 1em;
+  background-color: white;
+  margin: 0;
   order: 2;
   flex-grow: 1;
   flex-shrink: 0;
@@ -141,10 +150,10 @@ main nav {
   flex-shrink: 0;
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: flex-start;
   align-items: stretch;
-  align-content: stretch;
+  align-content: center;
   font-size: .9em;
   bottom: 0;
   left: 0;
@@ -153,18 +162,22 @@ main nav {
   padding: 0;
   padding-bottom: 3pt;
   padding-top: 3pt;
-  margin-left: 5%;
-  margin-right: 5%;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 main nav a {
+  display: inline-block;
   background-color: #8f750d;
   color: #f5db73;
-  margin-left: .5em;
-  margin-right: .5em;
-  border-radius: 1em;
-  padding-left: 1em;
-  padding-right: 1em;
+  margin-left: .2em;
+  margin-right: .2em;
+  border-radius: 1.8em;
+  padding: 0;
+  padding-left: .7em;
+  padding-right: .7em;
   text-decoration: none;
+  height: 1.8em;
+  line-height: 1.8em;
 }
 main nav a.selected,
 main nav a:active,
@@ -176,14 +189,24 @@ main article {
   background: white;
   padding: 1em;
   min-height: 800px;
-  margin-left: 5%;
-  margin-right: 5%;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 main aside {
   font-size: .8em;
   padding: .5em;
   border: 1px solid #383529;
   float: right;
+}
+main section.collector {
+  margin: 2em;
+}
+main section.collector table {
+  width: 100%;
+}
+main section.collector table select {
+  width: 100%;
 }
 main section.text {
   margin: 2em;
@@ -255,8 +278,7 @@ main span.token {
   padding-left: .3em;
   padding-right: .3em;
 }
-/*** helpers ***/
-div.helper {
+main div.blocks {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -264,7 +286,7 @@ div.helper {
   align-items: stretch;
   align-content: stretch;
 }
-div.helper section {
+main div.blocks section {
   flex-shrink: 0;
   flex-grow: 1;
   padding: 1em;
@@ -277,10 +299,78 @@ div.helper section {
   border: 1px solid #d3b747;
   margin: 1em;
 }
-div.helper section h2 {
-  text-align: center;
+main div.blocks section h1 {
+  background-color: rgba(211, 183, 71, 0.5);
+  border-color: #8f750d;
+  color: #8f750d;
   font-size: 1em;
-  border: none;
+  margin-top: 0;
+}
+main div.blocks section p {
+  line-height: 1.2em;
+  padding: 0;
+  margin: 0;
+  margin-bottom: .3em;
+}
+main div.blocks section table {
+  width: 100%;
+}
+main div.blocks section table tbody:nth-child(even) {
+  background-color: rgba(211, 183, 71, 0.2);
+}
+main div.blocks section table tbody:nth-child(odd) {
+  background-color: rgba(211, 183, 71, 0.1);
+}
+/*** helpers ***/
+div.helper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: stretch;
+  align-items: stretch;
+  align-content: stretch;
+}
+div.helper section {
+  flex-shrink: 0;
+  flex-grow: 1;
+  padding: .5em;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: stretch;
+  align-items: stretch;
+  align-content: stretch;
+  border: 1px solid #d3b747;
+  margin: .5em;
+}
+div.helper section h1 {
+  background-color: rgba(211, 183, 71, 0.5);
+  border-color: #8f750d;
+  color: #8f750d;
+  font-size: 1em;
+  margin-top: 0;
+}
+div.helper section .expand {
+  min-width: 40vw;
+}
+div.helper section table {
+  width: 100%;
+}
+div.helper section table .entry,
+div.helper section table input[type=text] {
+  width: 10em;
+}
+div.helper section table .checkbox,
+div.helper section table input[type=checkbox] {
+  text-align: center;
+  width: 3em;
+}
+div.helper section table select {
+  width: 100%;
+}
+div.helper section table thead th {
+  font-size: .8em;
+  color: #d3b747;
 }
 div.helper section p {
   display: flex;
@@ -298,6 +388,7 @@ div.helper section p input[type=checkbox] {
 }
 div.helper section p input[type=text] {
   flex-grow: 1;
+  flex-shrink: 1;
 }
 div.helper section p span.separator {
   line-height: 2em;

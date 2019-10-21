@@ -1,6 +1,33 @@
 from django.contrib import admin
 from . import models
 
+class InitialFilter(admin.SimpleListFilter):
+    title = "initial"
+    parameter_name = 'initial'
+    field = ""
+
+    def lookups(self, request, model_admin):
+
+        qset=model_admin.get_queryset(request)
+        initial_list=[ x[self.field][0] for x in qset.values(self.field) ]
+        initial_list=list(set(initial_list))
+        initial_list.sort()
+        
+        return [ (x,x) for x in initial_list ]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            kwargs={
+                self.field+"__startswith": self.value()
+            }
+            return queryset.filter(**kwargs)
+        return queryset
+
+def initial_filter_factory(sel_field):
+    class FieldInitialFilter(InitialFilter):
+        field=sel_field
+    return FieldInitialFilter
+
 admin.site.register(models.CasePair)
 
 class CasePairInline(admin.TabularInline):
@@ -55,8 +82,6 @@ admin.site.register(models.TokenRegexpSet,TokenRegexpSetAdmin)
 
 # admin.site.register(models.NotWord,NotWordAdmin)
 
-admin.site.register(models.Attribute)
-admin.site.register(models.Value)
 admin.site.register(models.SubDescription)
 
 class DescriptionEntryInline(admin.TabularInline):
@@ -80,6 +105,29 @@ admin.site.register(models.Description,DescriptionAdmin)
 
 class EntryAdmin(admin.ModelAdmin):
     inlines=[DescriptionEntryInline]
-    
+    list_display = ["__str__","description_count","negate","attribute","value","value_id"]
+    list_editable = ["value"]
+
+    def value_id(self,obj): return obj.value.pk
+
+    def description_count(self,obj):
+        return obj.description_set.count()
 
 admin.site.register(models.Entry,EntryAdmin)
+
+class EntryInline(admin.TabularInline):
+    model = models.Entry
+    extra = 0
+
+class ValueAdmin(admin.ModelAdmin):
+    inlines = [EntryInline]
+    list_display=["__str__","entry_count"]
+
+    def entry_count(self,obj):
+        return obj.entry_set.count()
+
+    
+admin.site.register(models.Value,ValueAdmin)
+
+admin.site.register(models.Attribute)
+    

@@ -104,9 +104,15 @@ class Command(BaseCommand):
                     negate=False
                     
                 attr,created=base_models.Attribute.objects.get_or_create(name=k)
-                val,created=base_models.Value.objects.get_or_create(string=s_val)
+                try:
+                    val,created=base_models.Value.objects.get_or_create(string=s_val)
+                except Exception as e:
+                    print(s_val)
+                    raise e
+                    
                 entry,created=base_models.Entry.objects.get_or_create(attribute=attr,value=val,
-                                                                      negate__exact=negate, defaults={"negate":negate})
+                                                                      negate__exact=negate,
+                                                                      defaults={"negate":negate})
                 ok.append(entry.pk)
                 desc.entries.add(entry)
             desc.entries.remove(*desc.entries.exclude(pk__in=ok))
