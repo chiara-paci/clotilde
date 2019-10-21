@@ -141,15 +141,25 @@ class Command(BaseCommand):
         fd=archive.extractfile(tarinfo)
         data=json.loads(fd.read().decode())
         root_ok=[]
+        L=len(data)
+        n=1
+        show=int(L/10)
         for root in data:
+            if (n%show)==0:
+                print("    %5d/%d %.2f %% " % (n,L,100*n/L) )
+                
             tema=tema_dict[root["tema"]]
             pos=pos_dict[root["part_of_speech"]]
             desc=desc_dict[root["description"]]
             val=root["root"]
-            obj,created=morph_models.Root.objects.get_or_create(root=val,part_of_speech=pos,
-                                                                tema_obj=tema,
-                                                                description_obj=desc,
-                                                                language=language)
+            try:
+                obj,created=morph_models.Root.objects.get_or_create(root=val,part_of_speech=pos,
+                                                                    tema_obj=tema,
+                                                                    description_obj=desc,
+                                                                    language=language)
+            except Exception as e:
+                print(val,pos,tema)
+                raise e
             root_ok.append(obj.pk)
 
         print("Roots OK")
