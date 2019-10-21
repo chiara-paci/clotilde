@@ -234,7 +234,7 @@ class Root(models.Model):
 
     class Meta:
         ordering = ["root"]
-        unique_together = [ "language","root","tema_obj","part_of_speech","description_obj" ]
+        unique_together = [ ["language","root","tema_obj","part_of_speech","description_obj"] ]
 
     def __str__(self):
         return "%s (%s)" % (self.root,self.part_of_speech)
