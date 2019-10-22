@@ -117,12 +117,51 @@ class TemaNameListFilter(admin.SimpleListFilter):
         val=self.value()
         if not val: return queryset
         return queryset.filter(name__startswith=val)
- 
+
+
+class TemaEntryFilter(admin.SimpleListFilter):
+    title = "entry"
+    parameter_name = 'argval'
+
+    def lookups(self, request, model_admin):
+        def label(s):
+            s=s.replace(";"," ")
+            t=s.split()
+            if len(t)==1: return s
+            base=t[0]
+            if t[1] in ["derivato","proprio"]:
+                return base+" "+t[1]
+            return base
+
+        qset=models.TemaEntry.objects.all().values("argument__pk","argument__name",
+                                                   "value__pk","value__name").distinct()
+        
+        name_list=[ (
+            "%(argument__pk)s_%(value__pk)s" % k,
+            "%(argument__name)s=%(value__name)s" % k
+        ) for k in qset ]
+         
+        return name_list
+
+    def queryset(self, request, queryset):
+        val=self.value()
+        print(val)
+        if not val: return queryset
+
+        t=val.split("_")
+        arg=int(t[0])
+        val=int(t[1])
+        print(arg,val)
+        qset=[ x["tema__pk"] for x in models.TemaEntry.objects.filter(argument__pk=arg,
+                                                                      value__pk=val).values("tema__pk") ]
+        
+        return queryset.filter(pk__in=qset)
+    
 class TemaAdmin(admin.ModelAdmin):
     inlines=[TemaEntryInline,DerivationInline,RootInline,FusionRuleInline]
     list_display=[ "name", "build", "num_roots","num_derivations","num_fusion_rules" ]
     save_as=True
-    list_filter=[TemaNameListFilter]
+    list_filter=[TemaNameListFilter,TemaEntryFilter]
 
 admin.site.register(models.Tema,TemaAdmin)
 
@@ -220,10 +259,13 @@ class DerivationNameListFilter(admin.SimpleListFilter):
 
 
 class DerivationAdmin(admin.ModelAdmin):
-    list_display = [ "name", "tema", "root_part_of_speech", "root_description", 
-                     "part_of_speech", "description", "regsub", "paradigma" ]
-    list_filter = [ "root_part_of_speech",DerivationNameListFilter,"paradigma"]
-    list_editable = [ "root_part_of_speech" ]
+    list_display = [ "__str__","name", "paradigma", "tema", "description", "root_part_of_speech", "root_description", 
+                     "part_of_speech", "regsub" ]
+    list_filter = [ "root_part_of_speech",
+                    DerivationNameListFilter,
+                    ('paradigma', admin.RelatedOnlyFieldListFilter),
+                    "tema_obj"]
+    list_editable = [ "name" ]
     save_as=True
     inlines=[StemInline]
 
@@ -258,8 +300,9 @@ admin.site.register(models.Fusion,FusionAdmin)
 class FusionRuleAdmin(admin.ModelAdmin): 
     inlines=[FusionRuleRelationInline]
     save_as=True
-    list_display=[ "name", "tema", "part_of_speech", "description","description_obj", "regsub" ]
-    list_editable=["description_obj"]
+    list_display=[ "name", "tema","description", "part_of_speech", "description", "regsub" ]
+    #list_editable=["tema_obj"]
+    list_filter=["part_of_speech"]
 
 admin.site.register(models.FusionRule,FusionRuleAdmin)
 

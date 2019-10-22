@@ -154,7 +154,10 @@ class Inflection(models.Model):
         if not self.dict_entry:
             return "%s [%s]" % (self.regsub,self.description)
         return "%s [%s] [DICT]" % (self.regsub,self.description)
-        
+
+    @cached_property
+    def num_paradigmas(self):
+        return self.paradigma_set.count()
 
     def serialize(self):
         return {
