@@ -27,6 +27,7 @@ class Command(BaseCommand):
             if t1.num_roots()!=0: continue
             if t1.num_derivations()!=0: continue
             if t1.num_fusion_rules()!=0: continue
-            print(t1)
+            t1.temaentry_set.all().delete()
+            t1.delete()
 
         

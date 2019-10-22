@@ -146,7 +146,7 @@ class Command(BaseCommand):
         for root in data:
             if (n%show)==0:
                 print("    %5d/%d %.2f %% " % (n,L,100*n/L) )
-                
+            n+=1
             tema=tema_dict[root["tema"]]
             pos=pos_dict[root["part_of_speech"]]
             desc=desc_dict[root["description"]]
@@ -272,7 +272,11 @@ class Command(BaseCommand):
         morph_models.Word.objects.filter(stem__root__language=language).exclude(stem__root__pk__in=root_ok).delete()
         morph_models.Stem.objects.filter(root__language=language).exclude(root__pk__in=root_ok).delete()
         morph_models.Root.objects.filter(language=language).exclude(pk__in=root_ok).delete()
-        morph_models.Derivation.objects.filter(language=language).exclude(pk__in=der_ok).delete()
+
+        der_qset=morph_models.Derivation.objects.filter(language=language).exclude(pk__in=der_ok)
+        morph_models.Root.objects.clean_derived_tables(language,[ x["stem__root__root"] for x in der_qset.values("stem__root__root") ] )
+        der_qset.delete()
+
         morph_models.Paradigma.objects.filter(language=language).exclude(pk__in=par_ok).delete()
 
         archive.close()

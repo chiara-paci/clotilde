@@ -265,7 +265,7 @@ class DerivationAdmin(admin.ModelAdmin):
                     DerivationNameListFilter,
                     ('paradigma', admin.RelatedOnlyFieldListFilter),
                     "tema_obj"]
-    list_editable = [ "name" ]
+    list_editable = [ "name","paradigma" ]
     save_as=True
     inlines=[StemInline]
 
