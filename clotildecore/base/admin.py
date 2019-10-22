@@ -105,7 +105,7 @@ admin.site.register(models.Description,DescriptionAdmin)
 
 class EntryAdmin(admin.ModelAdmin):
     inlines=[DescriptionEntryInline]
-    list_display = ["__str__","description_count","negate","attribute","value","value_id"]
+    list_display = ["__str__","description_count","invert","attribute","value","value_id"]
     list_editable = ["value"]
 
     def value_id(self,obj): return obj.value.pk

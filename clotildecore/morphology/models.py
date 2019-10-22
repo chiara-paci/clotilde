@@ -504,7 +504,7 @@ class FusedWordManager(models.Manager):
                 val=description[arg][0]
             else:
                 val=description[arg]
-            qentry=base_models.Entry.objects.filter( models.Q(attribute__name=arg,value__string=val,negate=False) )
+            qentry=base_models.Entry.objects.filter( models.Q(attribute__name=arg,value__string=val,invert=False) )
             desc_list=[x["description"] for x in  qentry.values("description")] 
             query= models.Q(stem__derivation__description_obj__in=desc_list) | \
                 models.Q(stem__root__description_obj__in=desc_list) | \

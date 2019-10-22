@@ -25,9 +25,9 @@ class Command(BaseCommand):
                 t=e.value.string.replace('[','').replace(']','').split(',')
                 s=t[0].replace("'","")
                 if t[1]=="True":
-                    e.negate=True
+                    e.invert=True
                 else:
-                    e.negate=False
+                    e.invert=False
                 e.value.string=s
                 e.value.save()
                 e.save()

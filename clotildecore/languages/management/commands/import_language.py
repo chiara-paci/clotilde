@@ -98,10 +98,10 @@ class Command(BaseCommand):
             for k in data[name]:
                 if type(data[name][k]) is list:
                     s_val=data[name][k][0]
-                    negate=data[name][k][1]
+                    invert=data[name][k][1]
                 else:
                     s_val=data[name][k]
-                    negate=False
+                    invert=False
                     
                 attr,created=base_models.Attribute.objects.get_or_create(name=k)
                 try:
@@ -111,8 +111,7 @@ class Command(BaseCommand):
                     raise e
                     
                 entry,created=base_models.Entry.objects.get_or_create(attribute=attr,value=val,
-                                                                      negate__exact=negate,
-                                                                      defaults={"negate":negate})
+                                                                      invert=invert)
                 ok.append(entry.pk)
                 desc.entries.add(entry)
             desc.entries.remove(*desc.entries.exclude(pk__in=ok))

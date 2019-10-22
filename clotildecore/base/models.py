@@ -227,17 +227,17 @@ class Value(models.Model):
 class Entry(models.Model):
     attribute = models.ForeignKey(Attribute,on_delete="cascade")    
     value = models.ForeignKey(Value,on_delete="cascade")    
-    negate = models.BooleanField(default=False)
+    invert = models.BooleanField(default=False)
 
     def __str__(self):
         v=str(self.value)
-        if self.negate:
+        if self.invert:
             v="!"+v
         return "%s=%s" % (self.attribute,v)
 
     class Meta:
         ordering = [ "attribute","value" ]
-        unique_together = [ ["attribute","value","negate"] ]
+        unique_together = [ ["attribute","value","invert"] ]
 
 class DescriptionManager(models.Manager):
 
@@ -266,11 +266,11 @@ class DescriptionManager(models.Manager):
 
         if type(edata) is tuple:
             value,created=Value.objects.get_or_create(string=edata[0])
-            entry,created=Entry.objects.get_or_create(attribute=attr,value=value,negate=edata[1])
+            entry,created=Entry.objects.get_or_create(attribute=attr,value=value,invert=edata[1])
             return [entry],[]
 
         value,created=Value.objects.get_or_create(string=edata)
-        entry,created=Entry.objects.get_or_create(attribute=attr,value=value) #,negate=False)
+        entry,created=Entry.objects.get_or_create(attribute=attr,value=value) #,invert=False)
         return [entry],[]
 
     def get_or_create_by_dict(self,name,data):
@@ -294,7 +294,7 @@ class Description(AbstractName):
 
 
     def build(self):
-        args=[ (str(e.attribute), ( str(e.value),e.negate) ) for e in self.entries.all() ]
+        args=[ (str(e.attribute), ( str(e.value),e.invert) ) for e in self.entries.all() ]
         argsb=[ (str(e.attribute), e.value.build()) for e in self.subdescriptions.all() ]
         kwargs=dict(args+argsb)
         #kwargs={ str(e.attribute): str(e.value) for e in self.entries.all() }
@@ -302,7 +302,7 @@ class Description(AbstractName):
         return descriptions.Description(**kwargs)
 
     def serialize(self):
-        kwargs=[ (str(e.attribute), ( str(e.value), e.negate ) ) for e in self.entries.all() ]
+        kwargs=[ (str(e.attribute), ( str(e.value), e.invert ) ) for e in self.entries.all() ]
         kwargsb=[ e.serialize() for e in self.subdescriptions.all() ]
         return (self.name,dict(kwargs+kwargsb))
     
