@@ -268,7 +268,10 @@ class Command(BaseCommand):
 
         morph_models.FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
         morph_models.FusedWord.objects.filter(fusion__language=language).delete()
-        morph_models.Fusion.objects.filter(language=language).exclude(pk__in=fusion_ok).delete()
+        
+        fusion_qset=morph_models.Fusion.objects.filter(language=language).exclude(pk__in=fusion_ok)
+        morph_models.FusionRuleRelation.objects.filter(fusion__in=fusion_qset).delete()
+        fusion_qset.delete()
         morph_models.Word.objects.filter(stem__root__language=language).exclude(stem__root__pk__in=root_ok).delete()
         morph_models.Stem.objects.filter(root__language=language).exclude(root__pk__in=root_ok).delete()
         morph_models.Root.objects.filter(language=language).exclude(pk__in=root_ok).delete()
