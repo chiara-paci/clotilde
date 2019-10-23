@@ -375,15 +375,23 @@ class ItalianoVerbiView(TemplateView):
 
         return redirect("/helpers/italiano/verbi/")
 
+def tema_entries_choices(argument):
+    qset=morph_models.TemaEntry.objects.filter(argument__name=argument)
+    qset=qset.values("value__name").distinct().order_by("value__name")
+    return [ (x["value__name"],x["value__name"]) for x in qset ]
 
 class ItalianoAddRootView(TemplateView):
     template_name="helpers/italiano/add_root.html"
 
     class RootForm(forms.Form):
         root = forms.CharField()
-        part_of_speech = forms.ModelChoiceField(queryset=morph_models.PartOfSpeech.objects.all(),empty_label=None)
-        base = forms.ChoiceField(choices=[ (x["value__name"],x["value__name"]) 
-                                           for x in morph_models.TemaEntry.objects.filter(argument__name="base").values("value__name").distinct().order_by("value__name") ])
+        part_of_speech = forms.ModelChoiceField(queryset=morph_models.PartOfSpeech.objects.all(),
+                                                empty_label=None)
+        #base = forms.ChoiceField(choices=tema_entries_choices("base"))
+        base = forms.ModelChoiceField(queryset=morph_models.TemaValue.objects.filter(temaentry__argument__name="base").distinct(),
+                                      empty_label=None)
+
+        
 
     class DerivatoForm(forms.Form):
         pattern = forms.CharField(initial="(.+)")
@@ -417,9 +425,10 @@ class ItalianoAddRootView(TemplateView):
         context["form_root"]=self.RootForm(prefix="root")
         context["formsets"]=collections.OrderedDict()
         context["formsets"]["nome"]      = self._formset_factory("nome")(prefix="nome")
+        context["formsets"]["aggettivo"] = self._formset_factory("aggettivo")(prefix="aggettivo")
         context["formsets"]["verbo"]     = self._formset_factory("verbo")(prefix="verbo")
         context["formsets"]["avverbio"]  = self._formset_factory("avverbio")(prefix="avverbio")
-        context["formsets"]["aggettivo"] = self._formset_factory("aggettivo")(prefix="aggettivo")
+        context["formsets"]["preposizione"]  = self._formset_factory("preposizione")(prefix="preposizione")
         return context
 
     
@@ -484,9 +493,14 @@ class ItalianoAddRootView(TemplateView):
             
             label=self._label(regsub,paradigma)
 
-            name="%s derivato in %s" % (self._part_of_speech,label)
+            if self._part_of_speech in ["preposizione","congiunzione"]:
+                name="%s derivata in %s" % (self._part_of_speech,label)
+                arg_name="%s derivata" % self._part_of_speech
+            else:
+                name="%s derivato in %s" % (self._part_of_speech,label)
+                arg_name="%s derivato" % self._part_of_speech
 
-            tema_argument,created=morph_models.TemaArgument.objects.get_or_create(name="%s derivato" % self._part_of_speech)
+            tema_argument,created=morph_models.TemaArgument.objects.get_or_create(name=arg_name)
             tema_value,created=morph_models.TemaValue.objects.get_or_create(name=label)
 
             L_entry=morph_models.TemaEntry.objects.filter(argument=tema_argument,value=tema_value)
@@ -535,6 +549,7 @@ class ItalianoAddRootView(TemplateView):
         "verbo": Creator("verbo"),
         "aggettivo": Creator("aggettivo"),
         "avverbio": Creator("avverbio"),
+        "preposizione": Creator("preposizione"),
     }
 
     def _build_tema(self,entry_data):
@@ -554,7 +569,7 @@ class ItalianoAddRootView(TemplateView):
         t=[ entry_data[0][1] ]
         for k in labels:
             val=", ".join(labels[k])
-            pre=k.replace("derivato","der.")
+            pre=k.replace("derivato","der.").replace("derivata","der.")
             t.append( "%s %s" % (pre,val) )
         tema_name="; ".join(t)
 
@@ -574,6 +589,7 @@ class ItalianoAddRootView(TemplateView):
         formsets["verbo"]=self._formset_factory("verbo")(prefix="verbo",data=request.POST)
         formsets["aggettivo"]=self._formset_factory("aggettivo")(prefix="aggettivo",data=request.POST)
         formsets["avverbio"]=self._formset_factory("avverbio")(prefix="avverbio",data=request.POST)
+        formsets["preposizione"]=self._formset_factory("preposizione")(prefix="preposizione",data=request.POST)
 
         if not form_root.is_valid():
             context=self.get_context_data()
@@ -596,7 +612,7 @@ class ItalianoAddRootView(TemplateView):
 
         root=form_root.cleaned_data["root"]
         root_part_of_speech=form_root.cleaned_data["part_of_speech"]
-        root_base=form_root.cleaned_data["base"]
+        root_base=form_root.cleaned_data["base"].name
         root_description=base_models.Description.objects.get(name="vuota")
 
         tema_list=[]

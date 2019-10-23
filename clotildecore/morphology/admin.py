@@ -103,7 +103,7 @@ class TemaNameListFilter(admin.SimpleListFilter):
             t=s.split()
             if len(t)==1: return s
             base=t[0]
-            if t[1] in ["derivato","proprio"]:
+            if t[1] in ["derivato","proprio","derivata"]:
                 return base+" "+t[1]
             return base
 
@@ -167,6 +167,7 @@ admin.site.register(models.Tema,TemaAdmin)
 
 class TemaEntryAdmin(admin.ModelAdmin):
     list_display=["__str__","tema"]
+    list_filter=["argument","value"]
 
 admin.site.register(models.TemaEntry,TemaEntryAdmin)
 
