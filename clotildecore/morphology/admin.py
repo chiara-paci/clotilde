@@ -53,6 +53,8 @@ class TemaArgumentAdmin(admin.ModelAdmin):
 admin.site.register(models.TemaArgument,TemaArgumentAdmin)
 
 class TemaValueAdmin(admin.ModelAdmin):
+    list_display=["__str__","name"]
+    list_editable=["name"]
     inlines = [TemaEntryInline]
 
 admin.site.register(models.TemaValue,TemaValueAdmin)
@@ -159,9 +161,10 @@ class TemaEntryFilter(admin.SimpleListFilter):
     
 class TemaAdmin(admin.ModelAdmin):
     inlines=[TemaEntryInline,DerivationInline,RootInline,FusionRuleInline]
-    list_display=[ "name", "build", "num_roots","num_derivations","num_fusion_rules" ]
+    list_display=[ "__str__","name", "num_roots","num_derivations","num_fusion_rules","build" ]
     save_as=True
     list_filter=[TemaNameListFilter,TemaEntryFilter]
+    list_editable=["name"]
 
 admin.site.register(models.Tema,TemaAdmin)
 
@@ -258,15 +261,60 @@ class DerivationNameListFilter(admin.SimpleListFilter):
         if not val: return queryset
         return queryset.filter(name__startswith=val)
 
+class DerivationDescriptionEntryFilter(admin.SimpleListFilter):
+    title = "description entry"
+    parameter_name = 'descentry'
+
+    def lookups(self, request, model_admin):
+        def label(D):
+            if D["invert"]:
+                D["x"]="!"
+            else:
+                D["x"]=""
+            return "%(attribute__name)s=%(x)s%(value__string)s" % D
+
+        def key(D):
+            if D["invert"]:
+                D["x"]="1"
+            else:
+                D["x"]="0"
+            return "%(attribute__pk)s_%(value__pk)s_%(x)s" % D
+            
+
+        qset=base_models.Entry.objects.all().values("attribute__pk","attribute__name",
+                                                    "value__pk","value__string",
+                                                    "invert").distinct()
+        
+        name_list=[ (key(k),label(k)) for k in qset ]
+         
+        return name_list
+
+    def queryset(self, request, queryset):
+        val=self.value()
+        print(val)
+        if not val: return queryset
+
+        t=val.split("_")
+        arg=int(t[0])
+        val=int(t[1])
+        inv=(int(t[2])==1)
+        print(arg,val,inv)
+        qset=base_models.Description.objects.filter(entries__attribute__pk=arg,
+                                                    entries__value__pk=val,
+                                                    entries__invert=inv).distinct()
+        return queryset.filter(description_obj__in=qset)
+    
 
 class DerivationAdmin(admin.ModelAdmin):
-    list_display = [ "__str__","name", "paradigma", "tema", "description", "root_part_of_speech", "root_description", 
+    list_display = [ "__str__","name", "root_part_of_speech","description_obj","tema", "paradigma",
+                      "root_description", 
                      "part_of_speech", "regsub" ]
     list_filter = [ "root_part_of_speech",
                     DerivationNameListFilter,
+                    DerivationDescriptionEntryFilter,
                     ('paradigma', admin.RelatedOnlyFieldListFilter),
                     "tema_obj"]
-    list_editable = [ "name","paradigma" ]
+    list_editable = [ "name","description_obj" ]
     save_as=True
     inlines=[StemInline]
 
@@ -278,7 +326,7 @@ class RootAdmin(admin.ModelAdmin):
     list_filter=["part_of_speech",base_admin.initial_filter_factory("root")]
     list_display=["root","language","part_of_speech","tema_obj","description_obj"]
     inlines=[StemInline]
-    #list_editable=["description_obj","tema_obj","part_of_speech"]
+    list_editable=["description_obj"] #,"tema_obj","part_of_speech"]
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(RootAdmin, self).get_form(request, obj, **kwargs)

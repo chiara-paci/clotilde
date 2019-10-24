@@ -95,7 +95,8 @@ class DescriptionSubDescriptionInline(admin.TabularInline):
 class DescriptionAdmin(admin.ModelAdmin):
     exclude = [ "entries","subdescriptions"]
     inlines=[DescriptionEntryInline,DescriptionSubDescriptionInline]
-    list_display=[ "name","_build" ]
+    list_display=[ "__str__","name","_build" ]
+    list_editable=["name"]
     save_as=True
 
     def _build(self,obj):

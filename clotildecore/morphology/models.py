@@ -215,7 +215,7 @@ class RootManager(models.Manager):
                 word,created=Word.objects.get_or_create(stem=stem,inflection=infl)
                 word.clean()
                 word.save()
-                print("        W",word)
+                print("        W %-20.20s %s" % (str(word),str(word.description)))
                 ok.append(word.pk)
         queryset_word.exclude(pk__in=ok).delete()
 
@@ -507,7 +507,8 @@ class FusedWordManager(models.Manager):
                 val=description[arg][0]
             else:
                 val=description[arg]
-            qentry=base_models.Entry.objects.filter( models.Q(attribute__name=arg,value__string=val,invert=False) )
+            qentry=base_models.Entry.objects.filter( models.Q(attribute__name=arg,
+                                                              value__string=val,invert=False) )
             desc_list=[x["description"] for x in  qentry.values("description")] 
             query= models.Q(stem__derivation__description_obj__in=desc_list) | \
                 models.Q(stem__root__description_obj__in=desc_list) | \
@@ -532,9 +533,10 @@ class FusedWordManager(models.Manager):
             abort=False
             for rel in fusion.fusionrulerelation_set.all().order_by("order"):
                 rule=rel.fusion_rule
-                word_list=self._reduce_word_list(rule.part_of_speech,rule.tema,rule.description) #   Word.objects.filter(stem__derivation__paradigma__part_of_speech=rule.part_of_speech)
+                word_list=self._reduce_word_list(rule.part_of_speech,rule.tema,rule.description)
                 w_comp=[]
                 print("    rule %s: tema=%s, description=%s" % (rule,str(rule.tema),str(rule.description) ) )
+                print("        ",word_list)
                 for w in word_list:
                     if not (rule.tema <= w.tema): continue
                     if not (rule.description <= w.description): continue
