@@ -35,6 +35,7 @@ class Text(models.Model):
     title = models.CharField(max_length=1024)
     text = models.TextField()
     
+    
     def __str__(self): return(self.title)
 
     def get_absolute_url(self):
@@ -52,6 +53,19 @@ class Text(models.Model):
             html=html.replace('[/'+k+']','</'+k+'>')
         return html
 
+class MetaDataArgument(base_models.AbstractName): pass
+
+class MetaDataEntry(models.Model):
+    text = models.ForeignKey(Text,on_delete="cascade")    
+    argument = models.ForeignKey(MetaDataArgument,on_delete="cascade")    
+    value = models.TextField()
+
+    def __str__(self):
+        return "%s=%s" % (str(self.argument),str(self.value))
+
+    class Meta:
+        ordering=["argument","value"]
+    
 class WDConcorso(models.Model):
     title = models.CharField(max_length=1024)
     tag = models.CharField(max_length=10,db_index=True)

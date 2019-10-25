@@ -167,8 +167,35 @@ class Inflection(models.Model):
         }
 
 class RootManager(models.Manager):
-    def clean_derived_tables(self,language,root_names): 
-        root_list=self.filter(language=language,root__in=root_names)
+    def _clean_fused(self,language,root_list=None):
+        if root_list is None:
+            FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
+            FusedWord.objects.filter(fusion__language=language).delete()
+            return
+        fword_list=list(FusedWord.objects.filter(fusedwordrelation__word__stem__root__in=root_list))
+        FusedWordRelation.objects.filter(fused_word__in=fword_list).delete()
+        for fword in fword_list:
+            fword.delete()
+
+    def _rebuild_fused(self,language,root_list=None):
+        if root_list is None:
+            FusedWord.objects.rebuild(language)
+            return
+        qset=Word.objects.filter(stem__root__in=root_list)
+        qset=qset.values("inflection__paradigma__part_of_speech")
+        qset=qset.order_by("inflection__paradigma__part_of_speech").distinct()
+        fpk_qset=FusionRuleRelation.objects.filter(fusion_rule__part_of_speech__in=qset)
+        fpk_qset=fpk_qset.values("fusion__pk")
+        fusion_list=Fusion.objects.filter(pk__in=fpk_qset)
+        FusedWord.objects.rebuild(language,fusion_list=fusion_list)
+        
+    def clean_derived_tables(self,language,root_names):
+        if root_names:
+            root_list=self.filter(language=language,root__in=root_names)
+            self._clean_fused(language,root_list)
+        else:
+            root_list=self.filter(language=language)
+            self._clean_fused(language)
         Word.objects.filter(stem__root__in=root_list).delete()
         Stem.objects.filter(root__in=root_list).delete()
 
@@ -177,16 +204,14 @@ class RootManager(models.Manager):
             root_list=self.filter(language=language)
             queryset_word=Word.objects.filter(stem__root__language=language)
             queryset_stem=Stem.objects.filter(root__language=language)
+            if fused: self._clean_fused(language)
         else:
             root_list=self.filter(language=language,root__in=root_names)
             queryset_word=Word.objects.filter(stem__root__language=language,
                                               stem__root__in=root_list)
             queryset_stem=Stem.objects.filter(root__language=language,
                                               root__in=root_list)
-
-        if fused:
-            FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
-            FusedWord.objects.filter(fusion__language=language).delete()
+            if fused: self._clean_fused(language,root_list)
 
         # phase 1. stems
         der_list=Derivation.objects.filter(language=language)
@@ -221,8 +246,13 @@ class RootManager(models.Manager):
 
         # phase 3. fused words
 
-        if fused:
-            FusedWord.objects.rebuild(language)
+        if not fused: return
+
+        if not root_names:
+            self._rebuild_fused(language)
+            return
+        self._rebuild_fused(language,root_list)
+
 
 class Root(models.Model):
     root=models.CharField(max_length=1024)
@@ -319,6 +349,9 @@ class Derivation(base_models.AbstractName):
             "paradigma": self.paradigma.name,
         })
 
+    @cached_property
+    def num_stem(self):
+        return self.stem_set.count()
 
     @cached_property
     def description(self):
@@ -516,6 +549,7 @@ class FusedWordManager(models.Manager):
             qset=qset.filter(query)
         return qset
 
+
     def rebuild(self,language,fusion_list=[]):
         # FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
         # self.filter(fusion__language=language).delete()
@@ -565,7 +599,6 @@ class FusedWordManager(models.Manager):
 class FusedWord(models.Model):
     fusion = models.ForeignKey(Fusion,on_delete="cascade")    
     cache = models.CharField(max_length=1024,db_index=True,editable=False)
-
     objects=FusedWordManager()
 
     def clean(self):
@@ -607,6 +640,9 @@ class FusedWordRelation(models.Model):
     fused_word = models.ForeignKey(FusedWord,on_delete="cascade")    
     word = models.ForeignKey(Word,on_delete="cascade")    
     order = models.IntegerField()
+
+    def __str__(self):
+        return "%s/%s" % (self.fused_word.cache,self.word.cache)
 
     def clean(self):
         if self.word.language != self.fused_word.language:

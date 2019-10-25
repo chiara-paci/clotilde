@@ -306,9 +306,12 @@ class DerivationDescriptionEntryFilter(admin.SimpleListFilter):
     
 
 class DerivationAdmin(admin.ModelAdmin):
-    list_display = [ "__str__","name", "root_part_of_speech","description_obj","tema", "paradigma",
-                      "root_description", 
-                     "part_of_speech", "regsub" ]
+    list_display = [ "__str__","name","regsub","num_stem",
+                     "root_part_of_speech","tema_obj",
+                     "description_obj",
+                     "paradigma",
+                     "root_description", 
+                     "part_of_speech" ]
     list_filter = [ "root_part_of_speech",
                     DerivationNameListFilter,
                     DerivationDescriptionEntryFilter,
