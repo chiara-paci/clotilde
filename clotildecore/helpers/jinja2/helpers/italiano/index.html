@@ -16,10 +16,10 @@
     <p><a href='{{ url("helpers:italiano_add_root") }}'>Inserimento root</a></p>
   </section>
 
+  {% for corpus in language.corpus_set.all() %}
   <section>
-    <h1>Text collectors</h1>
+    <h1>Text collectors: {{ corpus }}</h1>
 
-    {% for corpus in language.corpus_set.all() %}
     <table>
       {% for text in corpus.text_ordered_by_len() %}
       <tbody>
@@ -30,9 +30,9 @@
       </tbody>
       {% endfor %}
     </table>
-    {% endfor %}
-    
   </section>
+  {% endfor %}
+    
 
 </div>
 {% endblock centercontent %}

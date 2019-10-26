@@ -23,9 +23,26 @@ def combine(list_of_list):
             ret.append( [x]+y )
     return ret
 
+        
+
+class RegexpReplacementManager(models.Manager):
+    def update_reverse(self):
+        for obj in self.all():
+            #if hasattr(obj,"reverse"): continue
+            RegexpReverse.objects.add_reverse(obj)
+                
+    def de_serialize(self,data):
+        regsub,created=self.get_or_create(pattern=data["pattern"],
+                                          replacement=data["regexp"])
+        if "reverse" in data:
+            rev,created=RegexpReverse.objects.update_or_create(target=regsub,defaults=data["reverse"])
+        return regsub
+
 class RegexpReplacement(models.Model):
     pattern=models.CharField(max_length=1024)
     replacement=models.CharField(max_length=1024)
+
+    objects=RegexpReplacementManager()
 
     class Meta:
         ordering = ["pattern","replacement"]
@@ -39,7 +56,18 @@ class RegexpReplacement(models.Model):
         return q
 
     def serialize(self):
-        return [ str(self.pattern),str(self.replacement) ]
+        ret={
+            "pattern": self.pattern,
+            "replacement": self.replacement,
+        }
+        
+        if hasattr(self,"reverse"):
+            ret["reverse"]={
+                "pattern": self.reverse.pattern,
+                "replacement": self.reverse.replacement,
+            }
+
+        return ret
 
     class Meta:
         ordering = ["pattern","replacement"]
@@ -52,6 +80,129 @@ class RegexpReplacement(models.Model):
 
     @cached_property
     def num_fusion_rules(self): return self.fusionrule_set.count()
+
+
+class RegexpReverseManager(models.Manager):
+
+    def _add_N0(self,target):
+        rev,created=self.update_or_create(target=target,
+                                          defaults={
+                                              "pattern":target.replacement,
+                                              "replacement":target.replacement
+                                          })
+        return rev
+
+    def _add_N1(self,target):
+        N=target.replacement.count('\\1')
+        if N==0:
+            print("N==0",N,target)
+            return None
+        M=target.pattern.count(r'(')
+        if M!=1:
+            print("M!=1",M,target)
+            return None
+        base=""
+        base_list=[ r'(.+)', r'(.+?)', r'(.)' ]
+        for b in base_list:
+            M=target.pattern.count(b)
+            if M!=1: continue
+            base=b
+            break
+        if not base:
+            print("B   ",base_list,target)
+            return
+        rev_pattern=target.replacement.replace(r'\1',base)
+        rev_replacement=target.pattern.replace(base,r'\1')
+        rev,created=self.update_or_create(target=target,
+                                          defaults={
+                                              "pattern":rev_pattern,
+                                              "replacement":rev_replacement
+                                          })
+        return rev
+        
+    def _add_N2(self,target):
+        N1=target.replacement.count('\\1')
+        N2=target.replacement.count('\\2')
+        if N1!=1 or N2!=1:
+            print("N!=1",N1,N2,target)
+            return None
+
+        if target.pattern not in [ '(.+)(.)', '(.)(.+)' ]:
+            print("P2  ",target)
+
+        if target.pattern=='(.+)(.)':
+            rev_pattern=target.replacement.replace(r'\1',r'(.+)').replace(r'\2',r'(.)')
+        else:
+            rev_pattern=target.replacement.replace(r'\2',r'(.+)').replace(r'\1',r'(.)')
+
+        rev_replacement=r'\1\2'
+        rev,created=self.update_or_create(target=target,
+                                          defaults={
+                                              "pattern":rev_pattern,
+                                              "replacement":rev_replacement
+                                          })
+        return rev
+        
+    def _add_N3(self,target):
+        N1=target.replacement.count('\\1')
+        N2=target.replacement.count('\\2')
+        if N1>2 or N2>2:
+            print("N!=2",N1,N2,target)
+            return None
+        if target.pattern not in [ '(.+)(.)', '(.)(.+)' ]:
+            print("P3  ",target)
+        
+        if target.pattern=='(.+)(.)':
+            p1=r'(.+)'
+            p2=r'(.)'
+        else:
+            p1=r'(.)'
+            p2=r'(.+)'
+
+        if N1==2:
+            rev_pattern=target.replacement.replace(r'\1\1',r'%s\1' % p1)
+            rev_pattern=rev_pattern.replace(r'\2',p2)
+        else:
+            rev_pattern=target.replacement.replace(r'\2\2',r'%s\2' % p2)
+            rev_pattern=rev_pattern.replace(r'\1',p1)
+
+
+        rev_replacement=r'\1\2'
+        rev,created=self.update_or_create(target=target,
+                                          defaults={
+                                              "pattern":rev_pattern,
+                                              "replacement":rev_replacement
+                                          })
+        return rev
+        
+
+    def add_reverse(self,target):
+        N=target.replacement.count('\\')
+        if N==0:
+            rev=self._add_N0(target)
+            return
+        if N==1:
+            rev=self._add_N1(target)
+            return
+        if N==2:
+            rev=self._add_N2(target)
+            return
+        if N==3:
+            rev=self._add_N3(target)
+            return
+        print("N>3 ",N,target)
+        return
+
+
+class RegexpReverse(models.Model):
+    target=models.OneToOneField(RegexpReplacement,on_delete="cascade",related_name="reverse")
+    pattern=models.CharField(max_length=1024)
+    replacement=models.CharField(max_length=1024)
+
+    objects=RegexpReverseManager()
+
+    def __str__(self):
+        return "%s => %s" % (self.pattern,self.replacement)
 
 class PartOfSpeech(base_models.AbstractName):
     bg_color = models.CharField(max_length=20,default="#ffff00")
@@ -120,8 +271,8 @@ class TemaEntry(models.Model):
         ordering=["argument","value"]
 
 class Paradigma(base_models.AbstractName):
-    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
-    language = models.ForeignKey('languages.Language',on_delete="cascade")    
+    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="protect")    
+    language = models.ForeignKey('languages.Language',on_delete="protect")    
     inflections = models.ManyToManyField("Inflection",blank=True)
 
     class Meta:
@@ -140,8 +291,8 @@ class Paradigma(base_models.AbstractName):
 
 class Inflection(models.Model):
     dict_entry = models.BooleanField(default=False)
-    regsub = models.ForeignKey(RegexpReplacement,on_delete="cascade")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")
+    regsub = models.ForeignKey(RegexpReplacement,on_delete="protect")    
+    description_obj = models.ForeignKey(base_models.Description,on_delete="protect")
 
     class Meta:
         ordering = ["regsub"]
@@ -256,10 +407,10 @@ class RootManager(models.Manager):
 
 class Root(models.Model):
     root=models.CharField(max_length=1024)
-    language = models.ForeignKey('languages.Language',on_delete="cascade")    
-    tema_obj = models.ForeignKey(Tema,on_delete="cascade")    
-    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
+    language = models.ForeignKey('languages.Language',on_delete="protect")    
+    tema_obj = models.ForeignKey(Tema,on_delete="protect")    
+    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="protect")    
+    description_obj = models.ForeignKey(base_models.Description,on_delete="protect")    
 
     objects=RootManager()
 
@@ -326,15 +477,15 @@ class Root(models.Model):
     
     
 class Derivation(base_models.AbstractName):
-    language = models.ForeignKey('languages.Language',on_delete="cascade")    
-    regsub = models.ForeignKey(RegexpReplacement,on_delete="cascade")    
-    tema_obj = models.ForeignKey(Tema,on_delete="cascade")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
+    language = models.ForeignKey('languages.Language',on_delete="protect")    
+    regsub = models.ForeignKey(RegexpReplacement,on_delete="protect")    
+    tema_obj = models.ForeignKey(Tema,on_delete="protect")    
+    description_obj = models.ForeignKey(base_models.Description,on_delete="protect")    
     root_description_obj = models.ForeignKey(base_models.Description,
-                                             on_delete="cascade",
+                                             on_delete="protect",
                                              related_name="root_derivation_set")    
-    root_part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
-    paradigma = models.ForeignKey(Paradigma,on_delete="cascade")    
+    root_part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="protect")    
+    paradigma = models.ForeignKey(Paradigma,on_delete="protect")    
 
     class Meta:
         ordering = ['name']
@@ -383,14 +534,14 @@ class Derivation(base_models.AbstractName):
 
     
 class Fusion(base_models.AbstractName):
-    language = models.ForeignKey('languages.Language',on_delete="cascade")    
+    language = models.ForeignKey('languages.Language',on_delete="protect")    
     #objects=FusionManager()
 
 class FusionRule(base_models.AbstractName):
-    regsub = models.ForeignKey(RegexpReplacement,on_delete="cascade")    
-    tema_obj = models.ForeignKey(Tema,on_delete="cascade")    
-    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="cascade")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="cascade")    
+    regsub = models.ForeignKey(RegexpReplacement,on_delete="protect")    
+    tema_obj = models.ForeignKey(Tema,on_delete="protect")    
+    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="protect")    
+    description_obj = models.ForeignKey(base_models.Description,on_delete="protect")    
 
     @cached_property
     def description(self):

@@ -24,6 +24,14 @@ def build_tarinfo(fname,data):
     info.mtime=time.time()
     return info, io.BytesIO(data)
 
+def insert_regexp_replacement(data):
+    try:
+        regsub=morph_models.RegexpReplacement.objects.de_serialize(data)
+    except Exception as e:
+        print(data)
+        raise e
+    return regsub
+
 class Command(BaseCommand):
     requires_migrations_checks = True
     help = 'Import language from file <fname.lar>'
@@ -180,12 +188,15 @@ class Command(BaseCommand):
             for infl in data["inflections"]:
                 desc=desc_dict[infl["description"]]
                 dict_entry=infl["dict_entry"]
-                try:
-                    regsub,created=morph_models.RegexpReplacement.objects.update_or_create(pattern=infl["regsub"][0],
-                                                                                           replacement=infl["regsub"][1])
-                except Exception as e:
-                    print(infl["regsub"])
-                    raise e
+                regsub=insert_regexp_replacement(infl["regsub"])
+
+                # try:
+                #     regsub,created=morph_models.RegexpReplacement.objects.update_or_create(pattern=infl["regsub"][0],
+                #                                                                            replacement=infl["regsub"][1])
+                # except Exception as e:
+                #     print(infl["regsub"])
+                #     raise e
+
                 try:
                     obj,created=morph_models.Inflection.objects.get_or_create(regsub=regsub,
                                                                               dict_entry=dict_entry,
@@ -207,13 +218,13 @@ class Command(BaseCommand):
         data=json.loads(fd.read().decode())
         der_ok=[]
         for name in data:
-            try:
-                regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=data[name]["regsub"][0],
-                                                                                    replacement=data[name]["regsub"][1])
-            except Exception as e:
-                print(data[name]["regsub"])
-                raise e
-
+            regsub=insert_regexp_replacement(data[name])
+            # try:
+            #     regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=data[name]["regsub"][0],
+            #                                                                         replacement=data[name]["regsub"][1])
+            # except Exception as e:
+            #     print(data[name]["regsub"])
+            #     raise e
             tema=tema_dict[data[name]["tema"]]
             desc=desc_dict[data[name]["description"]]
             r_desc=desc_dict[data[name]["root_description"]]
@@ -243,8 +254,10 @@ class Command(BaseCommand):
             n=0
             ok=[]
             for rule in data[name]:
-                regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=rule["regsub"][0],
-                                                                                    replacement=rule["regsub"][1])
+                regsub=insert_regexp_replacement(rule["regsub"])
+
+                # regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=rule["regsub"][0],
+                #                                                                     replacement=rule["regsub"][1])
 
                 tema=tema_dict[rule["tema"]]
                 desc=desc_dict[rule["description"]]

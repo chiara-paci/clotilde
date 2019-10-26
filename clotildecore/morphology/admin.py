@@ -376,7 +376,7 @@ class InflectionInline(admin.TabularInline):
 
 class RegexpReplacementAdmin(admin.ModelAdmin):
     list_display = [ "__str__","num_fusion_rules",
-                     "num_derivations","num_inflections", "pattern", "replacement" ]
+                     "num_derivations","num_inflections", "pattern", "replacement", "reverse" ]
     list_editable = [ "pattern", "replacement" ]
     list_filter = [ "pattern", "replacement" ]
     inlines=[InflectionInline,DerivationInline,FusionRuleInline]
@@ -388,4 +388,18 @@ class RegexpReplacementAdmin(admin.ModelAdmin):
         return form
 
 admin.site.register(models.RegexpReplacement,RegexpReplacementAdmin)
+
+
+class RegexpReverseAdmin(admin.ModelAdmin):
+    list_display = [ "__str__", "target", "pattern", "replacement" ]
+    list_editable = [ "pattern", "replacement" ]
+    #list_filter = [ "pattern", "replacement" ]
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(RegexpReverseAdmin, self).get_form(request, obj, **kwargs)
+        form.base_fields['pattern'].initial = '(.+)'
+        form.base_fields['replacement'].initial = '\\1'
+        return form
+
+admin.site.register(models.RegexpReverse,RegexpReverseAdmin)
 

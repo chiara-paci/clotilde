@@ -10,10 +10,10 @@ from . import tokens
 
 # Create your models here.
 class Language(base_models.AbstractName):
-    token_regexp_set = models.ForeignKey(base_models.TokenRegexpSet,on_delete="cascade",related_name="a_set")
-    case_set = models.ForeignKey(base_models.CaseSet,default=1,on_delete="cascade",related_name="b_set")
-    period_sep = models.ForeignKey(base_models.TokenRegexp,on_delete="cascade",related_name="c_set")
-    alphabetic_order = models.ForeignKey(base_models.AlphabeticOrder,on_delete="cascade",related_name="d_set")
+    token_regexp_set = models.ForeignKey(base_models.TokenRegexpSet,on_delete="protect",related_name="a_set")
+    case_set = models.ForeignKey(base_models.CaseSet,default=1,on_delete="protect",related_name="b_set")
+    period_sep = models.ForeignKey(base_models.TokenRegexp,on_delete="protect",related_name="c_set")
+    alphabetic_order = models.ForeignKey(base_models.AlphabeticOrder,on_delete="protect",related_name="d_set")
 
     def clean(self):
         if not self.token_regexp_set.has_regexp(self.period_sep):

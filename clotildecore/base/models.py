@@ -225,8 +225,8 @@ class Value(models.Model):
         return S
     
 class Entry(models.Model):
-    attribute = models.ForeignKey(Attribute,on_delete="cascade")    
-    value = models.ForeignKey(Value,on_delete="cascade")    
+    attribute = models.ForeignKey(Attribute,on_delete="protect")    
+    value = models.ForeignKey(Value,on_delete="protect")    
     invert = models.BooleanField(default=False)
 
     def __str__(self):
@@ -307,8 +307,8 @@ class Description(AbstractName):
         return (self.name,dict(kwargs+kwargsb))
     
 class SubDescription(models.Model):
-    attribute = models.ForeignKey(Attribute,on_delete="cascade")    
-    value = models.ForeignKey(Description,on_delete="cascade")    
+    attribute = models.ForeignKey(Attribute,on_delete="protect")    
+    value = models.ForeignKey(Description,on_delete="protect")    
 
     def serialize(self):
         name,ser=self.value.serialize()

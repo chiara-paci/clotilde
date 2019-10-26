@@ -17,7 +17,7 @@ class Author(models.Model):
         return str(self.name)
 
 class Corpus(base_models.AbstractNameDesc):
-    language = models.ForeignKey('languages.Language',on_delete="cascade")
+    language = models.ForeignKey('languages.Language',on_delete="protect")
 
     def get_absolute_url(self):
         return "/%s/corpus/%d" % ("corpora",self.id)
@@ -44,8 +44,8 @@ class TextManager(models.Manager):
         return self.all().annotate(text_len=Length("text")).order_by("text_len")
 
 class Text(models.Model):
-    corpus = models.ForeignKey(Corpus,on_delete="cascade")
-    author = models.ForeignKey(Author,on_delete="cascade")
+    corpus = models.ForeignKey(Corpus,on_delete="protect")
+    author = models.ForeignKey(Author,on_delete="protect")
     title = models.CharField(max_length=1024)
     text = models.TextField()
     label = models.SlugField(max_length=128)
@@ -91,7 +91,7 @@ class MetaDataArgument(base_models.AbstractName): pass
 
 class MetaDataEntry(models.Model):
     text = models.ForeignKey(Text,on_delete="cascade")    
-    argument = models.ForeignKey(MetaDataArgument,on_delete="cascade")    
+    argument = models.ForeignKey(MetaDataArgument,on_delete="protect")    
     value = models.TextField()
 
     def __str__(self):
@@ -120,8 +120,8 @@ class WDAuthor(Author):
     wd_id = models.IntegerField()
 
 class WDText(Text):
-    concorso = models.ForeignKey(WDConcorso,on_delete="cascade")
-    forum = models.ForeignKey(WDForum,on_delete="cascade")
+    concorso = models.ForeignKey(WDConcorso,on_delete="protect")
+    forum = models.ForeignKey(WDForum,on_delete="protect")
     wd_id = models.IntegerField()
     pub_date = models.DateTimeField(auto_now_add=False)
 
