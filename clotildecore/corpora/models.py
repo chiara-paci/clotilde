@@ -72,13 +72,14 @@ class Text(models.Model):
 
     def save(self,*args,**kwargs):
         if not self.label:
-            self.label=slugify(self.title)[:128]
+            self.label=slugify(self.title).strip("-").strip("_")[:128]
         models.Model.save(self,*args,**kwargs)
 
     def serialize(self):
         ret={
             "author": self.author.serialize(),
             "title": self.title,
+            "label": self.label,
             "file_name": "%s.txt" % self.label,
             "metadata": []
         }
@@ -98,6 +99,7 @@ class MetaDataEntry(models.Model):
 
     class Meta:
         ordering=["argument","value"]
+        unique_together = [ ["text","argument"] ] 
     
 class WDConcorso(models.Model):
     title = models.CharField(max_length=1024)
