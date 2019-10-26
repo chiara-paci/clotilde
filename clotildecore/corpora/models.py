@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.db.models.functions import Length
+from django.utils.text import slugify
 
 # Create your models here.
 
@@ -11,6 +12,9 @@ class Author(models.Model):
     name = models.CharField(max_length=1024,db_index=True)
 
     def __str__(self): return(self.name)
+
+    def serialize(self):
+        return str(self.name)
 
 class Corpus(base_models.AbstractNameDesc):
     language = models.ForeignKey('languages.Language',on_delete="cascade")
@@ -24,6 +28,16 @@ class Corpus(base_models.AbstractNameDesc):
     def text_ordered_by_len(self):
         return self.text_set.all().annotate(text_len=Length("text")).order_by("text_len")
 
+    def serialize(self):
+        ret={
+            "name": self.name,
+            "description": self.description,
+            "language": str(self.language.name),
+            "texts": []
+        }
+        for t in self.text_set.all():
+            ret["texts"].append(t.serialize())
+        return ret
 
 class TextManager(models.Manager):
     def all_ordered_by_len(self):
@@ -34,7 +48,10 @@ class Text(models.Model):
     author = models.ForeignKey(Author,on_delete="cascade")
     title = models.CharField(max_length=1024)
     text = models.TextField()
-    
+    label = models.SlugField(max_length=128)
+
+    class Meta:
+        unique_together = [ ["corpus","label"] ]
     
     def __str__(self): return(self.title)
 
@@ -52,6 +69,22 @@ class Text(models.Model):
             html=html.replace('['+k+']','<'+k+'>')
             html=html.replace('[/'+k+']','</'+k+'>')
         return html
+
+    def save(self,*args,**kwargs):
+        if not self.label:
+            self.label=slugify(self.title)[:128]
+        models.Model.save(self,*args,**kwargs)
+
+    def serialize(self):
+        ret={
+            "author": self.author.serialize(),
+            "title": self.title,
+            "file_name": "%s.txt" % self.label,
+            "metadata": []
+        }
+        for m in self.metadataentry_set.all():
+            ret["metadata"].append( [str(m.argument),str(m.value)] )
+        return ret
 
 class MetaDataArgument(base_models.AbstractName): pass
 

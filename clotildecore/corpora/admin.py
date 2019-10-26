@@ -15,8 +15,9 @@ class MetaDataEntryInline(admin.TabularInline):
     extra = 0
 
 class TextAdmin(admin.ModelAdmin):
-    list_display=['title','author','corpus']
+    list_display=['title',"label",'author','corpus']
     list_filter=["corpus"]
+    list_editable=["label"]
     inlines=[MetaDataEntryInline]
 
 admin.site.register(models.Text,TextAdmin)
