@@ -195,7 +195,7 @@ class RegexpReverseManager(models.Manager):
 
 
 class RegexpReverse(models.Model):
-    target=models.OneToOneField(RegexpReplacement,on_delete="cascade",related_name="reverse")
+    target=models.OneToOneField(RegexpReplacement,on_delete=models.CASCADE,related_name="reverse")
     pattern=models.CharField(max_length=1024)
     replacement=models.CharField(max_length=1024)
 
@@ -260,9 +260,9 @@ class Tema(base_models.AbstractName):
         ordering = [ "name" ]
 
 class TemaEntry(models.Model):
-    tema = models.ForeignKey(Tema,on_delete="cascade")    
-    argument = models.ForeignKey(TemaArgument,on_delete="cascade")    
-    value = models.ForeignKey(TemaValue,on_delete="cascade")    
+    tema = models.ForeignKey(Tema,on_delete=models.CASCADE)    
+    argument = models.ForeignKey(TemaArgument,on_delete=models.CASCADE)    
+    value = models.ForeignKey(TemaValue,on_delete=models.CASCADE)    
 
     def __str__(self):
         return "%s=%s" % (str(self.argument),str(self.value))
@@ -271,8 +271,8 @@ class TemaEntry(models.Model):
         ordering=["argument","value"]
 
 class Paradigma(base_models.AbstractName):
-    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="protect")    
-    language = models.ForeignKey('languages.Language',on_delete="protect")    
+    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete=models.PROTECT)    
+    language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
     inflections = models.ManyToManyField("Inflection",blank=True)
 
     class Meta:
@@ -283,16 +283,44 @@ class Paradigma(base_models.AbstractName):
 
     @cached_property
     def count_roots(self):
-        return self.root_set.count()
+        return Root.objects.filter(stem__derivation__paradigma=self).distinct().count()
+
+    @cached_property
+    def count_words(self):
+        return Word.objects.filter(stem__derivation__paradigma=self).distinct().count()
+
+    @cached_property
+    def count_stems(self):
+        return Stem.objects.filter(derivation__paradigma=self).distinct().count()
 
     @cached_property
     def count_derivations(self):
         return self.derivation_set.count()
 
+    @cached_property
+    def count_inflections(self):
+        return self.inflections.count()
+
+    def split_inflections(self,arg_list):
+
+        qset=Inflection.objects.filter(paradigma=self)
+        kwargs={}
+        for k in arg_list:
+            kwargs[k]= models.Max("description_obj__entries__value__string",filter=models.Q(description_obj__entries__attribute__name=k))
+        qset=qset.annotate(**kwargs)
+
+        ret={}
+        for infl in qset:
+            key=tuple( [ x if x is not None else "-" for x in [ getattr(infl,k) for k in arg_list ] ])
+            print(key)
+            if key not in ret: ret[key]=[]
+            ret[key].append(infl)
+        return ret
+
 class Inflection(models.Model):
     dict_entry = models.BooleanField(default=False)
-    regsub = models.ForeignKey(RegexpReplacement,on_delete="protect")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="protect")
+    regsub = models.ForeignKey(RegexpReplacement,on_delete=models.PROTECT)    
+    description_obj = models.ForeignKey(base_models.Description,on_delete=models.PROTECT)
 
     class Meta:
         ordering = ["regsub"]
@@ -407,10 +435,10 @@ class RootManager(models.Manager):
 
 class Root(models.Model):
     root=models.CharField(max_length=1024)
-    language = models.ForeignKey('languages.Language',on_delete="protect")    
-    tema_obj = models.ForeignKey(Tema,on_delete="protect")    
-    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="protect")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="protect")    
+    language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
+    tema_obj = models.ForeignKey(Tema,on_delete=models.PROTECT)    
+    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete=models.PROTECT)    
+    description_obj = models.ForeignKey(base_models.Description,on_delete=models.PROTECT)    
 
     objects=RootManager()
 
@@ -477,15 +505,15 @@ class Root(models.Model):
     
     
 class Derivation(base_models.AbstractName):
-    language = models.ForeignKey('languages.Language',on_delete="protect")    
-    regsub = models.ForeignKey(RegexpReplacement,on_delete="protect")    
-    tema_obj = models.ForeignKey(Tema,on_delete="protect")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="protect")    
+    language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
+    regsub = models.ForeignKey(RegexpReplacement,on_delete=models.PROTECT)    
+    tema_obj = models.ForeignKey(Tema,on_delete=models.PROTECT)    
+    description_obj = models.ForeignKey(base_models.Description,on_delete=models.PROTECT)    
     root_description_obj = models.ForeignKey(base_models.Description,
-                                             on_delete="protect",
+                                             on_delete=models.PROTECT,
                                              related_name="root_derivation_set")    
-    root_part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="protect")    
-    paradigma = models.ForeignKey(Paradigma,on_delete="protect")    
+    root_part_of_speech = models.ForeignKey(PartOfSpeech,on_delete=models.PROTECT)    
+    paradigma = models.ForeignKey(Paradigma,on_delete=models.PROTECT)    
 
     class Meta:
         ordering = ['name']
@@ -526,22 +554,16 @@ class Derivation(base_models.AbstractName):
 
     def get_absolute_url(self):
         return "/morphology/derivation/%d/" % self.pk
-
-
-#class ParadigmaInflection(models.Model):
-#    paradigma = models.ForeignKey(Paradigma,on_delete="cascade")    
-#    inflection = models.ForeignKey(Inflection,on_delete="cascade")    
-
     
 class Fusion(base_models.AbstractName):
-    language = models.ForeignKey('languages.Language',on_delete="protect")    
+    language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
     #objects=FusionManager()
 
 class FusionRule(base_models.AbstractName):
-    regsub = models.ForeignKey(RegexpReplacement,on_delete="protect")    
-    tema_obj = models.ForeignKey(Tema,on_delete="protect")    
-    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete="protect")    
-    description_obj = models.ForeignKey(base_models.Description,on_delete="protect")    
+    regsub = models.ForeignKey(RegexpReplacement,on_delete=models.PROTECT)    
+    tema_obj = models.ForeignKey(Tema,on_delete=models.PROTECT)    
+    part_of_speech = models.ForeignKey(PartOfSpeech,on_delete=models.PROTECT)    
+    description_obj = models.ForeignKey(base_models.Description,on_delete=models.PROTECT)    
 
     @cached_property
     def description(self):
@@ -562,8 +584,8 @@ class FusionRule(base_models.AbstractName):
 
 
 class FusionRuleRelation(models.Model):
-    fusion = models.ForeignKey(Fusion,on_delete="cascade")    
-    fusion_rule = models.ForeignKey(FusionRule,on_delete="cascade")    
+    fusion = models.ForeignKey(Fusion,on_delete=models.CASCADE)    
+    fusion_rule = models.ForeignKey(FusionRule,on_delete=models.CASCADE)    
     order = models.IntegerField()
 
     def __str__(self):
@@ -573,8 +595,8 @@ class FusionRuleRelation(models.Model):
         ordering = [ "order" ]
 
 class Stem(models.Model):
-    root = models.ForeignKey(Root,on_delete="cascade")    
-    derivation = models.ForeignKey(Derivation,on_delete="cascade")    
+    root = models.ForeignKey(Root,on_delete=models.CASCADE)    
+    derivation = models.ForeignKey(Derivation,on_delete=models.CASCADE)    
     cache=models.CharField(max_length=1024,db_index=True,editable=False)
 
     class Meta:
@@ -624,8 +646,8 @@ class Stem(models.Model):
 class WordManager(models.Manager): pass
 
 class Word(models.Model):
-    stem = models.ForeignKey(Stem,on_delete="cascade")    
-    inflection = models.ForeignKey(Inflection,on_delete="cascade")    
+    stem = models.ForeignKey(Stem,on_delete=models.CASCADE)    
+    inflection = models.ForeignKey(Inflection,on_delete=models.CASCADE)    
     cache=models.CharField(max_length=1024,db_index=True,editable=False)
 
     objects=WordManager()
@@ -748,7 +770,7 @@ class FusedWordManager(models.Manager):
                 print("        = %20s" % fword)
 
 class FusedWord(models.Model):
-    fusion = models.ForeignKey(Fusion,on_delete="cascade")    
+    fusion = models.ForeignKey(Fusion,on_delete=models.CASCADE)    
     cache = models.CharField(max_length=1024,db_index=True,editable=False)
     objects=FusedWordManager()
 
@@ -788,8 +810,8 @@ class FusedWord(models.Model):
 
 
 class FusedWordRelation(models.Model):
-    fused_word = models.ForeignKey(FusedWord,on_delete="cascade")    
-    word = models.ForeignKey(Word,on_delete="cascade")    
+    fused_word = models.ForeignKey(FusedWord,on_delete=models.CASCADE)    
+    word = models.ForeignKey(Word,on_delete=models.CASCADE)    
     order = models.IntegerField()
 
     def __str__(self):

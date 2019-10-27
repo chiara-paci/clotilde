@@ -338,6 +338,68 @@ main {
 	    
 	}
     }
+
+
+    section.paradigma {
+	padding: .5em;
+	margin: 1em;
+	font-size: 90%;
+	table {
+	    width: 100%;
+	    
+	    thead {}
+	    
+	    tbody:nth-child(even) { 
+		background-color: fade(@color-primary-0,20%);
+	    };
+	    
+	    tbody:nth-child(odd) { 
+		background-color: fade(@color-primary-0,10%);
+	    };
+
+	    tbody {
+		th {
+		    text-align: right;
+		}
+	    }
+
+	    table.inner {
+		tbody:nth-child(even),
+		tbody:nth-child(odd),
+		* {
+		    background: transparent;
+		}
+		.infl_dict, .infl_arrow { 
+		    width: 1em; 
+		    text-align: center;
+		}
+		.infl_replacement { 
+		    width: 3em; 
+		    text-align: left;
+		}
+		.infl_pattern { 
+		    width: 3em; 
+		    text-align: right;
+		}
+		.infl_desc { 
+		    width: 10em; 
+		    font-size: .8em;
+		}
+
+	    }
+	    
+	}
+	
+    }
+   
+
+
+
+
+
+
+
+
     
 }
 

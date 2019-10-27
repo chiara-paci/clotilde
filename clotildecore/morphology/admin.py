@@ -120,7 +120,6 @@ class TemaNameListFilter(admin.SimpleListFilter):
         if not val: return queryset
         return queryset.filter(name__startswith=val)
 
-
 class TemaEntryFilter(admin.SimpleListFilter):
     title = "entry"
     parameter_name = 'argval'
@@ -197,10 +196,12 @@ class ParadigmaInflectionInline(admin.TabularInline):
         return field
 
 class ParadigmaAdmin(admin.ModelAdmin):
-    list_display=["__str__","name","part_of_speech"]
+    list_display=["__str__","name","part_of_speech",
+                  "count_inflections",
+                  "count_derivations","count_roots","count_stems","count_words"]
     list_filter=["part_of_speech"]
     list_editable=["name","part_of_speech"]
-    inlines=[ParadigmaInflectionInline]
+    inlines=[DerivationInline,ParadigmaInflectionInline]
     exclude=["inflections"]
     save_as=True
 
@@ -227,9 +228,40 @@ class WordInline(admin.TabularInline):
     model = models.Word
     extra = 0
 
+class InflectionPartOfSpeechFilter(admin.SimpleListFilter):
+    title = "part of speech"
+    parameter_name = 'pos'
+
+    def lookups(self, request, model_admin):
+        def label(s):
+            s=s.replace(";"," ")
+            t=s.split()
+            if len(t)==1: return s
+            base=t[0]
+            if t[1] in ["derivato","proprio"]:
+                return base+" "+t[1]
+            return base
+
+        qset=models.PartOfSpeech.objects.all().values("pk","name").distinct()
+        
+        name_list=[ (
+            "%(pk)s" % k,
+            "%(name)s" % k
+        ) for k in qset ]
+         
+        return name_list
+
+    def queryset(self, request, queryset):
+        val=self.value()
+        print(val)
+        if not val: return queryset
+        pk=int(val)
+
+        return queryset.filter(paradigma__part_of_speech=pk).distinct()
+
 class InflectionAdmin(admin.ModelAdmin):
-    list_filter=["dict_entry","paradigma","description_obj"]
-    list_display=["regsub","dict_entry","description_obj","description"]
+    list_filter=["dict_entry",InflectionPartOfSpeechFilter,"paradigma","description_obj"]
+    list_display=["regsub","dict_entry","num_paradigmas","description_obj","description"]
     list_editable=["description_obj"]
     inlines=[ParadigmaInflectionInline] #,WordInline]
     save_as=True
@@ -317,7 +349,7 @@ class DerivationAdmin(admin.ModelAdmin):
                     DerivationDescriptionEntryFilter,
                     ('paradigma', admin.RelatedOnlyFieldListFilter),
                     "tema_obj"]
-    list_editable = [ "name","description_obj" ]
+    list_editable = [ "name","description_obj","paradigma" ]
     save_as=True
     inlines=[StemInline]
 

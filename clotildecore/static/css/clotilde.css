@@ -321,6 +321,45 @@ main div.blocks section table tbody:nth-child(even) {
 main div.blocks section table tbody:nth-child(odd) {
   background-color: rgba(211, 183, 71, 0.1);
 }
+main section.paradigma {
+  padding: .5em;
+  margin: 1em;
+  font-size: 90%;
+}
+main section.paradigma table {
+  width: 100%;
+}
+main section.paradigma table tbody:nth-child(even) {
+  background-color: rgba(211, 183, 71, 0.2);
+}
+main section.paradigma table tbody:nth-child(odd) {
+  background-color: rgba(211, 183, 71, 0.1);
+}
+main section.paradigma table tbody th {
+  text-align: right;
+}
+main section.paradigma table table.inner tbody:nth-child(even),
+main section.paradigma table table.inner tbody:nth-child(odd),
+main section.paradigma table table.inner * {
+  background: transparent;
+}
+main section.paradigma table table.inner .infl_dict,
+main section.paradigma table table.inner .infl_arrow {
+  width: 1em;
+  text-align: center;
+}
+main section.paradigma table table.inner .infl_replacement {
+  width: 3em;
+  text-align: left;
+}
+main section.paradigma table table.inner .infl_pattern {
+  width: 3em;
+  text-align: right;
+}
+main section.paradigma table table.inner .infl_desc {
+  width: 10em;
+  font-size: .8em;
+}
 /*** helpers ***/
 div.helper {
   display: flex;

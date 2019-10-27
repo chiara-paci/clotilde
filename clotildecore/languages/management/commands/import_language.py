@@ -96,6 +96,17 @@ class Command(BaseCommand):
 
 
         # descriptions
+        try:
+            tarinfo=archive.getmember("./description_values.json")
+            fd=archive.extractfile(tarinfo)
+            data=json.loads(fd.read().decode())
+            for attr in data["attributes"]:
+                attribute,created=base_models.Attribute.objects.update_or_create(name=attr["name"],defaults={"order": attr["order"]})
+            for val in data["values"]:
+                value,created=base_models.Value.objects.update_or_create(string=val["string"],defaults={"order": attr["order"],"variable": attr["variable"]})
+        except KeyError as e:
+            pass
+
         tarinfo=archive.getmember("./descriptions.json")
         fd=archive.extractfile(tarinfo)
         data=json.loads(fd.read().decode())

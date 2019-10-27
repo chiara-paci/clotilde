@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block applicationmenu %}
+{% include "helpers/italiano/includes/menu.html" %}
+{% endblock %}
+
+{% block centercontent %}
+
+<h1>Paradigma nome</h1>
+
+{% macro infl_cell(data,key) %}
+{% if key in data %}
+  <table class="inner">
+    {% for infl in data[key] %}
+    <tbody>
+    <tr>
+    <td class="infl_dict">{% if infl.dict_entry %}D{% else %}&nbsp;{% endif %}</td>
+    <td class="infl_pattern">{{ infl.regsub.pattern }}</td>
+    <td class="infl_arrow">=></td>
+    <td class="infl_replacement">{{ infl.regsub.replacement }}</td>
+    <td class="infl_desc">
+      {% for arg in infl.description if not arg in ["modo","tempo","persona","genere","numero"] %}
+      {{ arg }}:{% if infl.description[arg][1] %}!{% endif %}{{ infl.description[arg][0] }}{% if not loop.last %},{% endif %}
+      {% else %}&nbsp;
+      {% endfor %}
+    </td>
+    </tr>
+    </tbody>
+    {% endfor %}
+  </table>
+{% else %} &nbsp;
+{% endif %}
+{% endmacro %}
+
+{% macro pers_abbr(persona,numero) %}
+{% if persona == "prima" %}I{% elif persona == "seconda" %}II{% else %}III{% endif %}{% if numero == "singolare" %}s{% else %}p{% endif %}
+{% endmacro %}
+
+
+<section class="paradigma">
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2" colspan="2"></th>
+      <th colspan="4">indicativo</th>
+      <th colspan="2">congiuntivo presente</th> 
+      <th rowspan="2">condizionale presente</th>
+      <th rowspan="2">imperativo presente</th>
+      <th rowspan="2">infinito</th>
+      <th rowspan="2">gerundio</th>
+      <th colspan="2">participio</th> 
+    </tr>
+    <tr>
+      <th>presente</th>
+      <th>imperfetto</th>
+      <th>passato remoto</th>
+      <th>futuro</th>
+      <th>presente</th>
+      <th>passato</th> 
+      <th>presente</th>
+      <th>passato</th> 
+    </tr>
+  </thead>
+  {% for paradigma in paradigma_list %}
+  {% set inflections = paradigma.split_inflections(["modo","tempo","persona","genere","numero"]) %}
+  <tbody>
+
+    {% for persona,numero in [("prima","singolare"),("seconda","singolare"),("terza","singolare"),("prima","plurale"),("seconda","plurale"),("terza","plurale"),] %}
+    <tr>
+      {% if loop.first %}<th rowspan="6">{{ paradigma.name }}</th>{% endif %}
+      <th>{{ pers_abbr(persona,numero) }}</th>
+      <td>{{ infl_cell(inflections,("indicativo","presente",persona,"-",numero)) }}</td>
+      <td>{{ infl_cell(inflections,("indicativo","imperfetto",persona,"-",numero)) }}</td>
+      <td>{{ infl_cell(inflections,("indicativo","passato remoto",persona,"-",numero)) }}</td>
+      <td>{{ infl_cell(inflections,("indicativo","futuro",persona,"-",numero)) }}</td>
+      <td>{{ infl_cell(inflections,("congiuntivo","presente",persona,"-",numero)) }}</td> 
+      <td>{{ infl_cell(inflections,("congiuntivo","imperfetto",persona,"-",numero)) }}</td> 
+      <td>{{ infl_cell(inflections,("condizionale","presente",persona,"-",numero)) }}</td> 
+      <td>{% if loop.first %}&nbsp;{% else %}{{ infl_cell(inflections,("imperativo","presente",persona,"-",numero)) }}{% endif %}</td>
+      {% if loop.first %}
+      <td>{{ infl_cell(inflections,("infinito","presente","-","-","-")) }}</td>
+      <td>{{ infl_cell(inflections,("gerundio","presente","-","-","-")) }}</td> 
+      {% else %}<td>&nbsp;</td><td>&nbsp;</td>{% endif %}
+      {% if loop.index == 1 %}
+      <td>{{ infl_cell(inflections,("participio","presente","-","maschile","singolare")) }}</td>
+      <td>{{ infl_cell(inflections,("participio","passato","-","maschile","singolare")) }}</td>
+      {% else %}
+      <td>&nbsp;</td><td>&nbsp;</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+
+
+  </tbody>
+  {% endfor %}
+</table>
+</section>
+
+{% endblock centercontent %}
+

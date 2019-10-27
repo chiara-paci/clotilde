@@ -209,14 +209,32 @@ class AlphabeticOrder(AbstractName):
         }
 
 
-class Attribute(AbstractName): pass
+class Attribute(AbstractName): 
+    order = models.IntegerField(default=1)
+
+    def serialize(self):
+        return {
+            "name": self.name,
+            "order": self.order
+        }
+
+    class Meta:
+        ordering = ["order"]
 
 class Value(models.Model):
     string=models.CharField(max_length=1024,db_index=True,unique=True)
     variable = models.BooleanField(default=False)
+    order = models.IntegerField(default=1)
+
+    def serialize(self):
+        return {
+            "string": self.string,
+            "order": self.order,
+            "variable": self.variable
+        }
 
     class Meta:
-        ordering = ["string"]
+        ordering = ["order"]
 
     def __str__(self):
         S=self.string
@@ -302,9 +320,35 @@ class Description(AbstractName):
         return descriptions.Description(**kwargs)
 
     def serialize(self):
-        kwargs=[ (str(e.attribute), ( str(e.value), e.invert ) ) for e in self.entries.all() ]
+        kwargs=[ ( str(e.attribute), ( str(e.value), e.invert ) ) for e in self.entries.all() ]
         kwargsb=[ e.serialize() for e in self.subdescriptions.all() ]
         return (self.name,dict(kwargs+kwargsb))
+
+    @cached_property
+    def count_fusionrules(self): return self.fusionrule_set.count()
+
+    @cached_property
+    def count_roots(self): return self.root_set.count()
+
+    @cached_property
+    def count_inflections(self): return self.inflection_set.count()
+
+    @cached_property
+    def count_derivations(self): return self.derivation_set.count()
+
+    @cached_property
+    def count_root_derivations(self): return self.root_derivation_set.count()
+
+    @cached_property
+    def count_references(self): 
+        N=0
+        N+=self.count_fusionrules
+        N+=self.count_roots
+        N+=self.count_inflections
+        N+=self.count_derivations
+        N+=self.count_root_derivations
+        return N
+    
     
 class SubDescription(models.Model):
     attribute = models.ForeignKey(Attribute,on_delete="protect")    

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block applicationmenu %}
+{% include "helpers/italiano/includes/menu.html" %}
+{% endblock %}
+
+{% block centercontent %}
+
+<h1>Paradigma nome</h1>
+
+{% macro infl_cell(data,key) %}
+{% if key in data %}
+  <table class="inner">
+    {% for infl in data[key] %}
+    <tbody>
+    <tr>
+    <td class="infl_dict">{% if infl.dict_entry %}D{% else %}&nbsp;{% endif %}</td>
+    <td class="infl_pattern">{{ infl.regsub.pattern }}</td>
+    <td class="infl_arrow">=></td>
+    <td class="infl_replacement">{{ infl.regsub.replacement }}</td>
+    <td class="infl_desc">
+      {% for arg in infl.description if not arg in ["genere","numero"] %}
+      {{ arg }}:{% if infl.description[arg][1] %}!{% endif %}{{ infl.description[arg][0] }}{% if not loop.last %},{% endif %}
+      {% else %}&nbsp;
+      {% endfor %}
+    </td>
+    </tr>
+    </tbody>
+    {% endfor %}
+  </table>
+{% else %} &nbsp;
+{% endif %}
+{% endmacro %}
+
+
+
+<section class="paradigma">
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2"></th>
+      <th colspan="2">maschile</th>
+      <th colspan="2">femminile</th>
+    </tr>
+    <tr>
+      <th>singolare</th>
+      <th>plurale</th>
+      <th>singolare</th>
+      <th>plurale</th>
+    </tr>
+  </thead>
+  {% for paradigma in paradigma_list %}
+  <tbody>
+    <tr>
+      <th>{{ paradigma.name }}</th>
+      {% set inflections = paradigma.split_inflections(["genere","numero"]) %}
+      <td>{{ infl_cell(inflections,("maschile","singolare")) }}</td>
+      <td>{{ infl_cell(inflections,("maschile","plurale")) }}</td>
+      <td>{{ infl_cell(inflections,("femminile","singolare")) }}</td>
+      <td>{{ infl_cell(inflections,("femminile","plurale")) }}</td>
+    </tr>
+  </tbody>
+  {% endfor %}
+</table>
+</section>
+
+{% endblock centercontent %}
+

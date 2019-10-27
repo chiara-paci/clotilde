@@ -95,7 +95,8 @@ class DescriptionSubDescriptionInline(admin.TabularInline):
 class DescriptionAdmin(admin.ModelAdmin):
     exclude = [ "entries","subdescriptions"]
     inlines=[DescriptionEntryInline,DescriptionSubDescriptionInline]
-    list_display=[ "__str__","name","_build" ]
+    list_display=[ "__str__","name","_build","count_references",
+                   "count_fusionrules","count_roots","count_inflections","count_derivations","count_root_derivations" ]
     list_editable=["name"]
     save_as=True
 
@@ -122,13 +123,28 @@ class EntryInline(admin.TabularInline):
 
 class ValueAdmin(admin.ModelAdmin):
     inlines = [EntryInline]
-    list_display=["__str__","entry_count"]
+    list_display=["__str__","string","order","attributes","entry_count"]
+    list_editable=["string","order"]
+    
 
     def entry_count(self,obj):
         return obj.entry_set.count()
 
+    def attributes(self,obj):
+        return ",".join([a["attribute__name"] for a in models.Entry.objects.filter(value=obj).values("attribute__name").distinct()])
+
     
 admin.site.register(models.Value,ValueAdmin)
 
-admin.site.register(models.Attribute)
+
+class AttributeAdmin(admin.ModelAdmin):
+    inlines = [EntryInline]
+    list_display=["__str__","name","order","entry_count"]
+    list_editable=["name","order"]
+    
+
+    def entry_count(self,obj):
+        return obj.entry_set.count()
+
+admin.site.register(models.Attribute,AttributeAdmin)
     

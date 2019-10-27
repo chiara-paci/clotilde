@@ -116,10 +116,22 @@ class Command(BaseCommand):
         desc_list=list(set(desc_list))
         tema_list=list(set(tema_list))
         pos_list=list(set(pos_list))
-        
-        desc_list=dict([ d.serialize() for d in base_models.Description.objects.filter(pk__in=desc_list)])
+
         tema_list=dict([ d.serialize() for d in morph_models.Tema.objects.filter(pk__in=tema_list)])
         pos_list =dict([ d.serialize() for d in morph_models.PartOfSpeech.objects.filter(pk__in=pos_list)])
+
+        desc_qset=base_models.Description.objects.filter(pk__in=desc_list)
+        desc_list=dict([ d.serialize() for d in desc_qset])
+
+        entry_list=desc_qset.values("entries")
+
+        desc_values={
+            "attributes": [ attr.serialize() for attr in base_models.Attribute.objects.filter(entry__in=entry_list).distinct() ],
+            "values":     [ val.serialize()  for val  in base_models.Value.objects.filter(entry__in=entry_list).distinct() ],
+        }
+
+        info,bdata=build_tarinfo("./description_values.json",json.dumps(desc_values))
+        archive.addfile(info, bdata)
 
         info,bdata=build_tarinfo("./descriptions.json",json.dumps(desc_list))
         archive.addfile(info, bdata)

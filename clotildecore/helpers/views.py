@@ -649,3 +649,20 @@ class ItalianoAddRootView(TemplateView):
         return redirect("/helpers/italiano/add_root/")
 
 
+class ParadigmaView(TemplateView):
+    template_name=""
+    part_of_speech=""
+ 
+    def get_template_names(self):
+        return ['helpers/italiano/paradigma_%s.html' % self.part_of_speech]
+
+    def get_paradigma_list(self,language):
+        return morph_models.Paradigma.objects.filter(language=language,part_of_speech__name=self.part_of_speech)
+
+    def get_context_data(self,**kwargs):
+        context=TemplateView.get_context_data(self,**kwargs)
+        language=lang_models.Language.objects.get(name="italiano")
+        context["language"]=language
+        context["paradigma_list"]=self.get_paradigma_list(language)
+        return context
+

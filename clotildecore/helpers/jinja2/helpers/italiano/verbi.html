@@ -83,8 +83,8 @@ $("#id_paradigma-template").change(function(event){
 	    for(n=0;n<data["inflections"].length;n++) {
 		pind=2;
 		infl=data["inflections"][n];
-		pattern=infl.regsub[0];
-		repl=infl.regsub[1];
+		pattern=infl.regsub["pattern"];
+		repl=infl.regsub["replacement"];
 		desc=infl.description.split(" ");
 
 		modo=desc[0];
