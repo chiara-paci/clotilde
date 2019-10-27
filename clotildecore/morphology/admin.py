@@ -256,7 +256,6 @@ class InflectionPartOfSpeechFilter(admin.SimpleListFilter):
         print(val)
         if not val: return queryset
         pk=int(val)
-
         return queryset.filter(paradigma__part_of_speech=pk).distinct()
 
 class InflectionAdmin(admin.ModelAdmin):
@@ -339,10 +338,12 @@ class DerivationDescriptionEntryFilter(admin.SimpleListFilter):
 
 class DerivationAdmin(admin.ModelAdmin):
     list_display = [ "__str__","name","regsub","num_stem",
-                     "root_part_of_speech","tema_obj",
+                     "root_part_of_speech",
+                     "paradigma","tema",
+                     "root_description", 
                      "description_obj",
                      "paradigma",
-                     "root_description", 
+                     "tema_obj",
                      "part_of_speech" ]
     list_filter = [ "root_part_of_speech",
                     DerivationNameListFilter,

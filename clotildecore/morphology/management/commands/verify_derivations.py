@@ -26,6 +26,7 @@ class Command(BaseCommand):
             "id": d.id,
             "root_part_of_speech": d.root_part_of_speech.name,
             "part_of_speech": d.part_of_speech.name,
+            "description": d.description,
             "tema": d.tema
         } for d in  models.Derivation.objects.filter(language=language) ]
 
@@ -35,9 +36,15 @@ class Command(BaseCommand):
             for d2 in der_list:
                 if d1["id"]==d2["id"]: continue
                 if d1["root_part_of_speech"]!=d2["root_part_of_speech"]: continue
-                if d1["part_of_speech"]!=d2["part_of_speech"]: continue
-                if d1["tema"]==d2["tema"]:
-                    duplicates.append( (d1,d2) )
-                    print("==",d1,d2)
+                if d1["paradigma"]!=d2["paradigma"]: continue
+                if d1["description"]!=d2["description"]: continue
+                if d1["regsub"]!=d2["regsub"]: continue
+
+                duplicates.append( (d1,d2) )
+                print("==",d1,d2)
+
+                #if d1["tema"]==d2["tema"]:
+                #    duplicates.append( (d1,d2) )
+                #    print("==",d1,d2)
                 
                 
