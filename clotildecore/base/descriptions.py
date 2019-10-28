@@ -85,7 +85,7 @@ class Description(BaseDescription):
         o_k.sort()
         if s_k!=o_k: return False
         for k in s_k:
-            if self._cfr(self[k],other[k])==0: return False
+            if self._cfr(self[k],other[k])!=0: return False
         return True
 
     # This is a "contains" confrontation, so _cfr(a,b)=1 is a !< b and not a>b

@@ -385,7 +385,7 @@ admin.site.register(models.Fusion,FusionAdmin)
 class FusionRuleAdmin(admin.ModelAdmin): 
     inlines=[FusionRuleRelationInline]
     save_as=True
-    list_display=[ "name", "tema","description", "part_of_speech", "description", "regsub" ]
+    list_display=[ "name","num_fusions", "tema","description", "part_of_speech", "description", "regsub" ]
     #list_editable=["tema_obj"]
     list_filter=["part_of_speech"]
 

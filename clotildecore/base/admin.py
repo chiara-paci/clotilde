@@ -95,8 +95,10 @@ class DescriptionSubDescriptionInline(admin.TabularInline):
 class DescriptionAdmin(admin.ModelAdmin):
     exclude = [ "entries","subdescriptions"]
     inlines=[DescriptionEntryInline,DescriptionSubDescriptionInline]
-    list_display=[ "__str__","name","_build","count_references",
-                   "count_fusionrules","count_roots","count_inflections","count_derivations","count_root_derivations" ]
+    list_display=[ "__str__","name","count_references",
+                   "count_fusionrules",
+                   "count_roots","count_inflections",
+                   "count_derivations","count_root_derivations","_build" ]
     list_editable=["name"]
     save_as=True
 

@@ -33,7 +33,7 @@ class RegexpReplacementManager(models.Manager):
                 
     def de_serialize(self,data):
         regsub,created=self.get_or_create(pattern=data["pattern"],
-                                          replacement=data["regexp"])
+                                          replacement=data["replacement"])
         if "reverse" in data:
             rev,created=RegexpReverse.objects.update_or_create(target=regsub,defaults=data["reverse"])
         return regsub
@@ -573,6 +573,10 @@ class FusionRule(base_models.AbstractName):
     def tema(self):
         return self.tema_obj.build()
 
+    @cached_property
+    def num_fusions(self):
+        return self.fusionrulerelation_set.all().count()
+    
     def serialize(self):
         return {
             "name": self.name,

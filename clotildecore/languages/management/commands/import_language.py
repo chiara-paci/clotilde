@@ -101,9 +101,12 @@ class Command(BaseCommand):
             fd=archive.extractfile(tarinfo)
             data=json.loads(fd.read().decode())
             for attr in data["attributes"]:
-                attribute,created=base_models.Attribute.objects.update_or_create(name=attr["name"],defaults={"order": attr["order"]})
+                attribute,created=base_models.Attribute.objects.update_or_create(name=attr["name"],
+                                                                                 defaults={"order": attr["order"]})
             for val in data["values"]:
-                value,created=base_models.Value.objects.update_or_create(string=val["string"],defaults={"order": attr["order"],"variable": attr["variable"]})
+                value,created=base_models.Value.objects.update_or_create(string=val["string"],
+                                                                         defaults={"order": val["order"],
+                                                                                   "variable": val["variable"]})
         except KeyError as e:
             pass
 
@@ -229,7 +232,7 @@ class Command(BaseCommand):
         data=json.loads(fd.read().decode())
         der_ok=[]
         for name in data:
-            regsub=insert_regexp_replacement(data[name])
+            regsub=insert_regexp_replacement(data[name]["regsub"])
             # try:
             #     regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=data[name]["regsub"][0],
             #                                                                         replacement=data[name]["regsub"][1])
