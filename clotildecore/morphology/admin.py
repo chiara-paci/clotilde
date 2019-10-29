@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.db.models.query import QuerySet,Q
+from django.db.models import Count
 from django.utils.html import format_html
 
 from . import models
@@ -49,13 +50,67 @@ class TemaEntryInline(admin.TabularInline):
 
 class TemaArgumentAdmin(admin.ModelAdmin):
     inlines = [TemaEntryInline]
+    list_display=["__str__","name","num_entries"]
 
 admin.site.register(models.TemaArgument,TemaArgumentAdmin)
 
+class TemaValueReferenceFilter(admin.SimpleListFilter):
+
+    title = "reference"
+    parameter_name = 'ref'
+
+    def lookups(self, request, model_admin):
+        return [
+            ( "notema","no tema"),
+            ( "noref","no reference"),
+            ( "derivation_only","derivation only"),
+            ( "root_only","root only"),
+            ( "fusion_rule_only","fusion rule only"),
+            ( "derivation","with derivation"),
+            ( "root","with root"),
+            ( "fusion_rule","with fusion rule"),
+            ( "mixed","mixed"),
+        ]
+
+    def _tema_queryset(self,val):
+        qset=models.Tema.objects.all().annotate(num_der=Count("derivation"),
+                                                num_root=Count("root"),
+                                                num_frule=Count("fusionrule"))
+        if val=="noref":
+            return qset.filter(num_der=0,num_root=0,num_frule=0)
+        if val=="derivation_only":
+            return qset.filter(num_root=0,num_frule=0).exclude(num_der=0)
+        if val=="root_only":
+            return qset.filter(num_der=0,num_frule=0).exclude(num_root=0)
+        if val=="fusion_rule_only":
+            return qset.filter(num_root=0,num_der=0).exclude(num_frule=0)
+        if val=="derivation":
+            return qset.exclude(num_der=0)
+        if val=="root":
+            return qset.exclude(num_root=0)
+        if val=="fusion_rule":
+            return qset.exclude(num_frule=0)
+        qset=qset.exclude(num_der=0,num_root=0,num_frule=0)
+        qset=qset.exclude(num_der=0,num_root=0)
+        qset=qset.exclude(num_der=0,num_frule=0)
+        qset=qset.exclude(num_root=0,num_frule=0)
+        return qset
+        
+    
+    def queryset(self, request, queryset):
+        val=self.value()
+        if not val: return queryset
+        if val=="notema":
+            return queryset.all().annotate(num_tema=Count("temaentry")).filter(num_tema=0)
+        
+        tqset=self._tema_queryset(val)
+        return queryset.filter(temaentry__tema__in=tqset).distinct()
+
 class TemaValueAdmin(admin.ModelAdmin):
-    list_display=["__str__","name"]
+    list_display=["__str__","name","num_entries","temas"]
     list_editable=["name"]
     inlines = [TemaEntryInline]
+    list_filter=[TemaValueReferenceFilter]
 
 admin.site.register(models.TemaValue,TemaValueAdmin)
 
@@ -157,15 +212,61 @@ class TemaEntryFilter(admin.SimpleListFilter):
                                                                       value__pk=val).values("tema__pk") ]
         
         return queryset.filter(pk__in=qset)
-    
+
+class TemaReferenceFilter(admin.SimpleListFilter):
+
+    title = "reference"
+    parameter_name = 'ref'
+
+    def lookups(self, request, model_admin):
+        return [
+            ( "noref","no references"),
+            ( "derivation_only","derivation only"),
+            ( "root_only","root only"),
+            ( "fusion_rule_only","fusion rule only"),
+            ( "derivation","with derivation"),
+            ( "root","with root"),
+            ( "fusion_rule","with fusion rule"),
+            ( "mixed","mixed"),
+        ]
+
+    def queryset(self, request, queryset):
+        val=self.value()
+        if not val: return queryset
+        qset=queryset.annotate(num_der=Count("derivation"),
+                               num_root=Count("root"),
+                               num_frule=Count("fusionrule"))
+        if val=="noref":
+            return qset.filter(num_der=0,num_root=0,num_frule=0)
+        if val=="derivation_only":
+            return qset.filter(num_root=0,num_frule=0).exclude(num_der=0)
+        if val=="root_only":
+            return qset.filter(num_der=0,num_frule=0).exclude(num_root=0)
+        if val=="fusion_rule_only":
+            return qset.filter(num_root=0,num_der=0).exclude(num_frule=0)
+        if val=="derivation":
+            return qset.exclude(num_der=0)
+        if val=="root":
+            return qset.exclude(num_root=0)
+        if val=="fusion_rule":
+            return qset.exclude(num_frule=0)
+        qset=qset.exclude(num_der=0,num_root=0,num_frule=0)
+        qset=qset.exclude(num_der=0,num_root=0)
+        qset=qset.exclude(num_der=0,num_frule=0)
+        qset=qset.exclude(num_root=0,num_frule=0)
+        return qset
+        
 class TemaAdmin(admin.ModelAdmin):
     inlines=[TemaEntryInline,DerivationInline,RootInline,FusionRuleInline]
-    list_display=[ "__str__","name", "num_roots","num_derivations","num_fusion_rules","build" ]
+    list_display=[ "id","name","build",
+                   "num_references","derivations",
+                   "num_roots","num_derivations","num_fusion_rules" ]
     save_as=True
-    list_filter=[TemaNameListFilter,TemaEntryFilter]
+    list_filter=[TemaReferenceFilter,TemaNameListFilter,TemaEntryFilter]
     list_editable=["name"]
 
 admin.site.register(models.Tema,TemaAdmin)
+
 
 class TemaEntryAdmin(admin.ModelAdmin):
     list_display=["__str__","tema"]
@@ -337,20 +438,22 @@ class DerivationDescriptionEntryFilter(admin.SimpleListFilter):
     
 
 class DerivationAdmin(admin.ModelAdmin):
-    list_display = [ "__str__","name","regsub","num_stem",
-                     "root_part_of_speech",
-                     "paradigma","tema",
-                     "root_description", 
+    list_display = [ "__str__",
+                     "regsub","root_part_of_speech","name","paradigma",
+                     "num_stem",
                      "description_obj",
+                     "tema",
+                     "root_description", 
                      "paradigma",
                      "tema_obj",
                      "part_of_speech" ]
     list_filter = [ "root_part_of_speech",
+                    "regsub__pattern",
                     DerivationNameListFilter,
                     DerivationDescriptionEntryFilter,
                     ('paradigma', admin.RelatedOnlyFieldListFilter),
                     "tema_obj"]
-    list_editable = [ "name","description_obj","paradigma" ]
+    list_editable = [ "name" ]#,"description_obj" ]
     save_as=True
     inlines=[StemInline]
 
@@ -385,8 +488,8 @@ admin.site.register(models.Fusion,FusionAdmin)
 class FusionRuleAdmin(admin.ModelAdmin): 
     inlines=[FusionRuleRelationInline]
     save_as=True
-    list_display=[ "name","num_fusions", "tema","description", "part_of_speech", "description", "regsub" ]
-    #list_editable=["tema_obj"]
+    list_display=[ "name","description", "description_obj","num_fusions", "tema","part_of_speech", "regsub" ]
+    list_editable=["description_obj"]
     list_filter=["part_of_speech"]
 
 admin.site.register(models.FusionRule,FusionRuleAdmin)

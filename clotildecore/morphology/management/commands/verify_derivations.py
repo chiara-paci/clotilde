@@ -30,21 +30,20 @@ class Command(BaseCommand):
             "tema": d.tema
         } for d in  models.Derivation.objects.filter(language=language) ]
 
+        der_list=list( models.Derivation.objects.filter(language=language) )
 
-        duplicates=[]
+        n=-1
         for d1 in der_list:
-            for d2 in der_list:
-                if d1["id"]==d2["id"]: continue
-                if d1["root_part_of_speech"]!=d2["root_part_of_speech"]: continue
-                if d1["paradigma"]!=d2["paradigma"]: continue
-                if d1["description"]!=d2["description"]: continue
-                if d1["regsub"]!=d2["regsub"]: continue
+            n+=1
+            for d2 in der_list[n+1:]:
+                if d1.regsub.pattern!=d2.regsub.pattern: continue
+                if d1.regsub.replacement!=d2.regsub.replacement: continue
+                if d1.root_part_of_speech.pk!=d2.root_part_of_speech.pk: continue
+                if d1.paradigma.pk!=d2.paradigma.pk: continue
+                if d1.description!=d2.description: continue
 
-                duplicates.append( (d1,d2) )
-                print("==",d1,d2)
+                print("==",d1.num_stem,d1,"|",d1.tema_obj)
+                print("    ",d2.num_stem,d2,"|",d2.tema_obj)
 
-                #if d1["tema"]==d2["tema"]:
-                #    duplicates.append( (d1,d2) )
-                #    print("==",d1,d2)
                 
                 

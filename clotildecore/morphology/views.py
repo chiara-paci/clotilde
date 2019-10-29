@@ -24,3 +24,8 @@ class ParadigmaView(DetailView):
         obj["inflections"]=[ infl.serialize() for infl in self.object.inflections.all() ]
         response=JsonResponse(obj,status=200)
         return response
+
+class ByLanguageListView(ListView):
+    def get_queryset(self):
+        pk=self.kwargs.get('pk')
+        return self.model.objects.by_language(pk)

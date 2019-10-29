@@ -2,7 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
-
+from django.utils.safestring import mark_safe
 # Create your models here.
 
 import re
@@ -214,10 +214,29 @@ class PartOfSpeech(base_models.AbstractName):
             "fg_color": self.fg_color,
         })
 
-class TemaArgument(base_models.AbstractName): pass
-class TemaValue(base_models.AbstractName): pass
+class TemaArgument(base_models.AbstractName):
+    @cached_property
+    def num_entries(self):
+        return self.temaentry_set.all().count()
+
+    
+class TemaValue(base_models.AbstractName): 
+    @cached_property
+    def num_entries(self):
+        return self.temaentry_set.all().count()
+
+    @cached_property
+    def temas(self):
+        T=" </li><li> ".join([ d.name for d in Tema.objects.filter(temaentry__value=self).distinct() ])
+        return mark_safe("<ul><li>"+T+"</li></ul>")
 
 class TemaManager(models.Manager):
+    def by_language(self,lang_pk):
+        q_or=models.Q(root__language__pk=lang_pk)
+        q_or=q_or|models.Q(derivation__language__pk=lang_pk)
+        q_or=q_or|models.Q(fusionrule__fusionrulerelation__fusion__language__pk=lang_pk)
+        return self.filter(q_or).distinct()
+    
     def by_part_of_speech(self,part_of_speech):
         if type(part_of_speech) is str:
             pos=PartOfSpeech.objects.filter(name=part_of_speech)[0]
@@ -239,6 +258,9 @@ class Tema(base_models.AbstractName):
                 D[k]=set( [D[k]] )
             D[k].add(v)
         return D
+
+    def get_absolute_url(self):
+        return "/morphology/tema/%d/" % self.pk
     
     def build(self):
         kwargs=self._multidict( [ (str(e.argument), str(e.value)) for e in self.temaentry_set.all() ])
@@ -247,14 +269,29 @@ class Tema(base_models.AbstractName):
     def serialize(self):
         return (self.name, [ (str(e.argument), str(e.value)) for e in self.temaentry_set.all() ] ) 
 
+    @cached_property
     def num_roots(self):
         return self.root_set.all().count()
 
+    @cached_property
     def num_derivations(self):
         return self.derivation_set.all().count()
 
+    @cached_property
     def num_fusion_rules(self):
         return self.fusionrule_set.all().count()
+
+    @cached_property
+    def num_references(self):
+        return self.num_roots+self.num_derivations+self.num_fusion_rules
+
+    @cached_property
+    def derivations(self):
+        return "; ".join([ d.name for d in self.derivation_set.all() ])
+
+    @cached_property
+    def roots(self):
+        return "; ".join([ r.root for r in self.root_set.all() ])
 
     class Meta:
         ordering = [ "name" ]
@@ -270,10 +307,16 @@ class TemaEntry(models.Model):
     class Meta:
         ordering=["argument","value"]
 
+class ParadigmaManager(models.Manager):
+    def by_language(self,lang_pk):
+        return self.filter(language__pk=lang_pk)
+
 class Paradigma(base_models.AbstractName):
     part_of_speech = models.ForeignKey(PartOfSpeech,on_delete=models.PROTECT)    
     language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
     inflections = models.ManyToManyField("Inflection",blank=True)
+
+    objects=ParadigmaManager()
 
     class Meta:
         ordering = ["name"]
@@ -346,6 +389,10 @@ class Inflection(models.Model):
         }
 
 class RootManager(models.Manager):
+
+    def by_language(self,lang_pk):
+        return self.filter(language__pk=lang_pk)
+
     def _clean_fused(self,language,root_list=None):
         if root_list is None:
             FusedWordRelation.objects.filter(fused_word__fusion__language=language).delete()
@@ -503,7 +550,10 @@ class Root(models.Model):
 
         #FusedWord.objects.rebuild(language)
     
-    
+class DerivationManager(models.Manager):
+    def by_language(self,lang_pk):
+        return self.filter(language__pk=lang_pk)
+
 class Derivation(base_models.AbstractName):
     language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
     regsub = models.ForeignKey(RegexpReplacement,on_delete=models.PROTECT)    
@@ -513,7 +563,9 @@ class Derivation(base_models.AbstractName):
                                              on_delete=models.PROTECT,
                                              related_name="root_derivation_set")    
     root_part_of_speech = models.ForeignKey(PartOfSpeech,on_delete=models.PROTECT)    
-    paradigma = models.ForeignKey(Paradigma,on_delete=models.PROTECT)    
+    paradigma = models.ForeignKey(Paradigma,on_delete=models.PROTECT)
+
+    objects=DerivationManager()
 
     class Meta:
         ordering = ['name']
@@ -554,10 +606,15 @@ class Derivation(base_models.AbstractName):
 
     def get_absolute_url(self):
         return "/morphology/derivation/%d/" % self.pk
+
+
+class FusionManager(models.Manager):
+    def by_language(self,lang_pk):
+        return self.filter(language__pk=lang_pk)
     
 class Fusion(base_models.AbstractName):
     language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
-    #objects=FusionManager()
+    objects=FusionManager()
 
 class FusionRule(base_models.AbstractName):
     regsub = models.ForeignKey(RegexpReplacement,on_delete=models.PROTECT)    
@@ -598,11 +655,17 @@ class FusionRuleRelation(models.Model):
     class Meta:
         ordering = [ "order" ]
 
+class StemManager(models.Manager):
+    def by_language(self,lang_pk):
+        return self.filter(root__language__pk=lang_pk)
+
 class Stem(models.Model):
     root = models.ForeignKey(Root,on_delete=models.CASCADE)    
     derivation = models.ForeignKey(Derivation,on_delete=models.CASCADE)    
     cache=models.CharField(max_length=1024,db_index=True,editable=False)
 
+    objects=StemManager()
+    
     class Meta:
         ordering = ["cache"]
 

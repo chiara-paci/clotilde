@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %} – Tema list{% endblock %}
+
+{% block centercontent %}
+
+<h1>Tema</h1>
+
+<table>
+  {% for obj in object_list %}
+  <tr>
+    <td><a href="{{ obj.get_absolute_url() }}">{{ obj.name }}</a></td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}

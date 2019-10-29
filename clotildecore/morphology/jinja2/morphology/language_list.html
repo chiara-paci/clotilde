@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %} – Morphology{% endblock %}
+
+{% block centercontent %}
+
+<h1>Morphology</h1>
+
+<div class="blocks">
+
+  {% for obj in object_list %}
+  <section>
+    <h1>{{ obj }}</h1>
+    <p><a href='{{ url("morphology:dictionary_detail",args=[obj.pk]) }}'>Dictionary</a></p>
+    <p><a href='{{ url("morphology:paradigma_language_list",args=[obj.pk]) }}'>Paradigmas</a></p>
+    <p><a href='{{ url("morphology:tema_language_list",args=[obj.pk]) }}'>Temas</a></p>
+    <p><a href='{{ url("morphology:root_language_list",args=[obj.pk]) }}'>Roots</a></p>
+    <p><a href='{{ url("morphology:derivation_language_list",args=[obj.pk]) }}'>Derivations</a></p>
+    <p><a href='{{ url("morphology:fusion_language_list",args=[obj.pk]) }}'>Fusions</a></p>
+    <p><a href='{{ url("morphology:stem_language_list",args=[obj.pk]) }}'>Stems</a></p>
+  </section>
+  {% endfor %}
+
+</div>
+
+
+{% endblock %}
