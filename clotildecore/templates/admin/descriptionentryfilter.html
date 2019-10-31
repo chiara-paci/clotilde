@@ -1,0 +1,175 @@
+{% load i18n %}
+<h3>{% blocktrans with filter_title=title %} By {{ filter_title }} {% endblocktrans %}</h3>
+<ul id="ul_search_{{ spec.parameter_name }}">
+  {% for choice in choices %}
+  {% if choice.type == "all" %}
+  <li{% if choice.selected %} class="selected"{% endif %}>
+    <a href="{{ choice.query_string|iriencode }}" title="{{ choice.display }}">{{ choice.display }}</a></li>
+  {% elif choice.type == "selected" %}
+  <li class="li_search_{{ spec.parameter_name }}">
+    <select style="width:30%;" class="select_search_{{ spec.parameter_name }}_attribute">
+      {% for key,label,selected in choice.keys %}
+      <option value="{{ key }}"{% if selected %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select style="width:45%;" class="select_search_{{ spec.parameter_name }}_value">
+      {% for key,label,selected in choice.vals %}
+      <option value="{{ key }}"{% if selected %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" title="remove" name="index"
+	    style="padding: 3px;font-size:80%;width:20%"
+	    value="0" class="button button_search_{{ spec.parameter_name }}_delete">Del</button>
+  </li>
+  {% endif %}
+  {% endfor %}
+  <li id="li_search_{{ spec.parameter_name }}_nav">
+    <button type="submit" title="add" name="index"
+	    style="padding: 3px;font-size:80%"
+	    value="0" class="button" id="button_search_{{ spec.parameter_name }}_add">Add</button>
+    <button type="submit" title="search {{ spec.parameter_name }}" name="index"
+	    style="padding: 3px;font-size:80%"
+	    value="0" class="button" id="button_search_{{ spec.parameter_name }}_filter">Filter</button>
+  </li>
+</ul>
+
+    <script>
+    
+
+var setup_{{ spec.parameter_name }}=function() { 
+
+    var ATTRIBUTES=[];
+    var VALUES={};
+    {% for choice in choices %}{% if choice.type == "choice" %}
+    ATTRIBUTES.push( [ "{{ choice.lookup }}", "{{ choice.display }}" ]);
+    VALUES["{{ choice.lookup }}"]=[
+	{% for k,v in choice.values %}["{{ k }}","{{ v }}"]{% if not forloop.last %},{% endif %}{% endfor %}
+    ];
+    {% endif %}{% endfor %}
+    
+    console.log(ATTRIBUTES,VALUES);
+    
+    var UL_ID="ul_search_{{ spec.parameter_name }}";
+    var ADD_ID="button_search_{{ spec.parameter_name }}_add";
+    var FILTER_ID="button_search_{{ spec.parameter_name }}_filter";
+    var DELETE_CLASS="button_search_{{ spec.parameter_name }}_delete";
+    var LI_CLASS="li_search_{{ spec.parameter_name }}";
+    var ATTR_CLASS="select_search_{{ spec.parameter_name }}_attribute";
+    var VALUE_CLASS="select_search_{{ spec.parameter_name }}_value";
+    var LI_NAV_ID="li_search_{{ spec.parameter_name }}_nav";
+    
+    
+    
+    django.jQuery("."+DELETE_CLASS).click(function(event){
+	event.preventDefault();
+	var li=django.jQuery(this).parent();
+	li.detach();
+    });
+    
+    django.jQuery("."+ATTR_CLASS).change(function(event){
+	event.preventDefault();
+	var sel_value=django.jQuery(this).siblings("."+VALUE_CLASS).first();
+	sel_value.empty();
+	var attr=django.jQuery(this).val();
+	var opt="<option selected disabled hidden style='display: none' value=''></option>";
+	sel_value.append(opt);
+	for(val in VALUES[attr]) {
+	    opt='<option value="'+VALUES[attr][val][0]+'">'+VALUES[attr][val][1]+'</option>';
+	    sel_value.append(opt);
+	}
+    });
+    
+    django.jQuery("#"+ADD_ID).click(function(event){
+	event.preventDefault();
+	var html="";
+	var ul=django.jQuery('#'+UL_ID);
+	var li=django.jQuery('<li class="'+LI_CLASS+'"></li>');
+	var li_nav=django.jQuery('#'+LI_NAV_ID);
+	
+	html+='<select style="width:30%;" class="'+ATTR_CLASS+'">';
+	html+="<option selected disabled hidden style='display: none' value=''></option>";
+	for(attr in ATTRIBUTES) {
+	    html+='<option value="'+ATTRIBUTES[attr][0]+'">'+ATTRIBUTES[attr][1]+'</option>';
+	}
+	html+='</select>';
+	var sel_attr=django.jQuery(html);
+	
+	
+	html="";
+	html+='<select style="width:45%;" class="'+VALUE_CLASS+'">';
+	html+='</select>';
+	var sel_value=django.jQuery(html);
+	
+	html="";
+	html+='<button type="submit" title="remove" name="remove"';
+	html+=' style="padding: 3px;font-size:80%;width:20%"';
+	html+=' value="0" class="button '+DELETE_CLASS+'">Del</button>';
+	var button_del=django.jQuery(html);
+	
+	li.append(sel_attr);
+	li.append("&nbsp;");
+	li.append(sel_value);
+	li.append("&nbsp;");
+	li.append(button_del);
+	li_nav.before(li);
+	
+	button_del.click(function(event){
+	    event.preventDefault();
+	    li.detach();
+	});
+	
+	sel_attr.change(function(event){
+	    event.preventDefault();
+	    sel_value.empty();
+	    var attr=django.jQuery(this).val();
+	    var opt="<option selected disabled hidden style='display: none' value=''></option>";
+	    sel_value.append(opt);
+	    for(val in VALUES[attr]) {
+		opt='<option value="'+VALUES[attr][val][0]+'">'+VALUES[attr][val][1]+'</option>';
+		sel_value.append(opt);
+	    }
+	});
+	
+    });
+    
+    django.jQuery("#"+FILTER_ID).click(function(event){
+	event.preventDefault();
+	var ul=django.jQuery('#'+UL_ID);
+	var desc_params=[];
+	var params={}
+	var url=window.location.origin+window.location.pathname;
+	var sep,k;
+	
+	ul.children("li."+LI_CLASS).each(function(index){
+	    var sel_value=django.jQuery(this).children("."+VALUE_CLASS).first();
+	    var sel_attr=django.jQuery(this).children("."+ATTR_CLASS).first();
+	    var attr=sel_attr.children("option:selected").val();
+	    var value=sel_value.children("option:selected").val();
+	    if ( (attr=="")||(value=="") ) return;
+	    desc_params.push( attr+":"+value );
+	});
+	
+	window.location.search.substr(1).split("&").forEach(function (pair) {
+	    if (pair === "") return;
+	    var parts = pair.split("=");
+	    params[parts[0]] = parts[1] &&
+		decodeURIComponent(parts[1].replace(/\+/g, " "));
+	});
+	if (desc_params)
+	    params["{{ spec.parameter_name }}"]=desc_params.join("_");
+	sep="?";
+	for(k in params) {
+	    url+=sep+k+"=";
+	    sep="&";
+	    url+=encodeURIComponent(params[k]);
+	}
+	console.log(url);
+	window.location.href=url;
+	
+
+    });
+};
+
+setup_{{ spec.parameter_name }}();
+  
+</script>

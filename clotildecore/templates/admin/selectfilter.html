@@ -1,0 +1,19 @@
+{% load i18n %}
+<h3>{% blocktrans with filter_title=title %} By {{ filter_title }} {% endblocktrans %}</h3>
+<select id="select_search_{{ spec.lookup_kwarg }}" style="max-width:90%;">
+{% for choice in choices %}
+<option{% if choice.selected %} selected{% endif %} value="{{ choice.query_string|iriencode }}">
+  {{ choice.display }}
+</option>
+{% endfor %}
+</select>
+
+<script>
+  django.jQuery("#select_search_{{ spec.lookup_kwarg }}").change(function(e){
+      e.preventDefault();
+      var query = django.jQuery(this).children("option:selected").val();
+      var url=window.location.origin+window.location.pathname;
+      console.log(url+query);
+      window.location.href=url+query;
+    });
+</script>

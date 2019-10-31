@@ -3,6 +3,9 @@ from django import forms
 from django.db.models.query import QuerySet,Q
 from django.db.models import Count
 from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
+
+import collections
 
 from . import models
 from base import models as base_models
@@ -41,6 +44,122 @@ def build_static_iterator(obj_list):
             return (self.field.prepare_value(obj), self.field.label_from_instance(obj))
 
     return ModelChoiceIterator
+
+class TemaEntryListFilter(base_admin.DescriptionEntryListFilter):
+    title = "tema entry"
+    parameter_name = 'tema_entry'
+    #template = "admin/descriptionentryfilter.html"
+    field_name = 'tema_obj'
+
+    # def has_output(self):
+    #     return True
+
+    # def choices(self, changelist):
+    #     yield {
+    #         'selected': not bool(self.value()),
+    #         'query_string': changelist.get_query_string(remove=[self.parameter_name]),
+    #         'display': _('Reset'),
+    #         "type": "all",
+    #     }
+
+    #     choices_sel,choices=self.lookup_choices
+
+    #     print(choices_sel)
+
+    #     for key_sel,val_sel in choices_sel:
+    #         T={
+    #             "keys": key_sel,
+    #             "vals": val_sel,
+    #             "type": "selected",
+    #         }
+            
+    #         yield T
+
+    #     for lookup, title, vals in choices:
+    #         T={
+    #             "lookup": str(lookup),
+    #             'display': title,
+    #             "type": "choice",
+    #             "values": vals,
+    #         }
+    #         yield T
+
+    def lookups(self, request, model_admin):
+        def flabel(D):
+            return "%(value__name)s" % D
+
+        def fkey(D):
+            return "%(value__pk)s" % D
+
+        qset=models.TemaEntry.objects.all().values("argument__pk","argument__name",
+                                                   "value__pk","value__name").distinct()
+
+        keys=list( set([ (e["argument__name"],e["argument__pk"]) for e in qset ]) )
+        keys.sort()
+        ret_d=collections.OrderedDict([ (k,[]) for k in keys ])        
+        
+        for e in qset:
+            key=(e["argument__name"],e["argument__pk"])
+            ret_d[key].append( (e["value__name"],e["value__pk"],fkey(e),flabel(e)) )
+
+        ret=[]
+        for k_name,k_pk in ret_d:
+            ret_d[ (k_name,k_pk) ].sort()
+            ret.append( (str(k_pk),k_name,
+                         [ (v_key,v_label) for v_str,v_pk,v_key,v_label in ret_d[ (k_name,k_pk) ] ]) )
+
+        if not self.value():
+            return [],ret
+
+        qfilter=Q()
+        for arg,val in self.value():
+            qfilter=qfilter|Q(argument__pk=arg,value__pk=val)
+        qset=models.TemaEntry.objects.filter(qfilter).distinct()
+
+        ret_sel=[]
+        for e in qset:
+            print(e)
+            key_sel=[ (str(k_pk),k_name,k_pk==e.argument.pk) for k_name,k_pk in keys ]
+            k=( e.argument.name, e.argument.pk )
+            val_sel=[ (v_key,v_label, (v_pk==e.value.pk) ) for v_str,v_pk,v_key,v_label in ret_d[k] ]
+            ret_sel.append( (key_sel,val_sel) )
+
+        return ret_sel,ret
+
+    def value(self):
+        """
+        Return the value (in string format) provided in the request's
+        query string for this filter, if any, or None if the value wasn't
+        provided.
+        """
+        vals=self.used_parameters.get(self.parameter_name)
+        if not vals: return []
+        t_entry=vals.split("_")
+        ret=[]
+        for e in t_entry:
+            t=e.split(":")
+            arg=int(t[0])
+            val=int(t[1])
+            ret.append( (arg,val) )
+        return ret
+
+    def queryset(self, request, queryset):
+        vals=self.value()
+        print(vals)
+        if not vals: return queryset
+        qset=models.Tema.objects.all()
+        for arg,val in vals:
+            qset=qset.filter(temaentry__argument__pk=arg,
+                             temaentry__value__pk=val)
+
+        kwargs={
+            self.field_name+"__in": qset
+        }
+        return queryset.filter(**kwargs)
+
+
+################
+
 
 admin.site.register(models.FusionRuleRelation)
 
@@ -274,9 +393,21 @@ class TemaEntryAdmin(admin.ModelAdmin):
 
 admin.site.register(models.TemaEntry,TemaEntryAdmin)
 
+class DerivationListFilter(base_admin.InputListFilter):
+    title = "derivation"
+    parameter_name = 'derivation'
+    filter_key = 'derivation__name__icontains'
+    
+class RootListFilter(base_admin.InputListFilter):
+    title = "root"
+    parameter_name = 'root'
+    filter_key = 'root__root__icontains'
+    
 class StemAdmin(admin.ModelAdmin):
-    list_display=["stem","part_of_speech","root","derivation","tema","paradigma"]
-    list_filter=[base_admin.initial_filter_factory("cache")]
+    list_display=["stem","dictionary_voice",
+                  "part_of_speech","root","derivation","tema","paradigma"]
+    list_filter=[DerivationListFilter,RootListFilter,
+                 base_admin.initial_filter_factory("cache")]
 
 admin.site.register(models.Stem,StemAdmin)
 
@@ -360,7 +491,14 @@ class InflectionPartOfSpeechFilter(admin.SimpleListFilter):
         return queryset.filter(paradigma__part_of_speech=pk).distinct()
 
 class InflectionAdmin(admin.ModelAdmin):
-    list_filter=["dict_entry",InflectionPartOfSpeechFilter,"paradigma","description_obj"]
+    list_filter=["dict_entry",
+                 ('paradigma', base_admin.select_filter_decorator(admin.RelatedFieldListFilter)),
+                 ("description_obj",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+                 base_admin.DescriptionEntryListFilter,
+                 InflectionPartOfSpeechFilter,
+                 ]
+
+                 #"description_obj"]
     list_display=["regsub","dict_entry","num_paradigmas","description_obj","description"]
     list_editable=["description_obj"]
     inlines=[ParadigmaInflectionInline] #,WordInline]
@@ -393,66 +531,64 @@ class DerivationNameListFilter(admin.SimpleListFilter):
         if not val: return queryset
         return queryset.filter(name__startswith=val)
 
-class DerivationDescriptionEntryFilter(admin.SimpleListFilter):
-    title = "description entry"
-    parameter_name = 'descentry'
+class DerivationTemaSizeFilter(admin.SimpleListFilter):
+    title = "tema size"
+    parameter_name = 'numtemaentries'
 
     def lookups(self, request, model_admin):
-        def label(D):
-            if D["invert"]:
-                D["x"]="!"
-            else:
-                D["x"]=""
-            return "%(attribute__name)s=%(x)s%(value__string)s" % D
+        def label(s):
+            s=s.replace(";"," ")
+            t=s.split()
+            if len(t)==1: return s
+            base=t[0]
+            if t[1] in ["derivato","proprio"]:
+                return base+" "+t[1]
+            return base
 
-        def key(D):
-            if D["invert"]:
-                D["x"]="1"
-            else:
-                D["x"]="0"
-            return "%(attribute__pk)s_%(value__pk)s_%(x)s" % D
-            
+        qset=models.Derivation.objects.annotate(n_entries=Count("tema_obj__temaentry"))
 
-        qset=base_models.Entry.objects.all().values("attribute__pk","attribute__name",
-                                                    "value__pk","value__string",
-                                                    "invert").distinct()
-        
-        name_list=[ (key(k),label(k)) for k in qset ]
-         
-        return name_list
+        N_list=list(set([ x["n_entries"] for x in qset.values("n_entries")]))
+        N_list.sort()
+
+        return [ (str(x),str(x)) for x in N_list ]
 
     def queryset(self, request, queryset):
         val=self.value()
-        print(val)
         if not val: return queryset
-
-        t=val.split("_")
-        arg=int(t[0])
-        val=int(t[1])
-        inv=(int(t[2])==1)
-        print(arg,val,inv)
-        qset=base_models.Description.objects.filter(entries__attribute__pk=arg,
-                                                    entries__value__pk=val,
-                                                    entries__invert=inv).distinct()
-        return queryset.filter(description_obj__in=qset)
+        qset=queryset.annotate(n_entries=Count("tema_obj__temaentry"))
+        return qset.filter(n_entries=val)
     
+class RootDescriptionEntryListFilter(base_admin.DescriptionEntryListFilter):
+    field_name="root_description_obj"
+    title = "root description entry"
+    parameter_name = 'root_description_entry'
 
 class DerivationAdmin(admin.ModelAdmin):
     list_display = [ "__str__",
-                     "regsub","root_part_of_speech","name","paradigma",
+                     "num_tema_entries",
+                     "tema",
+                     "root_part_of_speech",
+                     "name","paradigma","regsub",
                      "num_stem",
                      "description_obj",
-                     "tema",
                      "root_description", 
                      "paradigma",
                      "tema_obj",
                      "part_of_speech" ]
-    list_filter = [ "root_part_of_speech",
-                    "regsub__pattern",
-                    DerivationNameListFilter,
-                    DerivationDescriptionEntryFilter,
-                    ('paradigma', admin.RelatedOnlyFieldListFilter),
-                    "tema_obj"]
+    list_filter = [
+        DerivationTemaSizeFilter,
+        TemaEntryListFilter,
+        "root_part_of_speech",
+        ('paradigma', base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+        ("tema_obj",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+        ("description_obj",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+        base_admin.DescriptionEntryListFilter,
+        ("root_description_obj",
+         base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+        RootDescriptionEntryListFilter,
+        DerivationNameListFilter,
+        "regsub__pattern",
+    ]
     list_editable = [ "name" ]#,"description_obj" ]
     save_as=True
     inlines=[StemInline]

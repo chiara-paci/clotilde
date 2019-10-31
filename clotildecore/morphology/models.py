@@ -23,8 +23,6 @@ def combine(list_of_list):
             ret.append( [x]+y )
     return ret
 
-        
-
 class RegexpReplacementManager(models.Manager):
     def update_reverse(self):
         for obj in self.all():
@@ -214,6 +212,8 @@ class PartOfSpeech(base_models.AbstractName):
             "fg_color": self.fg_color,
         })
 
+##### Tema
+    
 class TemaArgument(base_models.AbstractName):
     @cached_property
     def num_entries(self):
@@ -230,24 +230,13 @@ class TemaValue(base_models.AbstractName):
         T=" </li><li> ".join([ d.name for d in Tema.objects.filter(temaentry__value=self).distinct() ])
         return mark_safe("<ul><li>"+T+"</li></ul>")
 
-class TemaManager(models.Manager):
-    def by_language(self,lang_pk):
-        q_or=models.Q(root__language__pk=lang_pk)
-        q_or=q_or|models.Q(derivation__language__pk=lang_pk)
-        q_or=q_or|models.Q(fusionrule__fusionrulerelation__fusion__language__pk=lang_pk)
-        return self.filter(q_or).distinct()
     
-    def by_part_of_speech(self,part_of_speech):
-        if type(part_of_speech) is str:
-            pos=PartOfSpeech.objects.filter(name=part_of_speech)[0]
-        else:
-            pos=part_of_speech
-        der_qset=Root.objects.filter(part_of_speech=pos).values("tema_obj")
-        return self.filter(pk__in=[ x["tema_obj"] for x in der_qset ])
+class AbstractTema(base_models.AbstractName):
 
-class Tema(base_models.AbstractName):
-    objects = TemaManager()
-
+    class Meta:
+        abstract = True
+        ordering = [ "name" ]
+    
     def _multidict(self,tlist):
         D={}
         for k,v in tlist:
@@ -269,6 +258,10 @@ class Tema(base_models.AbstractName):
     def serialize(self):
         return (self.name, [ (str(e.argument), str(e.value)) for e in self.temaentry_set.all() ] ) 
 
+    @cached_property
+    def num_entries(self):
+        return self.temaentry_set.all().count()
+    
     @cached_property
     def num_roots(self):
         return self.root_set.all().count()
@@ -293,9 +286,24 @@ class Tema(base_models.AbstractName):
     def roots(self):
         return "; ".join([ r.root for r in self.root_set.all() ])
 
-    class Meta:
-        ordering = [ "name" ]
+class TemaManager(models.Manager):
+    def by_language(self,lang_pk):
+        q_or=models.Q(root__language__pk=lang_pk)
+        q_or=q_or|models.Q(derivation__language__pk=lang_pk)
+        q_or=q_or|models.Q(fusionrule__fusionrulerelation__fusion__language__pk=lang_pk)
+        return self.filter(q_or).distinct()
+    
+    def by_part_of_speech(self,part_of_speech):
+        if type(part_of_speech) is str:
+            pos=PartOfSpeech.objects.filter(name=part_of_speech)[0]
+        else:
+            pos=part_of_speech
+        der_qset=Root.objects.filter(part_of_speech=pos).values("tema_obj")
+        return self.filter(pk__in=[ x["tema_obj"] for x in der_qset ])
 
+class Tema(AbstractTema):
+    objects = TemaManager()
+    
 class TemaEntry(models.Model):
     tema = models.ForeignKey(Tema,on_delete=models.CASCADE)    
     argument = models.ForeignKey(TemaArgument,on_delete=models.CASCADE)    
@@ -307,6 +315,9 @@ class TemaEntry(models.Model):
     class Meta:
         ordering=["argument","value"]
 
+
+#####
+    
 class ParadigmaManager(models.Manager):
     def by_language(self,lang_pk):
         return self.filter(language__pk=lang_pk)
@@ -600,6 +611,10 @@ class Derivation(base_models.AbstractName):
     def tema(self):
         return self.tema_obj.build()
 
+    @cached_property
+    def num_tema_entries(self):
+        return self.tema_obj.num_entries
+
     def clean(self):
         if self.language != self.paradigma.language:
             raise ValidationError(_('Paradigma and language are not compatible.'))
@@ -607,6 +622,7 @@ class Derivation(base_models.AbstractName):
     def get_absolute_url(self):
         return "/morphology/derivation/%d/" % self.pk
 
+    
 
 class FusionManager(models.Manager):
     def by_language(self,lang_pk):
@@ -709,6 +725,10 @@ class Stem(models.Model):
 
     @cached_property
     def part_of_speech(self): return self.derivation.paradigma.part_of_speech
+
+    @cached_property
+    def dictionary_voice(self):
+        return ", ".join([str(w) for w in self.word_set.filter(inflection__dict_entry=True)])
     
 class WordManager(models.Manager): pass
 

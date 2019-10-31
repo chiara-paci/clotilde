@@ -1,0 +1,49 @@
+{% load i18n %}
+<h3>{% blocktrans with filter_title=title %} By {{ filter_title }} {% endblocktrans %}</h3>
+<ul>
+  {% for choice in choices %}
+  {% if choice.all %}
+  <li{% if choice.selected %} class="selected"{% endif %}>
+    <a href="{{ choice.query_string|iriencode }}"
+       title="{{ choice.display }}">{{ choice.display }}</a>
+  </li>
+  {% else %}
+  {% if choice.display %}
+  <li{% if choice.selected %} class="selected"{% endif %}>{{ choice.display }}</li>
+  <li><input type="text" size=18 value="{{ choice.display }}" id="input_search_{{ choice.parameter }}"/>
+  {% else %}
+  <li><input type="text" size=18 value="" id="input_search_{{ choice.parameter }}"/>
+  {% endif %}
+
+  <button type="submit" class="button" title="Search" name="index"
+	  style="padding: 6px;font-size:80%"
+	  value="0" id="button_search_{{ choice.parameter }}">Search</button></li>
+
+  <script>
+    django.jQuery("#button_search_{{ choice.parameter }}").click(function(e){
+	e.preventDefault();
+	var val=django.jQuery("#input_search_{{ choice.parameter }}").val();
+	var url=window.location.origin+window.location.pathname;
+	var params={};
+	window.location.search.substr(1).split("&").forEach(function (pair) {
+	    if (pair === "") return;
+	    var parts = pair.split("=");
+	    params[parts[0]] = parts[1] &&
+		decodeURIComponent(parts[1].replace(/\+/g, " "));
+	});
+	if (val) params["{{ choice.parameter }}"]=val;
+	sep="?";
+	for(k in params) {
+	    url+=sep+k+"=";
+	    sep="&";
+	    url+=encodeURIComponent(params[k]);
+	}
+	window.location.href=url;
+    });
+  </script>
+  
+  {% endif %}
+
+  
+{% endfor %}
+</ul>

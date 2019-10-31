@@ -1,4 +1,9 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
+from django.db.models import Q
+
+import collections
+
 from . import models
 
 class InitialFilter(admin.SimpleListFilter):
@@ -27,6 +32,180 @@ def initial_filter_factory(sel_field):
     class FieldInitialFilter(InitialFilter):
         field=sel_field
     return FieldInitialFilter
+
+def select_filter_decorator(cls):
+    class DecoratedFilter(cls):
+        template = "admin/selectfilter.html"
+    return DecoratedFilter
+
+#SelectListFilter=select_filter_decorator(admin.RelatedOnlyFieldListFilter)
+
+#class SelectListFilter(admin.RelatedOnlyFieldListFilter):
+#    template = "admin/selectfilter.html"
+
+class InputListFilter(admin.SimpleListFilter):
+    # title = "derivation"
+    # parameter_name = 'derivation'
+    # filter_key = 'derivation__name__icontains'
+    template = "admin/inputfilter.html"
+
+    def has_output(self):
+        return True
+
+    def choices(self, changelist):
+        yield {
+            'selected': self.value() is None,
+            'query_string': changelist.get_query_string(remove=[self.parameter_name]),
+            'display': _('All'),
+            "all": True,
+        }
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == str(lookup),
+                'query_string': changelist.get_query_string({self.parameter_name: lookup}),
+                'display': title,
+                "all": False,
+                "parameter": self.parameter_name,
+            }
+
+    def lookups(self, request, model_admin):
+        return [ (self.value(),self.value()) ]
+
+    def queryset(self, request, queryset):
+        if not self.value():
+            return queryset
+        kwargs={
+            self.filter_key: self.value()
+        }
+        return queryset.filter(**kwargs)
+
+
+class DescriptionEntryListFilter(admin.SimpleListFilter):
+    title = "description entry"
+    parameter_name = 'description_entry'
+    template = "admin/descriptionentryfilter.html"
+    field_name = 'description_obj'
+
+    def has_output(self):
+        return True
+
+    def choices(self, changelist):
+        yield {
+            'selected': not bool(self.value()),
+            'query_string': changelist.get_query_string(remove=[self.parameter_name]),
+            'display': _('Reset'),
+            "type": "all",
+        }
+
+        choices_sel,choices=self.lookup_choices
+
+        print(choices_sel)
+
+        for key_sel,val_sel in choices_sel:
+            T={
+                "keys": key_sel,
+                "vals": val_sel,
+                "type": "selected",
+            }
+            
+            yield T
+
+        for lookup, title, vals in choices:
+            T={
+                "lookup": str(lookup),
+                'display': title,
+                "type": "choice",
+                "values": vals,
+            }
+            yield T
+
+    def lookups(self, request, model_admin):
+        def flabel(D):
+            if D["invert"]:
+                D["x"]="!"
+            else:
+                D["x"]=""
+            return "%(x)s%(value__string)s" % D
+
+        def fkey(D):
+            if D["invert"]:
+                D["x"]="1"
+            else:
+                D["x"]="0"
+            return "%(value__pk)s:%(x)s" % D
+            
+
+        qset=models.Entry.objects.all().values("attribute__pk","attribute__name",
+                                               "value__pk","value__string",
+                                               "invert").distinct()
+
+        keys=list( set([ (e["attribute__name"],e["attribute__pk"]) for e in qset ]) )
+        keys.sort()
+        ret_d=collections.OrderedDict([ (k,[]) for k in keys ])        
+        
+        for e in qset:
+            key=(e["attribute__name"],e["attribute__pk"])
+            ret_d[key].append( (e["value__string"],e["invert"],e["value__pk"],fkey(e),flabel(e)) )
+
+        ret=[]
+        for k_name,k_pk in ret_d:
+            ret_d[ (k_name,k_pk) ].sort()
+            ret.append( (str(k_pk),k_name,
+                         [ (v_key,v_label) for v_str,v_inv,v_pk,v_key,v_label in ret_d[ (k_name,k_pk) ] ]) )
+
+        if not self.value():
+            return [],ret
+
+        qfilter=Q()
+        for arg,val,inv in self.value():
+            qfilter=qfilter|Q(attribute__pk=arg,value__pk=val,invert=inv)
+        qset=models.Entry.objects.filter(qfilter)
+
+        ret_sel=[]
+        for e in qset:
+            print(e)
+            key_sel=[ (str(k_pk),k_name,k_pk==e.attribute.pk) for k_name,k_pk in keys ]
+            k=( e.attribute.name, e.attribute.pk )
+            val_sel=[ (v_key,v_label, (v_pk==e.value.pk) ) for v_str,v_inv,v_pk,v_key,v_label in ret_d[k] ]
+            ret_sel.append( (key_sel,val_sel) )
+            
+        return ret_sel,ret
+
+    def value(self):
+        """
+        Return the value (in string format) provided in the request's
+        query string for this filter, if any, or None if the value wasn't
+        provided.
+        """
+        vals=self.used_parameters.get(self.parameter_name)
+        if not vals: return []
+        t_entry=vals.split("_")
+        ret=[]
+        for e in t_entry:
+            t=e.split(":")
+            arg=int(t[0])
+            val=int(t[1])
+            inv=(int(t[2])==1)
+            ret.append( (arg,val,inv) )
+        return ret
+
+    def queryset(self, request, queryset):
+        vals=self.value()
+        print(vals)
+        if not vals: return queryset
+        qset=models.Description.objects.all()
+        for arg,val,inv in vals:
+            qset=qset.filter(entries__attribute__pk=arg,
+                             entries__value__pk=val,
+                             entries__invert=inv)
+
+        kwargs={
+            self.field_name+"__in": qset
+        }
+        return queryset.filter(**kwargs)
+
+    
+######################################
 
 admin.site.register(models.CasePair)
 
