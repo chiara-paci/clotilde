@@ -94,7 +94,6 @@ class Command(BaseCommand):
 
         print("Parts of speech OK")
 
-
         # descriptions
         try:
             tarinfo=archive.getmember("./description_values.json")
@@ -145,15 +144,16 @@ class Command(BaseCommand):
         fd=archive.extractfile(tarinfo)
         data=json.loads(fd.read().decode())
         for name in data:
-            tema,created=morph_models.Tema.objects.get_or_create(name=name)
+            tema=morph_models.Tema.objects.de_serialize( (name,data) )
+            # tema,created=morph_models.Tema.objects.get_or_create(name=name)
+            # ok=[]
+            # for k,v in data[name]:
+            #     attr,created=morph_models.TemaArgument.objects.get_or_create(name=k)
+            #     val,created=morph_models.TemaValue.objects.get_or_create(name=v)
+            #     entry,created=morph_models.TemaEntry.objects.get_or_create(argument=attr,value=val,tema=tema)
+            #     ok.append(entry.pk)
+            # morph_models.TemaEntry.objects.filter(tema=tema).exclude(pk__in=ok).delete()
             tema_dict[name]=tema
-            ok=[]
-            for k,v in data[name]:
-                attr,created=morph_models.TemaArgument.objects.get_or_create(name=k)
-                val,created=morph_models.TemaValue.objects.get_or_create(name=v)
-                entry,created=morph_models.TemaEntry.objects.get_or_create(argument=attr,value=val,tema=tema)
-                ok.append(entry.pk)
-            morph_models.TemaEntry.objects.filter(tema=tema).exclude(pk__in=ok).delete()
 
         print("Temas OK")
 

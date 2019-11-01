@@ -230,11 +230,37 @@ class TemaValue(base_models.AbstractName):
         T=" </li><li> ".join([ d.name for d in Tema.objects.filter(temaentry__value=self).distinct() ])
         return mark_safe("<ul><li>"+T+"</li></ul>")
 
+class TemaManager(models.Manager):
+    def by_language(self,lang_pk):
+        q_or=models.Q(root__language__pk=lang_pk)
+        q_or=q_or|models.Q(derivation__language__pk=lang_pk)
+        q_or=q_or|models.Q(fusionrule__fusionrulerelation__fusion__language__pk=lang_pk)
+        return self.filter(q_or).distinct()
     
-class AbstractTema(base_models.AbstractName):
+    def by_part_of_speech(self,part_of_speech):
+        if type(part_of_speech) is str:
+            pos=PartOfSpeech.objects.filter(name=part_of_speech)[0]
+        else:
+            pos=part_of_speech
+        der_qset=Root.objects.filter(part_of_speech=pos).values("tema_obj")
+        return self.filter(pk__in=[ x["tema_obj"] for x in der_qset ])
+
+    def de_serialize(self,ser):
+        name,data=ser
+        tema,created=Tema.objects.get_or_create(name=name)
+        ok=[]
+        for k,v in data[name]:
+            attr,created=TemaArgument.objects.get_or_create(name=k)
+            val,created=TemaValue.objects.get_or_create(name=v)
+            entry,created=TemaEntry.objects.get_or_create(argument=attr,value=val,tema=tema)
+            ok.append(entry.pk)
+        TemaEntry.objects.filter(tema=tema).exclude(pk__in=ok).delete()
+        return tema
+
+class Tema(base_models.AbstractName):
+    objects = TemaManager()
 
     class Meta:
-        abstract = True
         ordering = [ "name" ]
     
     def _multidict(self,tlist):
@@ -286,24 +312,6 @@ class AbstractTema(base_models.AbstractName):
     def roots(self):
         return "; ".join([ r.root for r in self.root_set.all() ])
 
-class TemaManager(models.Manager):
-    def by_language(self,lang_pk):
-        q_or=models.Q(root__language__pk=lang_pk)
-        q_or=q_or|models.Q(derivation__language__pk=lang_pk)
-        q_or=q_or|models.Q(fusionrule__fusionrulerelation__fusion__language__pk=lang_pk)
-        return self.filter(q_or).distinct()
-    
-    def by_part_of_speech(self,part_of_speech):
-        if type(part_of_speech) is str:
-            pos=PartOfSpeech.objects.filter(name=part_of_speech)[0]
-        else:
-            pos=part_of_speech
-        der_qset=Root.objects.filter(part_of_speech=pos).values("tema_obj")
-        return self.filter(pk__in=[ x["tema_obj"] for x in der_qset ])
-
-class Tema(AbstractTema):
-    objects = TemaManager()
-    
 class TemaEntry(models.Model):
     tema = models.ForeignKey(Tema,on_delete=models.CASCADE)    
     argument = models.ForeignKey(TemaArgument,on_delete=models.CASCADE)    
@@ -315,6 +323,15 @@ class TemaEntry(models.Model):
     class Meta:
         ordering=["argument","value"]
 
+class TemaEntryRelation(models.Model):
+    tema = models.ForeignKey(Tema,on_delete=models.CASCADE)    
+    entry = models.ForeignKey(TemaEntry,on_delete=models.CASCADE)    
+
+    def __str__(self):
+        return str(self.entry)
+
+    class Meta:
+        ordering=["entry"]
 
 #####
     
