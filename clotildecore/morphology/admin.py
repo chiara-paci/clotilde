@@ -46,7 +46,7 @@ def build_static_iterator(obj_list):
     return ModelChoiceIterator
 
 class TemaEntryListFilter(base_admin.DescriptionEntryListFilter):
-    title = "tema entry"
+    title = "tema"
     parameter_name = 'tema_entry'
     #template = "admin/descriptionentryfilter.html"
     field_name = 'tema_obj'
@@ -95,11 +95,6 @@ class TemaEntryListFilter(base_admin.DescriptionEntryListFilter):
         return ret_sel,ret
 
     def value(self):
-        """
-        Return the value (in string format) provided in the request's
-        query string for this filter, if any, or None if the value wasn't
-        provided.
-        """
         vals=self.used_parameters.get(self.parameter_name)
         if not vals: return []
         t_entry=vals.split("_")
@@ -116,15 +111,13 @@ class TemaEntryListFilter(base_admin.DescriptionEntryListFilter):
         vals=self.value()
         print(vals)
         if not vals: return queryset
-        qset=models.Tema.objects.all()
         for arg,val in vals:
-            qset=qset.filter(temaentryrelation__entry__argument__pk=arg,
-                             temaentryrelation__entry__value__pk=val)
-
-        kwargs={
-            self.field_name+"__in": qset
-        }
-        return queryset.filter(**kwargs)
+            entry=models.TemaEntry.objects.filter(argument__pk=arg,value__pk=val)
+            kwargs={
+                self.field_name+"__in": entry
+            }
+            queryset=queryset.filter(**kwargs)
+        return queryset
 
 
 ################
@@ -153,6 +146,7 @@ class TemaValueReferenceFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
+            ( "noentry","no entry"),
             ( "notema","no tema"),
             ( "noref","no reference"),
             ( "derivation_only","derivation only"),
@@ -188,15 +182,16 @@ class TemaValueReferenceFilter(admin.SimpleListFilter):
         qset=qset.exclude(num_root=0,num_frule=0)
         return qset
         
-    ## QUI
     def queryset(self, request, queryset):
         val=self.value()
         if not val: return queryset
+        if val=="noentry":
+            return queryset.all().annotate(num_entry=Count("temaentry")).filter(num_entry=0)
         if val=="notema":
-            return queryset.all().annotate(num_tema=Count("temaentry")).filter(num_tema=0)
+            return queryset.all().annotate(num_tema=Count("temaentry__temaentryrelation")).filter(num_tema=0)
         
         tqset=self._tema_queryset(val)
-        return queryset.filter(temaentry__tema__in=tqset).distinct()
+        return queryset.filter(temaentry__temaentryrelation__tema__in=tqset).distinct()
 
 class TemaValueAdmin(admin.ModelAdmin):
     list_display=["__str__","name","num_entries","temas"]
@@ -354,6 +349,13 @@ class TemaEntryRelationAdmin(admin.ModelAdmin):
 
 admin.site.register(models.TemaEntryRelation,TemaEntryRelationAdmin)
 
+
+class TemaTemaEntryListFilter(TemaEntryListFilter):
+    title = "tema"
+    parameter_name = 'tema_entry'
+    #template = "admin/descriptionentryfilter.html"
+    field_name = 'temaentryrelation__entry'
+
         
 class TemaAdmin(admin.ModelAdmin):
     inlines=[TemaEntryRelationInline,DerivationInline,RootInline,FusionRuleInline]
@@ -362,9 +364,12 @@ class TemaAdmin(admin.ModelAdmin):
                    "num_roots","num_derivations","num_fusion_rules" ]
     save_as=True
     list_filter=[
+        ('temaentryrelation__entry', base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+        "temaentryrelation__entry__argument",
+        ('temaentryrelation__entry__value', base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+        TemaTemaEntryListFilter,
         TemaReferenceFilter,
         TemaNameListFilter,
-        TemaEntryFilter
     ]
     list_editable=["name"]
 
