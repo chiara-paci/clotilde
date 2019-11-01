@@ -374,6 +374,12 @@ class TemaReferenceFilter(admin.SimpleListFilter):
         qset=qset.exclude(num_der=0,num_frule=0)
         qset=qset.exclude(num_root=0,num_frule=0)
         return qset
+
+# class TemaEntryRelationAdmin(admin.ModelAdmin):
+#     list_display= [ "__str__","tema","entry","argument","value" ]
+
+# admin.site.register(models.TemaEntryRelation,TemaEntryRelationAdmin)
+
         
 class TemaAdmin(admin.ModelAdmin):
     inlines=[TemaEntryInline,DerivationInline,RootInline,FusionRuleInline]

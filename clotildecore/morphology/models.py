@@ -333,6 +333,13 @@ class TemaEntryRelation(models.Model):
     class Meta:
         ordering=["entry"]
 
+    @cached_property
+    def argument(self): return self.entry.argument
+
+    @cached_property
+    def value(self): return self.entry.value
+
+
 #####
     
 class ParadigmaManager(models.Manager):
