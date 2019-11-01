@@ -227,7 +227,7 @@ class TemaValue(base_models.AbstractName):
 
     @cached_property
     def temas(self):
-        T=" </li><li> ".join([ d.name for d in Tema.objects.filter(temaentry__value=self).distinct() ])
+        T=" </li><li> ".join([ d.name for d in Tema.objects.filter(temaentryrelation__entry__value=self).distinct() ])
         return mark_safe("<ul><li>"+T+"</li></ul>")
 
 class TemaManager(models.Manager):
@@ -253,8 +253,9 @@ class TemaManager(models.Manager):
             attr,created=TemaArgument.objects.get_or_create(name=k)
             val,created=TemaValue.objects.get_or_create(name=v)
             entry,created=TemaEntry.objects.get_or_create(argument=attr,value=val,tema=tema)
-            ok.append(entry.pk)
-        TemaEntry.objects.filter(tema=tema).exclude(pk__in=ok).delete()
+            entryrel,created=TemaEntryRelation.objects.get_or_create(tema=tema,entry=entry)
+            ok.append(entryrel.pk)
+        TemaEntryRelation.objects.filter(tema=tema).exclude(pk__in=ok).delete()
         return tema
 
 class Tema(base_models.AbstractName):
@@ -278,15 +279,15 @@ class Tema(base_models.AbstractName):
         return "/morphology/tema/%d/" % self.pk
     
     def build(self):
-        kwargs=self._multidict( [ (str(e.argument), str(e.value)) for e in self.temaentry_set.all() ])
+        kwargs=self._multidict( [ (str(e.argument), str(e.value)) for e in self.temaentryrelation_set.all() ])
         return descriptions.Tema(**kwargs)
 
     def serialize(self):
-        return (self.name, [ (str(e.argument), str(e.value)) for e in self.temaentry_set.all() ] ) 
+        return (self.name, [ (str(e.argument), str(e.value)) for e in self.temaentryrelation_set.all() ] ) 
 
     @cached_property
     def num_entries(self):
-        return self.temaentry_set.all().count()
+        return self.temaentryrelation_set.all().count()
     
     @cached_property
     def num_roots(self):
@@ -313,7 +314,7 @@ class Tema(base_models.AbstractName):
         return "; ".join([ r.root for r in self.root_set.all() ])
 
 class TemaEntry(models.Model):
-    tema = models.ForeignKey(Tema,on_delete=models.CASCADE)    
+    #tema = models.ForeignKey(Tema,on_delete=models.CASCADE)    
     argument = models.ForeignKey(TemaArgument,on_delete=models.CASCADE)    
     value = models.ForeignKey(TemaValue,on_delete=models.CASCADE)    
 
@@ -322,6 +323,9 @@ class TemaEntry(models.Model):
 
     class Meta:
         ordering=["argument","value"]
+
+    @cached_property
+    def num_temas(self): return self.temaentryrelation_set.count()
 
 class TemaEntryRelation(models.Model):
     tema = models.ForeignKey(Tema,on_delete=models.CASCADE)    
@@ -801,6 +805,7 @@ class Word(models.Model):
 class FusedWordManager(models.Manager):
 
 
+    ### QUI
     def _reduce_word_list(self,part_of_speech,tema,description):
         """ This function is just a performance booster, not a perfect filter,
             and retrieves more words than  necessary (but still not all

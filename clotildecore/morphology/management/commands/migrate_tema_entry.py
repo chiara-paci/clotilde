@@ -10,5 +10,16 @@ class Command(BaseCommand):
     help = 'Verify temas for language <name>'
 
     def handle(self, *args, **options):
-        for entry in models.TemaEntry.objects.all():
-            models.TemaEntryRelation.objects.get_or_create(tema=entry.tema,entry=entry)
+        seq=[]
+        for x in models.TemaEntry.objects.all().values("argument__name","value__name").distinct():
+            arg=x["argument__name"]
+            val=x["value__name"]
+            obj=models.TemaEntry.objects.filter(argument__name=arg,value__name=val).order_by("id").first()
+            seq.append( (arg,val,obj) )
+        for arg,val,obj in seq:
+            for rel in models.TemaEntryRelation.objects.filter(entry__argument__name=arg,entry__value__name=val):
+                rel.entry=obj
+                rel.save()
+                print( "%20s %20s %s" % (arg,val,rel) )
+                
+            
