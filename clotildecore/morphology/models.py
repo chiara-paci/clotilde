@@ -323,6 +323,7 @@ class TemaEntry(models.Model):
 
     class Meta:
         ordering=["argument","value"]
+        unique_together=[ ["argument","value"] ]
 
     @cached_property
     def num_temas(self): return self.temaentryrelation_set.count()

@@ -21,5 +21,5 @@ class Command(BaseCommand):
                 rel.entry=obj
                 rel.save()
                 print( "%20s %20s %s" % (arg,val,rel) )
-                
+        
             
