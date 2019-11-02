@@ -240,7 +240,7 @@ class Command(BaseCommand):
                      "root_part_of_speech": pos_dict[data[name]["root_part_of_speech"]],
                      "paradigma": par_dict[data[name]["paradigma"]],
                  })
-            der=morph_models.Dervation.objects.de_serialize(ser)
+            der=morph_models.Derivation.objects.de_serialize(ser)
             # der,created=morph_models.Derivation.objects.update_or_create(name=name,language=language,
             #                                                              defaults={
             #                                                                  "regsub": regsub,
