@@ -235,7 +235,7 @@ class Command(BaseCommand):
                  {
                      "regsub": insert_regexp_replacement(data[name]["regsub"]),
                      "tema": tema_dict[data[name]["tema"]],
-                     "descritpion": desc_dict[data[name]["description"]],
+                     "description": desc_dict[data[name]["description"]],
                      #"r_desc": desc_dict[data[name]["root_description"]],
                      "root_part_of_speech": pos_dict[data[name]["root_part_of_speech"]],
                      "paradigma": par_dict[data[name]["paradigma"]],
