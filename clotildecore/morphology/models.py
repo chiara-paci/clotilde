@@ -252,7 +252,7 @@ class TemaManager(models.Manager):
         for k,v in data[name]:
             attr,created=TemaArgument.objects.get_or_create(name=k)
             val,created=TemaValue.objects.get_or_create(name=v)
-            entry,created=TemaEntry.objects.get_or_create(argument=attr,value=val,tema=tema)
+            entry,created=TemaEntry.objects.get_or_create(argument=attr,value=val) #,tema=tema)
             entryrel,created=TemaEntryRelation.objects.get_or_create(tema=tema,entry=entry)
             ok.append(entryrel.pk)
         TemaEntryRelation.objects.filter(tema=tema).exclude(pk__in=ok).delete()
