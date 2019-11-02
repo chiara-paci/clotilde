@@ -432,10 +432,10 @@ class RootManager(models.Manager):
 
     def de_serialize(self,ser):
         try:
-            obj,created=morph_models.Root.objects.get_or_create(root=ser["root"],
-                                                                part_of_speech=ser["part_of_speech"],
-                                                                tema_obj=ser["tema"],
-                                                                language=ser["language"])
+            obj,created=Root.objects.get_or_create(root=ser["root"],
+                                                   part_of_speech=ser["part_of_speech"],
+                                                   tema_obj=ser["tema"],
+                                                   language=ser["language"])
         except Exception as e:
             print(ser)
             raise e
@@ -612,8 +612,8 @@ class DerivationManager(models.Manager):
             defaults[k]=data[k]
         for k in [ "tema","description" ]:
             defaults[k+"_obj"]=data[k]
-        der,created=morph_models.Derivation.objects.update_or_create(name=name,language=language,
-                                                                     defaults=defaults)
+        der,created=Derivation.objects.update_or_create(name=name,language=language,
+                                                        defaults=defaults)
         return der
 
 
