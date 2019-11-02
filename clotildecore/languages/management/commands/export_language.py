@@ -66,7 +66,7 @@ class Command(BaseCommand):
         for root in morph_models.Root.objects.filter(language=language):
             root_list.append(root.serialize())
             tema_list.append(root.tema_obj.pk)
-            desc_list.append(root.description_obj.pk)
+            # desc_list.append(root.description_obj.pk)
             pos_list.append(root.part_of_speech.pk)
         info,bdata=build_tarinfo("./roots.json",json.dumps(root_list))
         archive.addfile(info, bdata)
@@ -77,7 +77,7 @@ class Command(BaseCommand):
             der_list.append(der.serialize())
             tema_list.append(der.tema_obj.pk)
             desc_list.append(der.description_obj.pk)
-            desc_list.append(der.root_description_obj.pk)
+            # desc_list.append(der.root_description_obj.pk)
             pos_list.append(der.root_part_of_speech.pk)
         info,bdata=build_tarinfo("./derivations.json",json.dumps(dict(der_list)))
         archive.addfile(info, bdata)

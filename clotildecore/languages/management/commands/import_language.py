@@ -169,18 +169,17 @@ class Command(BaseCommand):
             if (n%show)==0:
                 print("    %5d/%d %.2f %% " % (n,L,100*n/L) )
             n+=1
-            tema=tema_dict[root["tema"]]
-            pos=pos_dict[root["part_of_speech"]]
-            desc=desc_dict[root["description"]]
-            val=root["root"]
-            try:
-                obj,created=morph_models.Root.objects.get_or_create(root=val,part_of_speech=pos,
-                                                                    tema_obj=tema,
-                                                                    description_obj=desc,
-                                                                    language=language)
-            except Exception as e:
-                print(val,pos,tema)
-                raise e
+            # tema=tema_dict[root["tema"]]
+            # pos=pos_dict[root["part_of_speech"]]
+            # #desc=desc_dict[root["description"]]
+            # val=root["root"]
+            droot={
+                "tema": tema_dict[root["tema"]],
+                "part_of_speech": pos_dict[root["part_of_speech"]],
+                "root": root["root"],
+                "language": language,
+            }
+            obj=morph_models.Root.objects.de_serialize(droot)
             root_ok.append(obj.pk)
 
         print("Roots OK")
@@ -232,27 +231,25 @@ class Command(BaseCommand):
         data=json.loads(fd.read().decode())
         der_ok=[]
         for name in data:
-            regsub=insert_regexp_replacement(data[name]["regsub"])
-            # try:
-            #     regsub,created=morph_models.RegexpReplacement.objects.get_or_create(pattern=data[name]["regsub"][0],
-            #                                                                         replacement=data[name]["regsub"][1])
-            # except Exception as e:
-            #     print(data[name]["regsub"])
-            #     raise e
-            tema=tema_dict[data[name]["tema"]]
-            desc=desc_dict[data[name]["description"]]
-            r_desc=desc_dict[data[name]["root_description"]]
-            r_pos=pos_dict[data[name]["root_part_of_speech"]]
-            par=par_dict[data[name]["paradigma"]]
-            der,created=morph_models.Derivation.objects.update_or_create(name=name,language=language,
-                                                                         defaults={
-                                                                             "regsub": regsub,
-                                                                             "tema_obj": tema,
-                                                                             "description_obj": desc,
-                                                                             "root_description_obj": r_desc,
-                                                                             "root_part_of_speech": r_pos,
-                                                                             "paradigma": par,
-                                                                         })
+            ser=(language,name, 
+                 {
+                     "regsub": insert_regexp_replacement(data[name]["regsub"]),
+                     "tema": tema_dict[data[name]["tema"]],
+                     "descritpion": desc_dict[data[name]["description"]],
+                     #"r_desc": desc_dict[data[name]["root_description"]],
+                     "root_part_of_speech": pos_dict[data[name]["root_part_of_speech"]],
+                     "paradigma": par_dict[data[name]["paradigma"]],
+                 })
+            der=morph_models.Dervation.objects.de_serialize(ser)
+            # der,created=morph_models.Derivation.objects.update_or_create(name=name,language=language,
+            #                                                              defaults={
+            #                                                                  "regsub": regsub,
+            #                                                                  "tema_obj": tema,
+            #                                                                  "description_obj": desc,
+            #                                                                  "root_description_obj": r_desc,
+            #                                                                  "root_part_of_speech": r_pos,
+            #                                                                  "paradigma": par,
+            #                                                              })
             der_ok.append(der.pk)
 
         print("Derivations OK")

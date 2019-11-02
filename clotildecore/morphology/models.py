@@ -430,6 +430,17 @@ class Inflection(models.Model):
 
 class RootManager(models.Manager):
 
+    def de_serialize(self,ser):
+        try:
+            obj,created=morph_models.Root.objects.get_or_create(root=ser["root"],
+                                                                part_of_speech=ser["part_of_speech"],
+                                                                tema_obj=ser["tema"],
+                                                                language=ser["language"])
+        except Exception as e:
+            print(ser)
+            raise e
+        return obj
+
     def by_language(self,lang_pk):
         return self.filter(language__pk=lang_pk)
 
@@ -593,6 +604,18 @@ class Root(models.Model):
 class DerivationManager(models.Manager):
     def by_language(self,lang_pk):
         return self.filter(language__pk=lang_pk)
+
+    def de_serialize(self,ser):
+        language,name,data=ser
+        defaults={}
+        for k in [ "regsub","root_part_of_speech","paradigma" ]:
+            defaults[k]=data[k]
+        for k in [ "tema","description" ]:
+            defaults[k+"_obj"]=data[k]
+        der,created=morph_models.Derivation.objects.update_or_create(name=name,language=language,
+                                                                     defaults=defaults)
+        return der
+
 
 class Derivation(base_models.AbstractName):
     language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
