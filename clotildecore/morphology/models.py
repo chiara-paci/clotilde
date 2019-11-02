@@ -525,7 +525,7 @@ class Root(models.Model):
     language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
     tema_obj = models.ForeignKey(Tema,on_delete=models.PROTECT)    
     part_of_speech = models.ForeignKey(PartOfSpeech,on_delete=models.PROTECT)    
-    description_obj = models.ForeignKey(base_models.Description,on_delete=models.PROTECT)    
+    # description_obj = models.ForeignKey(base_models.Description,on_delete=models.PROTECT)    
 
     objects=RootManager()
 
