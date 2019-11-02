@@ -309,10 +309,10 @@ class TemaReferenceFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         return [
             ( "noref","no references"),
-            ( "derivation_only","derivation only"),
+            #( "derivation_only","derivation only"),
             ( "root_only","root only"),
             ( "fusion_rule_only","fusion rule only"),
-            ( "derivation","with derivation"),
+            #( "derivation","with derivation"),
             ( "root","with root"),
             ( "fusion_rule","with fusion rule"),
             ( "mixed","mixed"),
@@ -321,27 +321,31 @@ class TemaReferenceFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         val=self.value()
         if not val: return queryset
-        qset=queryset.annotate(num_der=Count("derivation"),
+        qset=queryset.annotate(#num_der=Count("derivation"),
                                num_root=Count("root"),
                                num_frule=Count("fusionrule"))
         if val=="noref":
-            return qset.filter(num_der=0,num_root=0,num_frule=0)
-        if val=="derivation_only":
-            return qset.filter(num_root=0,num_frule=0).exclude(num_der=0)
+            return qset.filter(num_root=0,num_frule=0)
+        # if val=="derivation_only":
+        #     return qset.filter(num_root=0,num_frule=0).exclude(num_der=0)
         if val=="root_only":
-            return qset.filter(num_der=0,num_frule=0).exclude(num_root=0)
+            # return qset.filter(num_der=0,num_frule=0).exclude(num_root=0)
+            return qset.filter(num_frule=0).exclude(num_root=0)
         if val=="fusion_rule_only":
-            return qset.filter(num_root=0,num_der=0).exclude(num_frule=0)
-        if val=="derivation":
-            return qset.exclude(num_der=0)
+            #return qset.filter(num_root=0,num_der=0).exclude(num_frule=0)
+            return qset.filter(num_root=0).exclude(num_frule=0)
+        #if val=="derivation":
+        #    return qset.exclude(num_der=0)
         if val=="root":
             return qset.exclude(num_root=0)
         if val=="fusion_rule":
             return qset.exclude(num_frule=0)
-        qset=qset.exclude(num_der=0,num_root=0,num_frule=0)
-        qset=qset.exclude(num_der=0,num_root=0)
-        qset=qset.exclude(num_der=0,num_frule=0)
-        qset=qset.exclude(num_root=0,num_frule=0)
+        # qset=qset.exclude(num_der=0,num_root=0,num_frule=0)
+        # qset=qset.exclude(num_der=0,num_root=0)
+        # qset=qset.exclude(num_der=0,num_frule=0)
+        # qset=qset.exclude(num_root=0,num_frule=0)
+        qset=qset.exclude(num_root=0)
+        qset=qset.exclude(num_frule=0)
         return qset
 
 class TemaEntryRelationAdmin(admin.ModelAdmin):
@@ -358,10 +362,9 @@ class TemaTemaEntryListFilter(TemaEntryListFilter):
 
         
 class TemaAdmin(admin.ModelAdmin):
-    inlines=[TemaEntryRelationInline,DerivationInline,RootInline,FusionRuleInline]
-    list_display=[ "id","name","build",
-                   "num_references","derivations",
-                   "num_roots","num_derivations","num_fusion_rules" ]
+    inlines=[TemaEntryRelationInline,RootInline,FusionRuleInline]
+    list_display=[ "id","name","build","num_derivations","derivations",
+                   "num_references","num_roots","num_fusion_rules" ]
     save_as=True
     list_filter=[
         ('temaentryrelation__entry', base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
@@ -375,36 +378,37 @@ class TemaAdmin(admin.ModelAdmin):
 
 admin.site.register(models.Tema,TemaAdmin)
 
-class TemaEntryUsedFilter(admin.SimpleListFilter):
-    title = "used"
-    parameter_name = 'used'
+class RelatedCountFilter(admin.SimpleListFilter):
+    title = ""
+    parameter_name = ''
+    related_name=""
 
     def lookups(self, request, model_admin):
-        def label(s):
-            s=s.replace(";"," ")
-            t=s.split()
-            if len(t)==1: return s
-            base=t[0]
-            if t[1] in ["derivato","proprio"]:
-                return base+" "+t[1]
-            return base
-
-        qset=models.TemaEntry.objects.annotate(n_temas=Count("temaentryrelation"))
-
-        N_list=list(set([ x["n_temas"] for x in qset.values("n_temas")]))
+        qset=models.TemaEntry.objects.annotate(num=Count(self.related_name))
+        N_list=list(set([ x["num"] for x in qset.values("num")]))
         N_list.sort()
-
         return [ (str(x),str(x)) for x in N_list ]
 
     def queryset(self, request, queryset):
         val=self.value()
         if not val: return queryset
-        qset=queryset.annotate(n_temas=Count("temaentryrelation"))
-        return qset.filter(n_temas=val)
+        qset=queryset.annotate(num=Count(self.related_name))
+        return qset.filter(num=val)
+
+class TemaEntryTemaCountFilter(RelatedCountFilter):
+    title = "tema count"
+    parameter_name = 'tema_count'
+    related_name="temaentryrelation"
+
+class TemaEntryDerivationCountFilter(RelatedCountFilter):
+    title = "derivation count"
+    parameter_name = 'derivation_count'
+    related_name="derivation"
 
 class TemaEntryAdmin(admin.ModelAdmin):
-    list_display=["__str__","num_temas","argument","value"]
-    list_filter=[TemaEntryUsedFilter,"argument","value"]
+    list_display=["__str__","num_temas","num_derivations","argument","value"]
+    list_filter=[TemaEntryTemaCountFilter,TemaEntryDerivationCountFilter,"argument","value"]
+    inlines=[DerivationInline,TemaEntryRelationInline]
 
 admin.site.register(models.TemaEntry,TemaEntryAdmin)
 
@@ -580,21 +584,21 @@ class DerivationNameListFilter(admin.SimpleListFilter):
 
 class DerivationAdmin(admin.ModelAdmin):
     list_display = [ "__str__",
-                     "num_tema_entries",
+                     "name",
+                     #"num_tema_entries",
                      #"tema",
                      "tema_entry",
                      "root_part_of_speech",
-                     "name","paradigma","regsub",
-                     "num_stem",
-                     "description_obj",
-                     # "root_description", 
+                     "part_of_speech",
+                     "regsub",
                      "paradigma",
-                     "tema_obj",
-                     "part_of_speech" ]
+                     "num_stem",
+                     "description" ]
     list_filter = [
         #DerivationTemaSizeFilter,
         #TemaEntryListFilter,
         "root_part_of_speech",
+        "paradigma__part_of_speech",
         ('paradigma', base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
         ("tema_entry",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
         ("description_obj",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),

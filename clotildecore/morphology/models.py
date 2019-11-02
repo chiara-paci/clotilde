@@ -295,7 +295,8 @@ class Tema(base_models.AbstractName):
 
     @cached_property
     def num_derivations(self):
-        return self.derivation_set.all().count()
+        qs_der=Derivation.objects.filter(tema_entry__in=self.temaentryrelation_set.all().values("tema_entry"))
+        return qs_der.count()
 
     @cached_property
     def num_fusion_rules(self):
@@ -303,11 +304,12 @@ class Tema(base_models.AbstractName):
 
     @cached_property
     def num_references(self):
-        return self.num_roots+self.num_derivations+self.num_fusion_rules
+        return self.num_roots+self.num_fusion_rules #+self.num_derivations
 
     @cached_property
     def derivations(self):
-        return "; ".join([ d.name for d in self.derivation_set.all() ])
+        qs_der=Derivation.objects.filter(tema_entry__in=self.temaentryrelation_set.all().values("tema_entry"))
+        return "; ".join([ d.name for d in qs_der ])
 
     @cached_property
     def roots(self):
@@ -327,6 +329,9 @@ class TemaEntry(models.Model):
 
     @cached_property
     def num_temas(self): return self.temaentryrelation_set.count()
+
+    @cached_property
+    def num_derivations(self): return self.derivation_set.count()
 
 class TemaEntryRelation(models.Model):
     tema = models.ForeignKey(Tema,on_delete=models.CASCADE)    
@@ -612,6 +617,12 @@ class DerivationManager(models.Manager):
             defaults[k]=data[k]
         for k in [ "tema","description" ]:
             defaults[k+"_obj"]=data[k]
+
+        a,v=data["tema_entry"]
+        attr,created=TemaArgument.objects.get_or_create(name=a)
+        val,created=TemaValue.objects.get_or_create(name=v)
+        entry,created=TemaEntry.objects.get_or_create(argument=attr,value=val) #,tema=tema)
+        defaults["tema_entry"]=entry
         der,created=Derivation.objects.update_or_create(name=name,language=language,
                                                         defaults=defaults)
         return der
@@ -642,6 +653,7 @@ class Derivation(base_models.AbstractName):
             #"root_description": self.root_description_obj.name,
             "root_part_of_speech": self.root_part_of_speech.name,
             "paradigma": self.paradigma.name,
+            "tema_entry": ( str(self.tema_entry.argument), str(self.tema_entry.value) )
         })
 
     @cached_property
@@ -662,11 +674,12 @@ class Derivation(base_models.AbstractName):
 
     @cached_property
     def tema(self):
-        return self.tema_obj.build()
+        kwargs=self._multidict( [ (str(self.tema_entry.argument), str(self.tema_entry.value)) ])
+        return descriptions.Tema(**kwargs)
 
-    @cached_property
-    def num_tema_entries(self):
-        return self.tema_obj.num_entries
+    # @cached_property
+    # def num_tema_entries(self):
+    #     return self.tema_obj.num_entries
 
     def clean(self):
         if self.language != self.paradigma.language:
@@ -674,8 +687,6 @@ class Derivation(base_models.AbstractName):
 
     def get_absolute_url(self):
         return "/morphology/derivation/%d/" % self.pk
-
-    
 
 class FusionManager(models.Manager):
     def by_language(self,lang_pk):
