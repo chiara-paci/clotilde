@@ -621,6 +621,7 @@ class Derivation(base_models.AbstractName):
     language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
     regsub = models.ForeignKey(RegexpReplacement,on_delete=models.PROTECT)    
     tema_obj = models.ForeignKey(Tema,on_delete=models.PROTECT)    
+    tema_entry = models.ForeignKey(TemaEntry,on_delete=models.PROTECT,null=True)    
     description_obj = models.ForeignKey(base_models.Description,on_delete=models.PROTECT)    
     # root_description_obj = models.ForeignKey(base_models.Description,
     #                                          on_delete=models.PROTECT,

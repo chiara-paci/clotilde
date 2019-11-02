@@ -546,32 +546,32 @@ class DerivationNameListFilter(admin.SimpleListFilter):
         if not val: return queryset
         return queryset.filter(name__startswith=val)
 
-class DerivationTemaSizeFilter(admin.SimpleListFilter):
-    title = "tema size"
-    parameter_name = 'numtemaentries'
+# class DerivationTemaSizeFilter(admin.SimpleListFilter):
+#     title = "tema size"
+#     parameter_name = 'numtemaentries'
 
-    def lookups(self, request, model_admin):
-        def label(s):
-            s=s.replace(";"," ")
-            t=s.split()
-            if len(t)==1: return s
-            base=t[0]
-            if t[1] in ["derivato","proprio"]:
-                return base+" "+t[1]
-            return base
+#     def lookups(self, request, model_admin):
+#         def label(s):
+#             s=s.replace(";"," ")
+#             t=s.split()
+#             if len(t)==1: return s
+#             base=t[0]
+#             if t[1] in ["derivato","proprio"]:
+#                 return base+" "+t[1]
+#             return base
 
-        qset=models.Derivation.objects.annotate(n_entries=Count("tema_obj__temaentryrelation"))
+#         qset=models.Derivation.objects.annotate(n_entries=Count("tema_obj__temaentryrelation"))
 
-        N_list=list(set([ x["n_entries"] for x in qset.values("n_entries")]))
-        N_list.sort()
+#         N_list=list(set([ x["n_entries"] for x in qset.values("n_entries")]))
+#         N_list.sort()
 
-        return [ (str(x),str(x)) for x in N_list ]
+#         return [ (str(x),str(x)) for x in N_list ]
 
-    def queryset(self, request, queryset):
-        val=self.value()
-        if not val: return queryset
-        qset=queryset.annotate(n_entries=Count("tema_obj__temaentryrelation"))
-        return qset.filter(n_entries=val)
+#     def queryset(self, request, queryset):
+#         val=self.value()
+#         if not val: return queryset
+#         qset=queryset.annotate(n_entries=Count("tema_obj__temaentryrelation"))
+#         return qset.filter(n_entries=val)
     
 # class RootDescriptionEntryListFilter(base_admin.DescriptionEntryListFilter):
 #     field_name="root_description_obj"
@@ -581,7 +581,8 @@ class DerivationTemaSizeFilter(admin.SimpleListFilter):
 class DerivationAdmin(admin.ModelAdmin):
     list_display = [ "__str__",
                      "num_tema_entries",
-                     "tema",
+                     #"tema",
+                     "tema_entry",
                      "root_part_of_speech",
                      "name","paradigma","regsub",
                      "num_stem",
@@ -591,11 +592,11 @@ class DerivationAdmin(admin.ModelAdmin):
                      "tema_obj",
                      "part_of_speech" ]
     list_filter = [
-        DerivationTemaSizeFilter,
+        #DerivationTemaSizeFilter,
         #TemaEntryListFilter,
         "root_part_of_speech",
         ('paradigma', base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
-        ("tema_obj",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+        ("tema_entry",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
         ("description_obj",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
         base_admin.DescriptionEntryListFilter,
         # ("root_description_obj",

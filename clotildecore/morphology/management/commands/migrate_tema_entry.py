@@ -11,15 +11,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         seq=[]
-        for x in models.TemaEntry.objects.all().values("argument__name","value__name").distinct():
-            arg=x["argument__name"]
-            val=x["value__name"]
-            obj=models.TemaEntry.objects.filter(argument__name=arg,value__name=val).order_by("id").first()
-            seq.append( (arg,val,obj) )
-        for arg,val,obj in seq:
-            for rel in models.TemaEntryRelation.objects.filter(entry__argument__name=arg,entry__value__name=val):
-                rel.entry=obj
-                rel.save()
-                print( "%20s %20s %s" % (arg,val,rel) )
-        
+        for der in models.Derivation.objects.all():
+            tentry=der.tema_obj.temaentryrelation_set.first().entry
+            der.tema_entry=tentry
+            der.save()
+            print("%30s %s" % (str(tentry),str(der)) ) 
             
