@@ -208,7 +208,7 @@ class DerivationFormSet(forms.models.BaseInlineFormSet):
        form.fields['language'].initial = DEFAULT_LANGUAGE
        form.fields['regsub'].initial = DEFAULT_REGSUB
        form.fields['description_obj'].initial = DEFAULT_DESCRIPTION
-       form.fields['root_description_obj'].initial = DEFAULT_DESCRIPTION
+       # form.fields['root_description_obj'].initial = DEFAULT_DESCRIPTION
        return form
 
 class DerivationInline(admin.TabularInline):
@@ -221,7 +221,7 @@ class RootFormSet(forms.models.BaseInlineFormSet):
     def empty_form(self):
        form = super(RootFormSet, self).empty_form
        form.fields['language'].initial = DEFAULT_LANGUAGE
-       form.fields['description_obj'].initial = DEFAULT_DESCRIPTION
+       #form.fields['description_obj'].initial = DEFAULT_DESCRIPTION
        return form
 
 class RootInline(admin.TabularInline):
@@ -573,10 +573,10 @@ class DerivationTemaSizeFilter(admin.SimpleListFilter):
         qset=queryset.annotate(n_entries=Count("tema_obj__temaentryrelation"))
         return qset.filter(n_entries=val)
     
-class RootDescriptionEntryListFilter(base_admin.DescriptionEntryListFilter):
-    field_name="root_description_obj"
-    title = "root description entry"
-    parameter_name = 'root_description_entry'
+# class RootDescriptionEntryListFilter(base_admin.DescriptionEntryListFilter):
+#     field_name="root_description_obj"
+#     title = "root description entry"
+#     parameter_name = 'root_description_entry'
 
 class DerivationAdmin(admin.ModelAdmin):
     list_display = [ "__str__",
@@ -586,7 +586,7 @@ class DerivationAdmin(admin.ModelAdmin):
                      "name","paradigma","regsub",
                      "num_stem",
                      "description_obj",
-                     "root_description", 
+                     # "root_description", 
                      "paradigma",
                      "tema_obj",
                      "part_of_speech" ]
@@ -598,9 +598,9 @@ class DerivationAdmin(admin.ModelAdmin):
         ("tema_obj",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
         ("description_obj",  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
         base_admin.DescriptionEntryListFilter,
-        ("root_description_obj",
-         base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
-        RootDescriptionEntryListFilter,
+        # ("root_description_obj",
+        #  base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+        # RootDescriptionEntryListFilter,
         DerivationNameListFilter,
         "regsub__pattern",
     ]
@@ -614,14 +614,14 @@ admin.site.register(models.Derivation,DerivationAdmin)
 class RootAdmin(admin.ModelAdmin):
     save_as=True
     list_filter=["part_of_speech",base_admin.initial_filter_factory("root")]
-    list_display=["root","language","part_of_speech","tema_obj","description_obj"]
+    list_display=["root","language","part_of_speech","tema_obj" ] #,"description_obj"]
     inlines=[StemInline]
-    list_editable=["description_obj"] #,"tema_obj","part_of_speech"]
+    # list_editable=["description_obj"] #,"tema_obj","part_of_speech"]
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(RootAdmin, self).get_form(request, obj, **kwargs)
         form.base_fields['language'].initial = DEFAULT_LANGUAGE
-        form.base_fields['description_obj'].initial = DEFAULT_DESCRIPTION
+        # form.base_fields['description_obj'].initial = DEFAULT_DESCRIPTION
         return form
 
 admin.site.register(models.Root,RootAdmin)

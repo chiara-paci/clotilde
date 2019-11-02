@@ -487,7 +487,7 @@ class RootManager(models.Manager):
             for der in der_list:
                 if root.part_of_speech != der.root_part_of_speech: continue
                 if not (der.tema <= root.tema): continue
-                if not (der.root_description <= root.description): continue
+                #if not (der.root_description <= root.description): continue
                 stem,created=Stem.objects.get_or_create(root=root,derivation=der)
                 stem.clean()
                 stem.save()
@@ -531,14 +531,14 @@ class Root(models.Model):
 
     class Meta:
         ordering = ["root"]
-        unique_together = [ ["language","root","tema_obj","part_of_speech","description_obj"] ]
+        unique_together = [ ["language","root","tema_obj","part_of_speech"] ] #,"description_obj"] ]
 
     def __str__(self):
         return "%s (%s)" % (self.root,self.part_of_speech)
 
-    @cached_property
-    def description(self):
-        return self.description_obj.build()
+    # @cached_property
+    # def description(self):
+    #     return self.description_obj.build()
 
     @cached_property
     def tema(self):
@@ -548,7 +548,7 @@ class Root(models.Model):
         return {
             "root": self.root,
             "tema": self.tema_obj.name,
-            "description": self.description_obj.name,
+            # "description": self.description_obj.name,
             "part_of_speech": self.part_of_speech.name,
         }
 
@@ -565,7 +565,7 @@ class Root(models.Model):
         ok=[]
         for der in der_list:
             if not (der.tema <= self.tema): continue
-            if not (der.root_description <= self.description): continue
+            #if not (der.root_description <= self.description): continue
             stem,created=Stem.objects.get_or_create(root=self,derivation=der)
             stem.clean()
             stem.save()
@@ -599,9 +599,9 @@ class Derivation(base_models.AbstractName):
     regsub = models.ForeignKey(RegexpReplacement,on_delete=models.PROTECT)    
     tema_obj = models.ForeignKey(Tema,on_delete=models.PROTECT)    
     description_obj = models.ForeignKey(base_models.Description,on_delete=models.PROTECT)    
-    root_description_obj = models.ForeignKey(base_models.Description,
-                                             on_delete=models.PROTECT,
-                                             related_name="root_derivation_set")    
+    # root_description_obj = models.ForeignKey(base_models.Description,
+    #                                          on_delete=models.PROTECT,
+    #                                          related_name="root_derivation_set")    
     root_part_of_speech = models.ForeignKey(PartOfSpeech,on_delete=models.PROTECT)    
     paradigma = models.ForeignKey(Paradigma,on_delete=models.PROTECT)
 
@@ -615,7 +615,7 @@ class Derivation(base_models.AbstractName):
             "regsub": self.regsub.serialize(),
             "tema": self.tema_obj.name,
             "description": self.description_obj.name,
-            "root_description": self.root_description_obj.name,
+            #"root_description": self.root_description_obj.name,
             "root_part_of_speech": self.root_part_of_speech.name,
             "paradigma": self.paradigma.name,
         })
@@ -632,9 +632,9 @@ class Derivation(base_models.AbstractName):
     def part_of_speech(self):
         return self.paradigma.part_of_speech
 
-    @cached_property
-    def root_description(self):
-        return self.root_description_obj.build()
+    # @cached_property
+    # def root_description(self):
+    #     return self.root_description_obj.build()
 
     @cached_property
     def tema(self):
@@ -725,20 +725,20 @@ class Stem(models.Model):
         rtema=self.root.tema
         if not dtema<=rtema: 
             raise ValidationError(_('Root and derivation are not compatible (tema).'))
-        ddesc=self.derivation.root_description
-        rdesc=self.root.description
-        if not ddesc<=rdesc: 
-            raise ValidationError(_('Root and derivation are not compatible (description).'))
+        # ddesc=self.derivation.root_description
+        # rdesc=self.root.description
+        # if not ddesc<=rdesc: 
+        #     raise ValidationError(_('Root and derivation are not compatible (description).'))
         # if self.status == 'published' and self.pub_date is None:
         #     self.pub_date = datetime.date.today()
         self.cache=self.derivation.regsub.apply(self.root.root)
 
         
     @cached_property
-    def description(self):
-        ddesc=self.derivation.description
-        rdesc=self.root.description
-        return ddesc+rdesc
+    def description(self): return self.derivation.description
+        # ddesc=self.derivation.description
+        # #rdesc=self.root.description
+        # return ddesc+rdesc
 
     @cached_property
     def stem(self): return self.cache
@@ -833,8 +833,10 @@ class FusedWordManager(models.Manager):
             qentry=base_models.Entry.objects.filter( models.Q(attribute__name=arg,
                                                               value__string=val,invert=False) )
             desc_list=[x["description"] for x in  qentry.values("description")] 
+            # query= models.Q(stem__derivation__description_obj__in=desc_list) | \
+            #     models.Q(stem__root__description_obj__in=desc_list) | \
+            #     models.Q(inflection__description_obj__in=desc_list) 
             query= models.Q(stem__derivation__description_obj__in=desc_list) | \
-                models.Q(stem__root__description_obj__in=desc_list) | \
                 models.Q(inflection__description_obj__in=desc_list) 
             qset=qset.filter(query)
         return qset
