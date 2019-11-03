@@ -4,6 +4,8 @@ import random
 import string
 
 class BaseTestCase(TestCase):
+    
+    databases = settings.DATABASES
 
     # def setUp(self):  
     #     self.user=self.create_random_user()
