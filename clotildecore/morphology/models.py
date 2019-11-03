@@ -295,7 +295,7 @@ class Tema(base_models.AbstractName):
 
     @cached_property
     def num_derivations(self):
-        qs_der=Derivation.objects.filter(tema_entry__in=self.temaentryrelation_set.all().values("tema_entry"))
+        qs_der=Derivation.objects.filter(tema_entry__in=self.temaentryrelation_set.all().values("entry"))
         return qs_der.count()
 
     @cached_property
@@ -308,7 +308,7 @@ class Tema(base_models.AbstractName):
 
     @cached_property
     def derivations(self):
-        qs_der=Derivation.objects.filter(tema_entry__in=self.temaentryrelation_set.all().values("tema_entry"))
+        qs_der=Derivation.objects.filter(tema_entry__in=self.temaentryrelation_set.all().values("entry"))
         return "; ".join([ d.name for d in qs_der ])
 
     @cached_property
@@ -615,7 +615,8 @@ class DerivationManager(models.Manager):
         defaults={}
         for k in [ "regsub","root_part_of_speech","paradigma" ]:
             defaults[k]=data[k]
-        for k in [ "tema","description" ]:
+        # for k in [ "tema","description" ]:
+        for k in [ "description" ]:
             defaults[k+"_obj"]=data[k]
 
         a,v=data["tema_entry"]
@@ -631,7 +632,7 @@ class DerivationManager(models.Manager):
 class Derivation(base_models.AbstractName):
     language = models.ForeignKey('languages.Language',on_delete=models.PROTECT)    
     regsub = models.ForeignKey(RegexpReplacement,on_delete=models.PROTECT)    
-    tema_obj = models.ForeignKey(Tema,on_delete=models.PROTECT)    
+    # tema_obj = models.ForeignKey(Tema,on_delete=models.PROTECT)    
     tema_entry = models.ForeignKey(TemaEntry,on_delete=models.PROTECT)    
     description_obj = models.ForeignKey(base_models.Description,on_delete=models.PROTECT)    
     # root_description_obj = models.ForeignKey(base_models.Description,
@@ -648,9 +649,9 @@ class Derivation(base_models.AbstractName):
     def serialize(self):
         return (self.name,{
             "regsub": self.regsub.serialize(),
-            "tema": self.tema_obj.name,
+            # "tema": self.tema_obj.name,
             "description": self.description_obj.name,
-            #"root_description": self.root_description_obj.name,
+            # "root_description": self.root_description_obj.name,
             "root_part_of_speech": self.root_part_of_speech.name,
             "paradigma": self.paradigma.name,
             "tema_entry": ( str(self.tema_entry.argument), str(self.tema_entry.value) )
@@ -674,7 +675,7 @@ class Derivation(base_models.AbstractName):
 
     @cached_property
     def tema(self):
-        kwargs=self._multidict( [ (str(self.tema_entry.argument), str(self.tema_entry.value)) ])
+        kwargs=dict( [ (str(self.tema_entry.argument), str(self.tema_entry.value)) ])
         return descriptions.Tema(**kwargs)
 
     # @cached_property
@@ -851,11 +852,11 @@ class FusedWordManager(models.Manager):
         qset=Word.objects.filter(stem__derivation__paradigma__part_of_speech=part_of_speech)        
         for arg in tema:
             if tema[arg] not in [list,set]:
-                qtentry=TemaEntry.objects.filter(argument__name=arg,value__name=tema[arg])
+                qtentry=TemaEntryRelation.objects.filter(entry__argument__name=arg,entry__value__name=tema[arg])
                 qset=qset.filter(stem__root__tema_obj__in=[x["tema"] for x in qtentry.values("tema")])
                 continue
             for val in tema[arg]:
-                qtentry=TemaEntry.objects.filter(argument__name=arg,value__name=val)
+                qtentry=TemaEntryRelation.objects.filter(entry__argument__name=arg,entry__value__name=val)
                 qset=qset.filter(stem__root__tema_obj__in=[x["tema"] for x in qtentry.values("tema")])
 
         for arg in description:

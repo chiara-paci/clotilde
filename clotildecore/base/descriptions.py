@@ -60,10 +60,10 @@ class Description(BaseDescription):
         for k in self._dict:
             r='<mtd columnalign="center"><mi>%s</mi></mtd>' % k
             r+='<mtd columnalign="center"><mo>=</mo></mtd>'
-            if isinstance(self._dict[k],Description):
-                r+='<mtd columnalign="center">%s</mtd>' % self._dict[k].html(inner=True)
-            else:
-                r+='<mtd columnalign="center"><mn>%s</mn></mtd>' % self._str_value(self._dict[k])
+            # if isinstance(self._dict[k],Description):
+            #     r+='<mtd columnalign="center">%s</mtd>' % self._dict[k].html(inner=True)
+            # else:
+            r+='<mtd columnalign="center"><mn>%s</mn></mtd>' % self._str_value(self._dict[k])
             S+="<mtr>%s</mtr>" % r
         S="<mrow><mo>[</mo><mtable>%s</mtable><mo>]</mo></mrow>" % S
         if not inner:
@@ -72,9 +72,9 @@ class Description(BaseDescription):
     
     def copy(self):
         D=self._dict.copy()
-        for k in D:
-            if isinstance(D[k],Description):
-                D[k]=D[k].copy()
+        # for k in D:
+        #     if isinstance(D[k],Description):
+        #         D[k]=D[k].copy()
         return Description(**D)
     
     def __eq__(self,other):
@@ -113,12 +113,12 @@ class Description(BaseDescription):
                 if type(self[k]) is not tuple: return False
                 if self[k][1]: continue
                 return False
-            if isinstance(self[k],Description):
-                if not isinstance(other[k],Description): return False
-                if self._cfr(self[k],other[k])<=0: continue
-                return False
-            if isinstance(other[k],Description): 
-                return False
+            # if isinstance(self[k],Description):
+            #     if not isinstance(other[k],Description): return False
+            #     if self._cfr(self[k],other[k])<=0: continue
+            #     return False
+            # if isinstance(other[k],Description): 
+            #     return False
             if self._cfr(self[k],other[k])<=0: continue
             return False
         return True
@@ -129,18 +129,18 @@ class Description(BaseDescription):
         D=self.copy()
         for k in other:
             if k not in self:
-                if isinstance(other[k],Description):
-                    D[k]=other[k].copy()
-                else:
-                    D[k]=other[k]
+                # if isinstance(other[k],Description):
+                #     D[k]=other[k].copy()
+                # else:
+                D[k]=other[k]
                 continue
-            if isinstance(D[k],Description):
-                if not isinstance(other[k],Description):
-                    raise FailedUnification("conflict on key %s" % k)
-                D[k]=D[k].__and__(other[k])
-                continue
-            if isinstance(other[k],Description):
-                raise FailedUnification("conflict on key %s" % k)
+            # if isinstance(D[k],Description):
+            #     if not isinstance(other[k],Description):
+            #         raise FailedUnification("conflict on key %s" % k)
+            #     D[k]=D[k].__and__(other[k])
+            #     continue
+            # if isinstance(other[k],Description):
+            #     raise FailedUnification("conflict on key %s" % k)
             if D[k]!=other[k]:
                 raise FailedUnification("conflict on key %s" % k)
 

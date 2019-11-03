@@ -407,7 +407,12 @@ class TemaEntryDerivationCountFilter(RelatedCountFilter):
 
 class TemaEntryAdmin(admin.ModelAdmin):
     list_display=["__str__","num_temas","num_derivations","argument","value"]
-    list_filter=[TemaEntryTemaCountFilter,TemaEntryDerivationCountFilter,"argument","value"]
+    list_filter=[
+        "argument",
+        ('value', base_admin.select_filter_decorator(admin.RelatedOnlyFieldListFilter)),
+        TemaEntryDerivationCountFilter,
+        TemaEntryTemaCountFilter,
+    ]
     inlines=[DerivationInline,TemaEntryRelationInline]
 
 admin.site.register(models.TemaEntry,TemaEntryAdmin)

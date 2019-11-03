@@ -75,7 +75,7 @@ class Command(BaseCommand):
         der_list=[]
         for der in morph_models.Derivation.objects.filter(language=language):
             der_list.append(der.serialize())
-            tema_list.append(der.tema_obj.pk)
+            # tema_list.append(der.tema_obj.pk)
             desc_list.append(der.description_obj.pk)
             # desc_list.append(der.root_description_obj.pk)
             pos_list.append(der.root_part_of_speech.pk)

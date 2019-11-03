@@ -79,7 +79,6 @@ class InputListFilter(admin.SimpleListFilter):
         }
         return queryset.filter(**kwargs)
 
-
 class DescriptionEntryListFilter(admin.SimpleListFilter):
     title = "description entry"
     parameter_name = 'description_entry'
@@ -261,23 +260,26 @@ admin.site.register(models.TokenRegexpSet,TokenRegexpSetAdmin)
 
 # admin.site.register(models.NotWord,NotWordAdmin)
 
-admin.site.register(models.SubDescription)
+# admin.site.register(models.SubDescription)
 
 class DescriptionEntryInline(admin.TabularInline):
     model = models.Description.entries.through
     extra = 0
 
-class DescriptionSubDescriptionInline(admin.TabularInline):
-    model = models.Description.subdescriptions.through
-    extra = 0
+# class DescriptionSubDescriptionInline(admin.TabularInline):
+#     model = models.Description.subdescriptions.through
+#     extra = 0
 
 class DescriptionAdmin(admin.ModelAdmin):
-    exclude = [ "entries","subdescriptions"]
-    inlines=[DescriptionEntryInline,DescriptionSubDescriptionInline]
+    exclude = [ "entries" ] #,"subdescriptions"]
+    inlines=[DescriptionEntryInline] #,DescriptionSubDescriptionInline]
     list_display=[ "__str__","name","count_references",
                    "count_fusionrules",
-                   "count_roots","count_inflections",
-                   "count_derivations","count_root_derivations","_build" ]
+                   #"count_roots",
+                   "count_inflections",
+                   "count_derivations",
+                   #"count_root_derivations",
+                   "_build" ]
     list_editable=["name"]
     save_as=True
 

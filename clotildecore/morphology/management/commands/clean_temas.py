@@ -24,10 +24,8 @@ class Command(BaseCommand):
         duplicates=[]
 
         for t1 in tema_list:
-            if t1.num_roots()!=0: continue
-            if t1.num_derivations()!=0: continue
-            if t1.num_fusion_rules()!=0: continue
-            t1.temaentry_set.all().delete()
+            if t1.num_roots!=0: continue
+            if t1.num_fusion_rules!=0: continue
             t1.delete()
 
         

@@ -260,51 +260,52 @@ class Entry(models.Model):
 class DescriptionManager(models.Manager):
 
     def _create_entry(self,key,edata): 
-        if type(edata) in [list,set]:
-            entries=[]
-            subdescriptions=[]
-            for d in edata:
-                e,s=self._create_entry(key,d)
-                entries+=e
-                subdescriptions+=e
-            return entries,subdescriptions
+        # if type(edata) in [list,set]:
+        #     entries=[]
+        #     subdescriptions=[]
+        #     for d in edata:
+        #         e,s=self._create_entry(key,d)
+        #         entries+=e
+        #         subdescriptions+=e
+        #     return entries,subdescriptions
 
-        if type(edata) is dict:
-            t=key.split(":")
-            attr,created=Attribute.objects.get_or_create(name=t[0])
-            if len(t)==1:
-                subname=t[0]
-            else:
-                subname=t[1]
-            subdesc,created=self.get_or_create_by_dict(subname,edata)
-            entry,created=SubDescription.objects.get_or_create(attribute=attr,value=subdesc)
-            return [],[entry]
+        # if type(edata) is dict:
+        #     t=key.split(":")
+        #     attr,created=Attribute.objects.get_or_create(name=t[0])
+        #     if len(t)==1:
+        #         subname=t[0]
+        #     else:
+        #         subname=t[1]
+        #     subdesc,created=self.get_or_create_by_dict(subname,edata)
+        #     entry,created=SubDescription.objects.get_or_create(attribute=attr,value=subdesc)
+        #     return [],[entry]
 
         attr,created=Attribute.objects.get_or_create(name=key)
 
         if type(edata) is tuple:
             value,created=Value.objects.get_or_create(string=edata[0])
             entry,created=Entry.objects.get_or_create(attribute=attr,value=value,invert=edata[1])
-            return [entry],[]
+            return [entry] #,[]
 
         value,created=Value.objects.get_or_create(string=edata)
         entry,created=Entry.objects.get_or_create(attribute=attr,value=value) #,invert=False)
-        return [entry],[]
+        return [entry] #,[]
 
     def get_or_create_by_dict(self,name,data):
         obj,created=self.get_or_create(name=name)
         if not created: return obj,False
 
         for k in data:
-            entries,subdescriptions=self._create_entry(k,data[k])
+            #entries,subdescriptions=self._create_entry(k,data[k])
+            entries=self._create_entry(k,data[k])
             for e in entries: obj.entries.add(e)
-            for e in subdescriptions: obj.subdescriptions.add(e)
+            #for e in subdescriptions: obj.subdescriptions.add(e)
 
         return obj,True
     
 class Description(AbstractName): 
     entries = models.ManyToManyField(Entry,blank=True)
-    subdescriptions = models.ManyToManyField('SubDescription',blank=True)
+    # subdescriptions = models.ManyToManyField('SubDescription',blank=True)
     objects = DescriptionManager()
 
     class Meta:
@@ -313,22 +314,22 @@ class Description(AbstractName):
 
     def build(self):
         args=[ (str(e.attribute), ( str(e.value),e.invert) ) for e in self.entries.all() ]
-        argsb=[ (str(e.attribute), e.value.build()) for e in self.subdescriptions.all() ]
-        kwargs=dict(args+argsb)
+        #argsb=[ (str(e.attribute), e.value.build()) for e in self.subdescriptions.all() ]
+        kwargs=dict(args) #+argsb)
         #kwargs={ str(e.attribute): str(e.value) for e in self.entries.all() }
         #kwargsb={ str(e.attribute): e.value.build() for e in self.subdescriptions.all() }
         return descriptions.Description(**kwargs)
 
     def serialize(self):
         kwargs=[ ( str(e.attribute), ( str(e.value), e.invert ) ) for e in self.entries.all() ]
-        kwargsb=[ e.serialize() for e in self.subdescriptions.all() ]
-        return (self.name,dict(kwargs+kwargsb))
+        # kwargsb=[ e.serialize() for e in self.subdescriptions.all() ]
+        return (self.name,dict(kwargs)) #+kwargsb))
 
     @cached_property
     def count_fusionrules(self): return self.fusionrule_set.count()
 
-    @cached_property
-    def count_roots(self): return self.root_set.count()
+    # @cached_property
+    # def count_roots(self): return self.root_set.count()
 
     @cached_property
     def count_inflections(self): return self.inflection_set.count()
@@ -336,25 +337,25 @@ class Description(AbstractName):
     @cached_property
     def count_derivations(self): return self.derivation_set.count()
 
-    @cached_property
-    def count_root_derivations(self): return self.root_derivation_set.count()
+    # @cached_property
+    # def count_root_derivations(self): return self.root_derivation_set.count()
 
     @cached_property
     def count_references(self): 
         N=0
         N+=self.count_fusionrules
-        N+=self.count_roots
+        # N+=self.count_roots
         N+=self.count_inflections
         N+=self.count_derivations
-        N+=self.count_root_derivations
+        # N+=self.count_root_derivations
         return N
     
     
-class SubDescription(models.Model):
-    attribute = models.ForeignKey(Attribute,on_delete="protect")    
-    value = models.ForeignKey(Description,on_delete="protect")    
+# class SubDescription(models.Model):
+#     attribute = models.ForeignKey(Attribute,on_delete="protect")    
+#     value = models.ForeignKey(Description,on_delete="protect")    
 
-    def serialize(self):
-        name,ser=self.value.serialize()
-        return "%s:%s" % (self.attribute,name),ser
+#     def serialize(self):
+#         name,ser=self.value.serialize()
+#         return "%s:%s" % (self.attribute,name),ser
 
