@@ -20,21 +20,29 @@ from django.conf.urls import url,include
 
 from django.views.generic import TemplateView
 
+import sys
+
 import base.urls
 import languages.urls
 import corpora.urls
-import helpers.urls
 import morphology.urls
+#import helpers.urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name="homepage"),
     url(r'^base/', include(base.urls)),
     url(r'^languages/', include(languages.urls)),
-    url(r'^corpora/', include(corpora.urls)),
-    url(r'^helpers/', include(helpers.urls)),
     url(r'^morphology/', include(morphology.urls)),
+    url(r'^corpora/', include(corpora.urls)),
+    #url(r'^helpers/', include(helpers.urls)),
 ]
+
+if "test" not in sys.argv:
+    import helpers.urls
+    urlpatterns += [
+        url(r'^helpers/', include(helpers.urls)),
+    ]
 
 if settings.DEBUG_TOOLBAR:
     import debug_toolbar

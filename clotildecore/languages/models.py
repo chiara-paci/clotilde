@@ -1,7 +1,8 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.utils.functional import cached_property
-from django.conf import settings
+#from django.conf import settings
+from django.apps import apps
 
 from base import tokens as base_tokens
 from base import models as base_models
@@ -13,7 +14,7 @@ from . import tokens
 
 class LanguageManager(models.Manager):
     def get_default(self):
-        language,created=lang_models.Language.objects.get_or_create(name=settings.DEFAULT_LANGUAGE_NAME)
+        language,created=lang_models.Language.objects.get_or_create(name=apps.get_app_config('languages').DEFAULT_LANGUAGE)
         return language
 
 class Language(base_models.AbstractName):
