@@ -5,7 +5,9 @@ import string
 
 class BaseTestCase(TestCase):
     
-    databases = settings.DATABASES
+    databases = {
+        'default'
+    }
 
     # def setUp(self):  
     #     self.user=self.create_random_user()
