@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.utils.functional import cached_property
+from django.conf import settings
 
 from base import tokens as base_tokens
 from base import models as base_models
@@ -9,11 +10,19 @@ from morphology import tokens as morph_tokens
 from . import tokens
 
 # Create your models here.
+
+class LanguageManager(models.Manager):
+    def get_default(self):
+        language,created=lang_models.Language.objects.get_or_create(name=settings.DEFAULT_LANGUAGE_NAME)
+        return language
+
 class Language(base_models.AbstractName):
     token_regexp_set = models.ForeignKey(base_models.TokenRegexpSet,on_delete="protect",related_name="a_set")
     case_set = models.ForeignKey(base_models.CaseSet,default=1,on_delete="protect",related_name="b_set")
     period_sep = models.ForeignKey(base_models.TokenRegexp,on_delete="protect",related_name="c_set")
     alphabetic_order = models.ForeignKey(base_models.AlphabeticOrder,on_delete="protect",related_name="d_set")
+
+    objects = LanguageManager()
 
     def clean(self):
         if not self.token_regexp_set.has_regexp(self.period_sep):

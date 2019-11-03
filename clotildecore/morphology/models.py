@@ -36,6 +36,10 @@ class RegexpReplacementManager(models.Manager):
             rev,created=RegexpReverse.objects.update_or_create(target=regsub,defaults=data["reverse"])
         return regsub
 
+    def get_default(self):
+        regexp,created=RegexpReplacement.objects.get_or_create(pattern="(.+)",replacement="\\1")
+        return regexp
+
 class RegexpReplacement(models.Model):
     pattern=models.CharField(max_length=1024)
     replacement=models.CharField(max_length=1024)

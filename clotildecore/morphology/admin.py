@@ -4,6 +4,7 @@ from django.db.models.query import QuerySet,Q
 from django.db.models import Count
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 import collections
 
@@ -12,9 +13,6 @@ from base import models as base_models
 from base import admin as base_admin
 from languages import models as lang_models
 
-DEFAULT_LANGUAGE= lang_models.Language.objects.get(name="italiano")
-DEFAULT_DESCRIPTION = base_models.Description.objects.get(name="vuota")
-DEFAULT_REGSUB = models.RegexpReplacement.objects.get(pattern="(.+)",replacement="\\1")
 
 def build_static_iterator(obj_list):
     class ModelChoiceIterator:
@@ -204,12 +202,14 @@ admin.site.register(models.TemaValue,TemaValueAdmin)
 class DerivationFormSet(forms.models.BaseInlineFormSet):
     @property
     def empty_form(self):
-       form = super(DerivationFormSet, self).empty_form
-       form.fields['language'].initial = DEFAULT_LANGUAGE
-       form.fields['regsub'].initial = DEFAULT_REGSUB
-       form.fields['description_obj'].initial = DEFAULT_DESCRIPTION
-       # form.fields['root_description_obj'].initial = DEFAULT_DESCRIPTION
-       return form
+        form = super(DerivationFormSet, self).empty_form
+        default_language=lang_models.Language.objects.get_default()
+        if default_language is not None:
+            form.fields['language'].initial = default_language
+        form.fields['regsub'].initial = models.RegexpReplacement.objects.get_default()
+        form.fields['description_obj'].initial = base_models.Description.objects.get_default()
+        # form.fields['root_description_obj'].initial = DEFAULT_DESCRIPTION
+        return form
 
 class DerivationInline(admin.TabularInline):
     model = models.Derivation
@@ -220,7 +220,11 @@ class RootFormSet(forms.models.BaseInlineFormSet):
     @property
     def empty_form(self):
        form = super(RootFormSet, self).empty_form
-       form.fields['language'].initial = DEFAULT_LANGUAGE
+       default_language=lang_models.Language.objects.get_default()
+       if default_language is not None:
+           form.fields['language'].initial = default_language
+       # if DEFAULT_LANGUAGE is not None:
+       #     form.fields['language'].initial = DEFAULT_LANGUAGE
        #form.fields['description_obj'].initial = DEFAULT_DESCRIPTION
        return form
 
@@ -630,7 +634,9 @@ class RootAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(RootAdmin, self).get_form(request, obj, **kwargs)
-        form.base_fields['language'].initial = DEFAULT_LANGUAGE
+        default_language=lang_models.Language.objects.get_default()
+        if default_language is not None:
+            form.fields['language'].initial = default_language
         # form.base_fields['description_obj'].initial = DEFAULT_DESCRIPTION
         return form
 

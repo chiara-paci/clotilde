@@ -3,6 +3,7 @@
 *.dia.autosave
 *.cdm3
 *.data
+*.sqlite3
 *_backup.svg
 docs/build/
 *.json

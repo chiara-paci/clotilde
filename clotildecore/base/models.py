@@ -4,6 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models.signals import post_save
 from django.utils.functional import cached_property
+from django.conf import settings
 
 import re
 
@@ -32,6 +33,8 @@ class AbstractNameDesc(models.Model):
         abstract = True
 
     def __str__(self): return(self.name)
+
+######
 
 class CasePair(models.Model):
     lower = models.CharField(max_length=10)
@@ -258,6 +261,10 @@ class Entry(models.Model):
         unique_together = [ ["attribute","value","invert"] ]
 
 class DescriptionManager(models.Manager):
+
+    def get_default(self):
+        desc,created=models.Description.objects.get_or_create(name="vuota")
+        return desc
 
     def _create_entry(self,key,edata): 
         # if type(edata) in [list,set]:
