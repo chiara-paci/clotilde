@@ -60,6 +60,7 @@ class CaseSet(AbstractName):
 
     objects = CaseSetManager()
 
+    @cached_property
     def length(self):
         return(self.pairs.count())
 
@@ -75,29 +76,22 @@ class CaseSet(AbstractName):
 ALPHA=u'a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ'
 class TokenRegexp(AbstractName):
     regexp = models.CharField(max_length=2048,default=r'['+ALPHA+r']+')
-    #invariant = models.BooleanField()
 
     def __str__(self):
         return "%s(%d)" % (self.name,self.pk)
 
-    def set_number(self):
-        return(self.tokenregexpsetthrough_set.all().count())
+    def get_absolute_url(self):
+        return("/base/tokenregexp/%d" % self.id)
+
+    @cached_property
+    def count_set(self):
+        return self.tokenregexpsetthrough_set.all().count()
 
 class TokenRegexpSetManager(models.Manager):
     def de_serialize(self,D):
         reg_set,created=self.get_or_create(name=D["name"])
         for rexp in D["regexps"]:
-            t_rexp,created=TokenRegexp.objects.get_or_create(name=rexp["name"],regexp=rexp["regexp"])
-            if "final" not in rexp: rexp["final"]=False
-            tr,created=TokenRegexpSetThrough.objects.update_or_create(token_regexp=t_rexp,
-                                                                      token_regexp_set=reg_set,
-                                                                      defaults={
-                                                                          "bg_color": rexp["bg_color"],
-                                                                          "fg_color": rexp["fg_color"],
-                                                                          "order":    rexp["order"],
-                                                                          "final":    rexp["final"],
-                                                                          "disabled": rexp["disabled"],
-                                                                      })
+            tr=TokenRegexpSetThrough.objects.de_serialize(reg_set,rexp)
         return reg_set
 
 class TokenRegexpSet(AbstractName):
@@ -106,16 +100,22 @@ class TokenRegexpSet(AbstractName):
 
     objects=TokenRegexpSetManager()
 
-    def regexp_all(self):
-        regs=[ r'\[/?'+x+r'\]' for x in tokens.MARKERS ]
-        regs+=[ rexp_t for (name,label,bg,fg,final,rexp,rexp_t) in self.regexp_objects ]
-        t="|".join(regs)
-        t="("+t+")"
-        return(t)
+    def get_absolute_url(self):
+        return("/base/tokenregexpset/%d" % self.id)
 
-    def _f(self,t):
-        for (name,label,bg,fg,final,rexp,rexp_t) in self.regexp_objects:
-            #print("==%s==" % t,[ord(x) for x in t])
+    def _regexp_objects(self):
+        objs=[]
+        for rel in self.tokenregexpsetthrough_set.all():
+            if rel.disabled: continue
+            name=rel.token_regexp.name
+            regexp=rel.token_regexp.regexp
+            objs.append( (name,name.lower().replace(' ',''),
+                          rel.bg_color,rel.fg_color,rel.final,
+                          re.compile('^'+regexp+'$'),regexp) )
+        return(objs)
+
+    def _f(self,t,regexp_objects):
+        for (name,label,bg,fg,final,rexp,rexp_t) in regexp_objects:
             if rexp.match(t):
                 return tokens.TokenBase(label,t,final=final)
         if t[0]=='[':
@@ -129,20 +129,15 @@ class TokenRegexpSet(AbstractName):
     def tokenize(self,text):
         c=re.compile(self.regexp_all())
         tokens=list(filter(bool,c.split(text)))
-        return self.regexp_objects,[ self._f(t) for t in tokens ]
+        regexp_objects=self._regexp_objects()
+        return regexp_objects,[ self._f(t,regexp_objects) for t in tokens ]
 
-    @cached_property
-    def regexp_objects(self):
-        objs=[]
-        for rel in self.tokenregexpsetthrough_set.all():
-            if rel.disabled: continue
-            name=rel.token_regexp.name
-            regexp=rel.token_regexp.regexp
-            #invariant=rel.token_regexp.invariant
-            objs.append( (name,name.lower().replace(' ',''),
-                          rel.bg_color,rel.fg_color,rel.final,
-                          re.compile('^'+regexp+'$'),regexp) )
-        return(objs)
+    def regexp_all(self):
+        regs=[ r'\[/?'+x+r'\]' for x in tokens.MARKERS ]
+        regs+=[ rel["token_regexp__regexp"] for rel in self.tokenregexpsetthrough_set.filter(disabled=False).values("token_regexp__regexp") ]
+        t="|".join(regs)
+        t="("+t+")"
+        return(t)
 
     def has_regexp(self,obj):
         return(self.tokenregexpsetthrough_set.filter(token_regexp=obj).exists())
@@ -153,18 +148,36 @@ class TokenRegexpSet(AbstractName):
             "regexps": [ r.serialize() for r in self.tokenregexpsetthrough_set.all() ]
         }
 
+class TokenRegexpSetThroughManager(models.Manager):
+    def de_serialize(self,token_set,ser): 
+        t_rexp,created=TokenRegexp.objects.get_or_create(name=ser["name"],regexp=ser["regexp"])
+        obj,created=TokenRegexpSetThrough.objects.update_or_create(token_regexp=t_rexp,
+                                                                   token_regexp_set=token_set,
+                                                                   defaults={
+                                                                      "bg_color": ser["bg_color"],
+                                                                      "fg_color": ser["fg_color"],
+                                                                      "order":    ser["order"],
+                                                                      "final":    ser["final"],
+                                                                      "disabled": ser["disabled"],
+                                                                  })
+        return obj
 
 class TokenRegexpSetThrough(models.Model):
     token_regexp_set = models.ForeignKey(TokenRegexpSet,on_delete="cascade")
     token_regexp = models.ForeignKey(TokenRegexp,on_delete="cascade")
+    order = models.IntegerField()
     bg_color = models.CharField(max_length=20,default="#ffff00")
     fg_color = models.CharField(max_length=20,default="#000000")
-    order = models.IntegerField()
     final = models.BooleanField(default=False)
-    disabled = models.BooleanField()
+    disabled = models.BooleanField(default=False)
+
+    objects=TokenRegexpSetThroughManager()
 
     class Meta:
         ordering = ['order','token_regexp_set']
+
+    def get_absolute_url(self):
+        return("/base/tokenregexpsetthrough/%d" % self.id)
 
     def __str__(self):
         if self.disabled: S="(D) "
@@ -174,9 +187,11 @@ class TokenRegexpSetThrough(models.Model):
         S+=str(self.token_regexp)
         return(S)
 
+    @cached_property
     def regexp(self):
         return(self.token_regexp.regexp)
 
+    @cached_property
     def name(self):
         return(self.token_regexp.name)
 
@@ -211,9 +226,23 @@ class AlphabeticOrder(AbstractName):
             "order": self.order
         }
 
+    def get_absolute_url(self):
+        return("/base/alphabeticorder/%d" % self.id)
+
+class AttributeManager(models.Manager):
+    def de_serialize(self,ser):
+        defaults={
+            "order": ser["order"]
+        }
+        obj,created=self.update_or_create(name=ser["name"],defaults=defaults)
+        return obj
 
 class Attribute(AbstractName): 
     order = models.IntegerField(default=1)
+    objects=AttributeManager()
+
+    def get_absolute_url(self):
+        return("/base/attribute/%d" % self.id)
 
     def serialize(self):
         return {
@@ -224,10 +253,23 @@ class Attribute(AbstractName):
     class Meta:
         ordering = ["order"]
 
+class ValueManager(models.Manager):
+    def de_serialize(self,ser):
+        defaults={
+            "order": ser["order"],
+            "variable": ser["variable"]
+        }
+        obj,created=self.update_or_create(string=ser["string"],defaults=defaults)
+        return obj
+
 class Value(models.Model):
     string=models.CharField(max_length=1024,db_index=True,unique=True)
     variable = models.BooleanField(default=False)
     order = models.IntegerField(default=1)
+    objects=ValueManager()
+
+    def get_absolute_url(self):
+        return("/base/value/%d" % self.id)
 
     def serialize(self):
         return {
@@ -256,6 +298,9 @@ class Entry(models.Model):
             v="!"+v
         return "%s=%s" % (self.attribute,v)
 
+    def get_absolute_url(self):
+        return("/base/entry/%d" % self.id)
+
     class Meta:
         ordering = [ "attribute","value" ]
         unique_together = [ ["attribute","value","invert"] ]
@@ -267,26 +312,6 @@ class DescriptionManager(models.Manager):
         return desc
 
     def _create_entry(self,key,edata): 
-        # if type(edata) in [list,set]:
-        #     entries=[]
-        #     subdescriptions=[]
-        #     for d in edata:
-        #         e,s=self._create_entry(key,d)
-        #         entries+=e
-        #         subdescriptions+=e
-        #     return entries,subdescriptions
-
-        # if type(edata) is dict:
-        #     t=key.split(":")
-        #     attr,created=Attribute.objects.get_or_create(name=t[0])
-        #     if len(t)==1:
-        #         subname=t[0]
-        #     else:
-        #         subname=t[1]
-        #     subdesc,created=self.get_or_create_by_dict(subname,edata)
-        #     entry,created=SubDescription.objects.get_or_create(attribute=attr,value=subdesc)
-        #     return [],[entry]
-
         attr,created=Attribute.objects.get_or_create(name=key)
 
         if type(edata) is tuple:
@@ -303,28 +328,25 @@ class DescriptionManager(models.Manager):
         if not created: return obj,False
 
         for k in data:
-            #entries,subdescriptions=self._create_entry(k,data[k])
             entries=self._create_entry(k,data[k])
             for e in entries: obj.entries.add(e)
-            #for e in subdescriptions: obj.subdescriptions.add(e)
 
         return obj,True
     
 class Description(AbstractName): 
     entries = models.ManyToManyField(Entry,blank=True)
-    # subdescriptions = models.ManyToManyField('SubDescription',blank=True)
+
     objects = DescriptionManager()
 
     class Meta:
         ordering = [ "name" ]
 
+    def get_absolute_url(self):
+        return("/base/description/%d" % self.id)
 
     def build(self):
         args=[ (str(e.attribute), ( str(e.value),e.invert) ) for e in self.entries.all() ]
-        #argsb=[ (str(e.attribute), e.value.build()) for e in self.subdescriptions.all() ]
-        kwargs=dict(args) #+argsb)
-        #kwargs={ str(e.attribute): str(e.value) for e in self.entries.all() }
-        #kwargsb={ str(e.attribute): e.value.build() for e in self.subdescriptions.all() }
+        kwargs=dict(args)
         return descriptions.Description(**kwargs)
 
     def serialize(self):
@@ -335,34 +357,17 @@ class Description(AbstractName):
     @cached_property
     def count_fusionrules(self): return self.fusionrule_set.count()
 
-    # @cached_property
-    # def count_roots(self): return self.root_set.count()
-
     @cached_property
     def count_inflections(self): return self.inflection_set.count()
 
     @cached_property
     def count_derivations(self): return self.derivation_set.count()
 
-    # @cached_property
-    # def count_root_derivations(self): return self.root_derivation_set.count()
-
     @cached_property
     def count_references(self): 
         N=0
         N+=self.count_fusionrules
-        # N+=self.count_roots
         N+=self.count_inflections
         N+=self.count_derivations
-        # N+=self.count_root_derivations
         return N
     
-    
-# class SubDescription(models.Model):
-#     attribute = models.ForeignKey(Attribute,on_delete="protect")    
-#     value = models.ForeignKey(Description,on_delete="protect")    
-
-#     def serialize(self):
-#         name,ser=self.value.serialize()
-#         return "%s:%s" % (self.attribute,name),ser
-

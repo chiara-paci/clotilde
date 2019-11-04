@@ -220,7 +220,7 @@ class CaseSetAdmin(admin.ModelAdmin):
 admin.site.register(models.CaseSet,CaseSetAdmin)
 
 class TokenRegexpAdmin(admin.ModelAdmin):
-    list_display=['name','regexp',"set_number"]
+    list_display=['name','regexp',"count_set"]
     list_editable=['regexp']
 
 admin.site.register(models.TokenRegexp,TokenRegexpAdmin)

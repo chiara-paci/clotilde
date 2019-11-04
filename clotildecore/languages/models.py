@@ -33,7 +33,7 @@ class Language(base_models.AbstractName):
     def __unicode__(self): return(self.name)
 
     def has_case(self):
-        return(self.case_set.length()!=0)
+        return(self.case_set.length!=0)
 
     def alpha_tokenize(self,text):
         rexp_list,token_list=self.token_regexp_set.tokenize(text)
