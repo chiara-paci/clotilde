@@ -51,10 +51,12 @@ class CommonTestCase(TestCase):
         self.assertEqual(required,actual,
                          msg="Constant %s: required='%s', actual='%s'" % (name,required,actual))
 
-    def assertFunctionCall(self,ret,func,*args,**kwargs):
+    def assertFunctionCall(self,expected,func,*args,**kwargs):
         actual=func(*args,**kwargs)
-        self.assertEqual(ret,actual,
-                         msg="Wrong return value for '%s': expected='%s', actual='%s' " % (func.__name__,str(ret),str(actual)))
+        self.assertEqual(expected,actual,
+                         msg="Wrong return value for '%s': expected='%s', actual='%s' " % (func.__name__,
+                                                                                           str(expected),
+                                                                                           str(actual)))
 
     def assertToken(self,obj,cls,label,text,final):
         self.assertIsInstance(obj,cls)
@@ -73,6 +75,7 @@ class BaseTestCase(CommonTestCase):
     CONST_MODELS={
         "ALPHA": 'a-zA-ZàèìòùáéíóúÀÈÌÒÙÁÉÍÓÚ',
         "ALPHA_ORDER": "AaÁáÀàÄäÆæ;Bb;CcÇç;Dd;EeÈèÉéËë;Ff;Gg;Hh;Ii;Jj;Kk;Ll;Mm;OoÒòÓóÖöŒœ;Pp;Qq;Rr;SsŞş;Tt;UuÙùÚúÜü;Vv;Ww;Xx;Yy;Zz",
+        "DEFAULT_DESCRIPTION_NAME":"vuota",
     }
 
     CONST_TOKENS={

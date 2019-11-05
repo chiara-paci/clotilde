@@ -305,10 +305,12 @@ class Entry(models.Model):
         ordering = [ "attribute","value" ]
         unique_together = [ ["attribute","value","invert"] ]
 
+DEFAULT_DESCRIPTION_NAME="vuota"
+
 class DescriptionManager(models.Manager):
 
     def get_default(self):
-        desc,created=models.Description.objects.get_or_create(name="vuota")
+        desc,created=self.get_or_create(name=DEFAULT_DESCRIPTION_NAME)
         return desc
 
     def _create_entry(self,key,edata): 
@@ -332,6 +334,19 @@ class DescriptionManager(models.Manager):
             for e in entries: obj.entries.add(e)
 
         return obj,True
+
+    def de_serialize(self,ser):
+        name,data=ser
+        obj,created=self.get_or_create(name=name)
+        e_ok=[]
+        for k in data:
+            attr,created=Attribute.objects.get_or_create(name=k)
+            value,created=Value.objects.get_or_create(string=data[k][0])
+            entry,created=Entry.objects.get_or_create(attribute=attr,value=value,invert=data[k][1])
+            obj.entries.add(entry)
+            e_ok.append(entry.pk)
+        obj.entries.remove( *obj.entries.exclude(pk__in=e_ok) )
+        return obj
     
 class Description(AbstractName): 
     entries = models.ManyToManyField(Entry,blank=True)

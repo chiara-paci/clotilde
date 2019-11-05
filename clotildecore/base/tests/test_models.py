@@ -22,6 +22,9 @@ class ConstantTest(common.BaseTestCase):
         for name,required,actual in [ 
                 ("ALPHA",      self.CONST_MODELS["ALPHA"],models.ALPHA),
                 ("ALPHA_ORDER",self.CONST_MODELS["ALPHA_ORDER"],models.ALPHA_ORDER),
+                ("DEFAULT_DESCRIPTION_NAME",
+                 self.CONST_MODELS["DEFAULT_DESCRIPTION_NAME"],
+                 models.DEFAULT_DESCRIPTION_NAME),
         ]: 
             with self.subTest(const=name):
                 self.assertConstant(name,required,actual)
@@ -692,4 +695,113 @@ class DescriptionTest(common.BaseTestCase,common.CommonModelTestCase):
             with self.subTest(key="entries",attribute=k):
                 self.assertEqual(entries[k],correct_entries[k])
 
+    def test_manager_method_get_or_create_by_dict(self):
+        name=self.random_string()
+        N=random.randint(1,5)
+        invert_list=[ True for n in range(0,N) ] + [ False for n in range(0,N) ]
+        random.shuffle(invert_list)
+        data={}
+        for n in range(0,2*N):
+            a=self.random_string()
+            v=self.random_string()
+            data[a]=(v,invert_list[n])
+        obj,created=models.Description.objects.get_or_create_by_dict(name,data)
 
+        with self.subTest(created=True):
+            self.assertTrue(created)
+        with self.subTest(created=True,key="name"):
+            self.assertEqual(name,obj.name)
+        for k in data:
+            with self.subTest(created=True,key="entries",attribute=k):
+                self.assertTrue(obj.entries.filter(attribute__name=k,
+                                                   value__string=data[k][0],
+                                                   invert=data[k][1]).exists())
+
+        N=random.randint(1,5)
+        invert_list=[ True for n in range(0,N) ] + [ False for n in range(0,N) ]
+        random.shuffle(invert_list)
+        data2={}
+        for n in range(0,2*N):
+            a=self.random_string()
+            v=self.random_string()
+            data2[a]=(v,invert_list[n])
+            
+        obj,created=models.Description.objects.get_or_create_by_dict(name,data2)
+
+        with self.subTest(created=False):
+            self.assertFalse(created)
+        with self.subTest(created=False,key="name"):
+            self.assertEqual(name,obj.name)
+        for k in data:
+            with self.subTest(created=False,key="entries",attribute=k):
+                self.assertTrue(obj.entries.filter(attribute__name=k,
+                                                   value__string=data[k][0],
+                                                   invert=data[k][1]).exists())
+
+
+    def test_manager_method_get_default(self):
+        obj=models.Description.objects.get_default()
+        with self.subTest(created=True):
+            self.assertEqual(obj.name,self.CONST_MODELS["DEFAULT_DESCRIPTION_NAME"])
+        obj2=models.Description.objects.get_default()
+        with self.subTest(created=False,test="name"):
+            self.assertEqual(obj2.name,self.CONST_MODELS["DEFAULT_DESCRIPTION_NAME"])
+        with self.subTest(created=False,test="pk"):
+            self.assertEqual(obj.pk,obj2.pk)
+
+    def test_count_fusionrules_is_num_of_fusionrules(self): assert True
+    def test_count_inflections_is_num_of_inflections(self): assert True
+    def test_count_derivations_is_num_of_derivations(self): assert True
+    def test_count_references_is_sum_of_all_references(self): assert True
+
+    def test_de_serialize(self): 
+        name=self.random_string()
+        N=random.randint(1,5)
+        invert_list=[ True for n in range(0,N) ] + [ False for n in range(0,N) ]
+        random.shuffle(invert_list)
+        data={}
+        for n in range(0,2*N):
+            a=self.random_string()
+            v=self.random_string()
+            data[a]=(v,invert_list[n])
+
+        ser=(name,data)
+        obj=models.Description.objects.de_serialize(ser)
+        with self.subTest(created=True,key="name"):
+            self.assertEqual(name,obj.name)
+        for k in data:
+            with self.subTest(created=True,key="entries",attribute=k):
+                self.assertTrue(obj.entries.filter(attribute__name=k,
+                                                   value__string=data[k][0],
+                                                   invert=data[k][1]).exists())
+
+        N=random.randint(1,3)
+        invert_list=[ True for n in range(0,N) ] + [ False for n in range(0,N) ]
+        random.shuffle(invert_list)
+        data_yes={}
+        for n in range(0,2*N):
+            a=self.random_string()
+            v=self.random_string()
+            data_yes[a]=(v,invert_list[n])
+
+        N1=random.randint(1,len(data)-1)
+        for k in list(data.keys())[:N1]:
+            data_yes[k]=data[k]
+        data_no={}
+        for k in list(data.keys())[N1:]:
+            data_no[k]=data[k]
+        
+        ser=(name,data_yes)
+        obj=models.Description.objects.de_serialize(ser)
+        with self.subTest(created=False,key="name"):
+            self.assertEqual(name,obj.name)
+        for k in data_yes:
+            with self.subTest(created=False,key="entries",attribute=k,exists=True):
+                self.assertTrue(obj.entries.filter(attribute__name=k,
+                                                   value__string=data_yes[k][0],
+                                                   invert=data_yes[k][1]).exists())
+        for k in data_no:
+            with self.subTest(created=False,key="entries",attribute=k,exists=False):
+                self.assertFalse(obj.entries.filter(attribute__name=k,
+                                                    value__string=data_no[k][0],
+                                                    invert=data_no[k][1]).exists())

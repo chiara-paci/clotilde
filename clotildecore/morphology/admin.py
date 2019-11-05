@@ -144,52 +144,41 @@ class TemaValueReferenceFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            ( "noentry","no entry"),
-            ( "notema","no tema"),
-            ( "noref","no reference"),
-            ( "derivation_only","derivation only"),
-            ( "root_only","root only"),
-            ( "fusion_rule_only","fusion rule only"),
-            ( "derivation","with derivation"),
-            ( "root","with root"),
-            ( "fusion_rule","with fusion rule"),
-            ( "mixed","mixed"),
+            ( "noentry",   "no entry"),
+            ( "noref",     "no reference"),
+            ( "notema",    "no tema"),
+            ( "noder",     "no derivation"),
+            ( "der_only",  "derivation only"),
+            ( "tema_only", "tema only"),
+            ( "der",       "with derivation"),
+            ( "tema",      "with tema"),
+            ( "mixed",     "mixed"),
         ]
 
-    def _tema_queryset(self,val):
-        qset=models.Tema.objects.all().annotate(num_der=Count("derivation"),
-                                                num_root=Count("root"),
-                                                num_frule=Count("fusionrule"))
-        if val=="noref":
-            return qset.filter(num_der=0,num_root=0,num_frule=0)
-        if val=="derivation_only":
-            return qset.filter(num_root=0,num_frule=0).exclude(num_der=0)
-        if val=="root_only":
-            return qset.filter(num_der=0,num_frule=0).exclude(num_root=0)
-        if val=="fusion_rule_only":
-            return qset.filter(num_root=0,num_der=0).exclude(num_frule=0)
-        if val=="derivation":
-            return qset.exclude(num_der=0)
-        if val=="root":
-            return qset.exclude(num_root=0)
-        if val=="fusion_rule":
-            return qset.exclude(num_frule=0)
-        qset=qset.exclude(num_der=0,num_root=0,num_frule=0)
-        qset=qset.exclude(num_der=0,num_root=0)
-        qset=qset.exclude(num_der=0,num_frule=0)
-        qset=qset.exclude(num_root=0,num_frule=0)
-        return qset
-        
     def queryset(self, request, queryset):
         val=self.value()
         if not val: return queryset
         if val=="noentry":
             return queryset.all().annotate(num_entry=Count("temaentry")).filter(num_entry=0)
+
+        qset=queryset.all().annotate( num_tema=Count("temaentry__temaentryrelation"),
+                                      num_der=Count("temaentry__derivation") )
+        if val=="noref":
+            return qset.filter(num_der=0,num_tema=0)
         if val=="notema":
-            return queryset.all().annotate(num_tema=Count("temaentry__temaentryrelation")).filter(num_tema=0)
-        
-        tqset=self._tema_queryset(val)
-        return queryset.filter(temaentry__temaentryrelation__tema__in=tqset).distinct()
+            return qset.filter(num_tema=0)
+        if val=="noder":
+            return qset.filter(num_der=0)
+        if val=="der_only":
+            return qset.filter(num_tema=0).exclude(num_der=0)
+        if val=="tema_only":
+            return qset.filter(num_der=0).exclude(num_tema=0)
+        if val=="der":
+            return qset.exclude(num_der=0)
+        if val=="tema":
+            return qset.exclude(num_tema=0)
+        qset=qset.exclude(num_der=0).exclude(num_tema=0)
+        return qset
 
 class TemaValueAdmin(admin.ModelAdmin):
     list_display=["__str__","name","num_entries","temas"]
@@ -378,7 +367,7 @@ class TemaAdmin(admin.ModelAdmin):
         TemaReferenceFilter,
         TemaNameListFilter,
     ]
-    list_editable=["name"]
+    #list_editable=["name"]
 
 admin.site.register(models.Tema,TemaAdmin)
 
