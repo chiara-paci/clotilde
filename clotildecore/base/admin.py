@@ -286,6 +286,22 @@ class DescriptionAdmin(admin.ModelAdmin):
     def _build(self,obj):
         return "[%s]" % obj.build()
 
+    def count_fusionrules(self,obj): return obj.fusionrule_set.count()
+    def count_inflections(self,obj): return obj.inflection_set.count()
+    def count_derivations(self,obj): return obj.derivation_set.count()
+
+    def count_references(self,obj):
+        M=0
+        for f in obj._meta.get_fields():
+            if not f.auto_created: continue
+            if not f.is_relation: continue
+            if f.concrete: continue
+            kwargs={
+                 f.remote_field.name: obj
+            }
+            M+=f.related_model.objects.filter(**kwargs).count()
+        return M
+    
 admin.site.register(models.Description,DescriptionAdmin)
 
 class EntryAdmin(admin.ModelAdmin):

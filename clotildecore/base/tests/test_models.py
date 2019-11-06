@@ -11,6 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError,PermissionDenied
 from django.db.utils import IntegrityError
 from sqlite3 import IntegrityError as S3IntegrityError
+from django.db import models as django_models
 
 import re
 
@@ -637,8 +638,7 @@ class EntryTest(common.BaseTestCase,common.CommonModelTestCase):
             self.assertEqual(str(obj_false),s_false)
 
 class DescriptionTest(common.BaseTestCase,common.CommonModelTestCase):
-    fields = [ "name","entries","count_fusionrules",
-               "count_inflections","count_derivations","count_references" ]
+    fields = [ "name","entries" ]
     model_name = "description"
 
     def create_random_object(self): return self.create_random_description()
@@ -748,11 +748,6 @@ class DescriptionTest(common.BaseTestCase,common.CommonModelTestCase):
             self.assertEqual(obj2.name,self.CONST_MODELS["DEFAULT_DESCRIPTION_NAME"])
         with self.subTest(created=False,test="pk"):
             self.assertEqual(obj.pk,obj2.pk)
-
-    def test_count_fusionrules_is_num_of_fusionrules(self): assert True
-    def test_count_inflections_is_num_of_inflections(self): assert True
-    def test_count_derivations_is_num_of_derivations(self): assert True
-    def test_count_references_is_sum_of_all_references(self): assert True
 
     def test_de_serialize(self): 
         name=self.random_string()

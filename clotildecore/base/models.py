@@ -366,23 +366,6 @@ class Description(AbstractName):
 
     def serialize(self):
         kwargs=[ ( str(e.attribute), ( str(e.value), e.invert ) ) for e in self.entries.all() ]
-        # kwargsb=[ e.serialize() for e in self.subdescriptions.all() ]
         return (self.name,dict(kwargs)) #+kwargsb))
 
-    @cached_property
-    def count_fusionrules(self): return self.fusionrule_set.count()
-
-    @cached_property
-    def count_inflections(self): return self.inflection_set.count()
-
-    @cached_property
-    def count_derivations(self): return self.derivation_set.count()
-
-    @cached_property
-    def count_references(self): 
-        N=0
-        N+=self.count_fusionrules
-        N+=self.count_inflections
-        N+=self.count_derivations
-        return N
     

@@ -24,7 +24,6 @@ def factory(alpha_token,word_list):
     slist.append( ("multiple","multiple","ffffff","000000") )
     return slist,TokenMultipleWord(alpha_token,tlist)
 
-
 class TokenWord(tokens.Token):
     def __init__(self,alpha_token,word):
         tokens.Token.__init__(self,
