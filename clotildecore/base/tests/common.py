@@ -228,19 +228,24 @@ class CommonTokenTestCase(abc.ABC):
     attributes=["label","text","description","final"]
     
     @abc.abstractmethod
-    def create_random_object(self): return None
-
-    @abc.abstractmethod
     def create_object(self,*args,**kwargs):
         return None
 
     @abc.abstractmethod
-    def make_parameters(self,*args,**kwargs):
+    def expected_attributes(self,*args,**kwargs):
         label=""
         text=""
         desc=None
         final=None # boolean
         return label,text,desc,final
+
+    @abc.abstractmethod
+    def create_random_parameters(self):
+        return [],{}
+
+    def create_random_object(self):
+        args,kwargs=self.create_random_parameters()
+        return self.create_object(*args,**kwargs)
 
     def test_object_has_attributes(self):
         obj=self.create_random_object()
@@ -250,7 +255,7 @@ class CommonTokenTestCase(abc.ABC):
 
     def _test_method_html(self,*args,**kwargs):
         obj=self.create_object(*args,**kwargs)
-        label,text,desc,final=self.make_parameters(*args,**kwargs)
+        label,text,desc,final=self.expected_attributes(*args,**kwargs)
         exp_format='<span class="token %s">%s</span>'
         expected=exp_format % ( label, text.replace("¶","¶<br/>"))
         result=obj.html()
@@ -258,7 +263,7 @@ class CommonTokenTestCase(abc.ABC):
 
     def _test_attribute_values(self,*args,**kwargs):
         obj=self.create_object(*args,**kwargs)
-        label,text,desc,final=self.make_parameters(*args,**kwargs)
+        label,text,desc,final=self.expected_attributes(*args,**kwargs)
         expected={
             "label": label,
             "text": text,
@@ -273,7 +278,7 @@ class CommonTokenTestCase(abc.ABC):
         
     def _test_object_is_hashable(self,*args,**kwargs):
         obj=self.create_object(*args,**kwargs)
-        label,text,desc,final=self.make_parameters(*args,**kwargs)
+        label,text,desc,final=self.expected_attributes(*args,**kwargs)
         expected=hash(label+":"+text+"/"+str(desc))
         self.assertFunctionCall(expected,hash,obj)
 
@@ -283,7 +288,7 @@ class CommonTokenTestCase(abc.ABC):
         expected_list=[]
         for args,kwargs in param_list:
             obj=self.create_object(*args,**kwargs)
-            label,text,desc,final=self.make_parameters(*args,**kwargs)
+            label,text,desc,final=self.expected_attributes(*args,**kwargs)
             expected_list.append( (text.lower(),desc,obj) )
             obj_list.append(obj)
         obj_list.sort()
@@ -294,6 +299,14 @@ class CommonTokenTestCase(abc.ABC):
                 msg="expected: %s %s, actual: %s %s" % (expected_list[n][0],str(expected_list[n][1]),
                                                         obj.text,str(obj.description)) 
                 self.assertEqual(obj_list[n],expected_list[n][2],msg=msg)
+
+    def test_method_html(self):
+        args,kwargs=self.create_random_parameters()
+        self._test_method_html(*args,**kwargs)
+
+    def test_object_is_hashable(self):
+        args,kwargs=self.create_random_parameters()
+        self._test_object_is_hashable(*args,**kwargs)
 
 
 

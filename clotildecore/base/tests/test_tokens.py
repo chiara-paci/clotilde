@@ -6,7 +6,7 @@ from unittest import mock
 import random
 
 from . import common
-from .. import tokens
+from .. import tokens,descriptions
 
 class ConstantTest(common.BaseTestCase):
     def test_tokens_constant(self):
@@ -68,25 +68,25 @@ class FunctionTest(common.BaseTestCase):
         with self.subTest(preserve="default"):
             self.assertFunctionCall(S_exp_false,tokens.replace_newline,S_data,repl)
 
-
 class TokenTest(common.BaseTestCase,common.CommonTokenTestCase):
-    def create_random_object(self):
-        return self.create_object(self.random_string(with_spaces=False),
-                                  self.random_string(),
-                                  self.random_description())
-
     def create_object(self,label,text,description,final=None):
         if final is None:
             return tokens.Token(label,text,description)
         return tokens.Token(label,text,description,final=final)
-        
-    def make_parameters(self,label,text,description,final=None):
+
+    def create_random_parameters(self):
+        label=self.random_string(with_spaces=False)
+        text=self.random_string()
+        description=self.random_description()
+        return [label,text,description],{}
+
+    def expected_attributes(self,label,text,description,final=None):
         t=text.replace('\xa0'," ") # non breaking space
         t=tokens.replace_newline(t,"¶")
         if final is None:
             return label,t,description,False
         return label,t,description,final
-        
+    
     def test_attribute_values(self):
         label=self.random_string(with_spaces=False)
         text=self.random_string()
@@ -97,18 +97,6 @@ class TokenTest(common.BaseTestCase,common.CommonTokenTestCase):
             self._test_attribute_values(label,text,description,final=True)
         with self.subTest(final=False):
             self._test_attribute_values(label,text,description,final=False)
-
-    def test_method_html(self):
-        label=self.random_string(with_spaces=False)
-        text=self.random_string()
-        description=self.random_description()
-        self._test_method_html(label,text,description)
-
-    def test_object_is_hashable(self):
-        label=self.random_string(with_spaces=False)
-        text=self.random_string()
-        description=self.random_description()
-        self._test_object_is_hashable(label,text,description)
 
     def test_object_is_sortable(self):
         N=random.randint(2,10)
@@ -125,5 +113,133 @@ class TokenTest(common.BaseTestCase,common.CommonTokenTestCase):
             p_list.append( ( (label,text2,description2), {} ) )
         self._test_object_is_sortable(p_list)
 
+class TokenBaseTest(common.BaseTestCase,common.CommonTokenTestCase):
+    def create_object(self,label,text,final=None):
+        if final is None:
+            return tokens.TokenBase(label,text)
+        return tokens.TokenBase(label,text,final=final)
 
+    def create_random_parameters(self):
+        label=self.random_string(with_spaces=False)
+        text=self.random_string()
+        return [label,text],{}
+
+    def expected_attributes(self,label,text,final=None):
+        t=text.replace('\xa0'," ") # non breaking space
+        t=tokens.replace_newline(t,"¶")
+        description=descriptions.Description(base=label)
+        if final is None:
+            return label,t,description,False
+        return label,t,description,final
     
+    def test_attribute_values(self):
+        label=self.random_string(with_spaces=False)
+        text=self.random_string()
+        with self.subTest(final=None):
+            self._test_attribute_values(label,text)
+        with self.subTest(final=True):
+            self._test_attribute_values(label,text,final=True)
+        with self.subTest(final=False):
+            self._test_attribute_values(label,text,final=False)
+
+    def test_object_is_sortable(self):
+        N=random.randint(2,10)
+        p_list=[]
+        for n in range(0,N):
+            label1=self.random_string(with_spaces=False)
+            label2=self.random_string(with_spaces=False)
+            text1=self.random_string()
+            text2=self.random_string()
+            p_list.append( ( (label1,text1), {} ) )
+            p_list.append( ( (label1,text2), {} ) )
+            p_list.append( ( (label2,text1), {} ) )
+            p_list.append( ( (label2,text2), {} ) )
+        self._test_object_is_sortable(p_list)
+
+class TokenNotFoundTest(common.BaseTestCase,common.CommonTokenTestCase):
+    def create_object(self,text):
+        return tokens.TokenNotFound(text)
+
+    def create_random_parameters(self):
+        text=self.random_string()
+        return [text],{}
+
+    def expected_attributes(self,text):
+        t=text.replace('\xa0'," ") # non breaking space
+        t=tokens.replace_newline(t,"¶")
+        label="not-found"
+        description=descriptions.Description(base=label)
+        final=True
+        return label,t,description,final
+    
+    def test_attribute_values(self):
+        text=self.random_string()
+        self._test_attribute_values(text)
+
+    def test_object_is_sortable(self):
+        N=random.randint(2,10)
+        p_list=[]
+        for n in range(0,N):
+            flag=self.random_boolean()
+            text=self.random_string()
+            p_list.append( ( (text,), {} ) )
+            if flag:
+                p_list.append( ( (text,), {} ) )
+        self._test_object_is_sortable(p_list)
+
+class TokenMarkerTest(common.BaseTestCase,common.CommonTokenTestCase):
+    def create_object(self,marker,pos):
+        return tokens.TokenMarker(marker,pos)
+
+    def create_random_parameters(self):
+        marker=random.choices(tokens.MARKERS)
+        pos=random.choices(["begin","end"])
+        return [marker,pos],{}
+
+    def _mark(self,marker):
+        if marker not in tokens.MARKERS: return ""
+        if marker in ["center","left","right"]:
+            return '<i class="fas fa-align-%s"></i>' % marker
+        return '<i class="fas fa-italic"></i>'
+    
+    def expected_attributes(self,marker,pos):
+        if marker in tokens.MARKERS:
+            label="marker"
+        else:
+            label="not-found"
+        description=descriptions.Description(base=label)
+        final=True
+        if pos=="begin":
+            text='<i class="fas fa-arrow-alt-circle-right"></i>'
+            text+=self._mark(marker)
+        else:
+            text=self._mark(marker)
+            text+='<i class="fas fa-arrow-alt-circle-left"></i>'
+        return label,text,description,final
+    
+    def test_attribute_values(self):
+        markers=[ random.choices([ m for m in tokens.MARKERS if m!="i" ]),
+                  "i",self.random_string() ]
+        pos=[ "begin",self.random_string() ]
+        for m in markers:
+            for p in pos:
+                with self.subTest(marker=m,pos=p):
+                    self._test_attribute_values(m,p)
+
+
+    def test_object_is_sortable(self):
+        markers=tokens.MARKERS + [ self.random_string() ]
+        pos=[ "begin",self.random_string() ]
+        p_list=[]
+        N=random.randint(2,10)
+        for n in range(0,N):
+            m1=random.choices(markers)
+            m2=random.choices(markers)
+            p1=random.choices(pos)
+            p2=random.choices(pos)
+            p_list.append( ( (m1,p1), {} ) )
+            p_list.append( ( (m1,p2), {} ) )
+            p_list.append( ( (m2,p1), {} ) )
+            p_list.append( ( (m2,p2), {} ) )
+        self._test_object_is_sortable(p_list)
+
