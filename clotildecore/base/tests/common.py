@@ -73,6 +73,28 @@ class CommonTestCase(TestCase):
         with self.assertRaises( (IntegrityError,) ):
             obj=create_func(*args,**kwargs)
 
+    def assertIsCopy(self,obj_1,obj_2):
+        self.assertEqual(obj_1,obj_2)
+        self.assertIsNot(obj_1,obj_2)
+
+    def assertIsDescriptionSubset(self,val1,val2):
+        if type(val2) is str:
+            self.assertIs(type(val1),str,msg="%s is not description subset of %s" % (val1,val2) )
+            self.assertEqual(val1,val2,msg="%s is not description subset of %s" % (val1,val2) )
+            return
+        if type(val2) is set:
+            S2=val2
+        else:
+            S2=set(val2)
+        if type(val1) is set:
+            self.assertTrue(val1.issubset(S2),msg="%s is not description subset of %s" % (val1,val2) )
+            return
+        if type(val1) is list:
+            self.assertTrue(set(val1).issubset(S2),msg="%s is not description subset of %s" % (val1,val2) )
+            return
+        self.assertIn(val1,S2,msg="%s is not description subset of %s" % (val1,val2) )
+
+        
 class BaseTestCase(CommonTestCase): 
     app_name="base"
     
@@ -308,6 +330,166 @@ class CommonTokenTestCase(abc.ABC):
         args,kwargs=self.create_random_parameters()
         self._test_object_is_hashable(*args,**kwargs)
 
+class CommonDescriptionTestCase(abc.ABC):
+    @abc.abstractmethod
+    def value_to_str(self,val): return ""
+
+    @abc.abstractmethod
+    def create_random_value(self): return ""
+
+    @abc.abstractmethod
+    def create_object(self,**kwargs): return None
+
+    def create_random_kwargs(self,min_len=1,max_len=10):
+        N=random.randint(min_len,max_len)
+        kwargs={}
+        for n in range(0,N):
+            key=self.random_string()
+            value=self.create_random_value()
+            kwargs[key]=value
+        return kwargs
+
+    def test_copy(self):
+        kwargs=self.create_random_kwargs()
+        desc=self.create_object(**kwargs)
+        desc2=desc.copy()
+        self.assertIsCopy(desc,desc2)
+
+    def test_str(self):
+        kwargs=self.create_random_kwargs()
+        desc=self.create_object(**kwargs)
+        keys=list(kwargs.keys())
+        keys.sort()
+        expected=",".join( [ "%s:%s" % (k,self.value_to_str(kwargs[k])) for k in keys ] )
+        self.assertEqual(expected,str(desc))
+
+    def test_html(self):
+        kwargs=self.create_random_kwargs()
+        desc=self.create_object(**kwargs)
+        keys=list(kwargs.keys())
+        keys.sort()
+        S=""
+        for k in keys:
+            r='<mtd columnalign="center"><mi>%s</mi></mtd>' % k
+            r+='<mtd columnalign="center"><mo>=</mo></mtd>'
+            r+='<mtd columnalign="center"><mn>%s</mn></mtd>' % self.value_to_str(kwargs[k])
+            S+="<mtr>%s</mtr>" % r
+        S="<mrow><mo>[</mo><mtable>%s</mtable><mo>]</mo></mrow>" % S
+        expected="<math>%s</math>" % S
+        self.assertEqual(expected,desc.html())
+
+    def test_operator_gt(self): assert True   # A>B
+    def test_operator_eq(self): assert True   # A==B
+    def test_operator_ne(self): assert True   # A!=B
+    def test_operator_le(self): assert True   # A<B
+    def test_operator_ge(self): assert True   # A>B
+
+    ## aggiungere il test con values tutti negati per ogni chiave
+    def test_operator_cfr_disjointed(self): 
+        kwargs1,kwargs2=self.create_two_kwargs_disjointed()
+        obj1=self.create_object(**kwargs1)
+        obj2=self.create_object(**kwargs2)
+        print(obj1,obj2)
+
+        with self.subTest(operator="=="): self.assertFalse(obj1==obj2)
+        with self.subTest(operator="<"):  self.assertFalse(obj1<obj2)
+        with self.subTest(operator="<="): self.assertFalse(obj1<=obj2)
+        with self.subTest(operator=">"):  self.assertFalse(obj1>obj2)
+        with self.subTest(operator=">="): self.assertFalse(obj1>=obj2)
+        with self.subTest(operator="!="): self.assertTrue(obj1!=obj2)
+        
+    def test_operator_not_implemented(self):
+        kwargs=self.create_random_kwargs()
+        obj=self.create_object(**kwargs)
+        other=random.randint(1,10)
+        
+        with self.subTest(case="obj+num"):
+            with self.assertRaises(TypeError) as cm:
+                obj_sum=obj+other
+        with self.subTest(case="num+obj"):
+            with self.assertRaises(TypeError) as cm:
+                obj_sum=other+obj
+        with self.subTest(case="obj<num"):
+            with self.assertRaises(TypeError) as cm:
+                obj<other
+        with self.subTest(case="num<obj"):
+            with self.assertRaises(TypeError) as cm:
+                other<obj
+        with self.subTest(case="obj<=num"):
+            with self.assertRaises(TypeError) as cm:
+                obj<=other
+        with self.subTest(case="num<=obj"):
+            with self.assertRaises(TypeError) as cm:
+                other<=obj
+        
+    def test_operator_plus_disjointed(self):
+        kwargs1,kwargs2=self.create_two_kwargs_disjointed()
+        obj1=self.create_object(**kwargs1)
+        obj2=self.create_object(**kwargs2)
+        obj_sum=obj1+obj2
+        for k in kwargs1:
+            with self.subTest(case="k in A",k=k):
+                self.assertIn(k,obj_sum)
+                self.assertEqual(kwargs1[k],obj_sum[k])
+        for k in kwargs2:
+            with self.subTest(case="k in B",k=k):
+                self.assertIn(k,obj_sum)
+                self.assertEqual(kwargs2[k],obj_sum[k])
+
+    def test_operator_plus_overlapping(self):
+        kwargs1,kwargs2=self.create_two_kwargs_overlapping()
+        obj1=self.create_object(**kwargs1)
+        obj2=self.create_object(**kwargs2)
+        obj_sum=obj1+obj2
+        for k in kwargs1:
+            with self.subTest(case="k in A",k=k):
+                self.assertIn(k,obj_sum)
+                self.assertEqual(kwargs1[k],obj_sum[k])
+        for k in kwargs2:
+            with self.subTest(case="k in B",k=k):
+                self.assertIn(k,obj_sum)
+                self.assertEqual(kwargs2[k],obj_sum[k])
+
+    def test_operator_plus_incoherent(self):
+        kwargs1,kwargs2=self.create_two_kwargs_incoherent()
+        obj1=self.create_object(**kwargs1)
+        obj2=self.create_object(**kwargs2)
+        with self.assertRaises(descriptions.FailedUnification) as cm:
+            obj_sum=obj1+obj2
+
+    def create_two_kwargs_disjointed(self):
+        kwargs1=self.create_random_kwargs(min_len=6,max_len=20)
+        kwargs2=self.create_random_kwargs(min_len=6,max_len=20)
+        if len(kwargs1)<=len(kwargs2):
+            for k in kwargs1:
+                if k in kwargs2: del(kwargs2[k])
+        else:
+            for k in kwargs2:
+                if k in kwargs1: del(kwargs1[k])
+        return kwargs1,kwargs2
+
+    def create_two_kwargs_overlapping(self):
+        kwargs1,kwargs2=self.create_two_kwargs_disjointed()
+        q=random.randint(0,1)
+        N1=random.randint(q,3)
+        N2=random.randint(1-q,3)
+        keys1=random.choices(list(kwargs1.keys()),k=N1)
+        keys2=random.choices(list(kwargs2.keys()),k=N2)
+        for k in keys1: kwargs2[k]=kwargs1[k]
+        for k in keys2: kwargs1[k]=kwargs2[k]
+        return kwargs1,kwargs2
+
+    def create_two_kwargs_incoherent(self):
+        kwargs1=self.create_random_kwargs()
+        kwargs2=self.create_random_kwargs()
+        q=random.randint(0,1)
+        N1=random.randint(q,3)
+        N2=random.randint(1-q,3)
+        keys1=random.choices(list(kwargs1.keys()),k=N1)
+        keys2=random.choices(list(kwargs2.keys()),k=N2)
+        for k in keys1: kwargs2[k]=self.create_random_value()
+        for k in keys2: kwargs1[k]=self.create_random_value()
+        return kwargs1,kwargs2
 
 
 

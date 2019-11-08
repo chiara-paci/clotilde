@@ -1,6 +1,3 @@
-def slugify(text):
-    T=text.lower().replace(" ","_")
-    T=T.replace("-","")
-    T=T.replace("/","_")
-    return T
+from django.utils.text import slugify 
+
 
