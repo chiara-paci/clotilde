@@ -22,18 +22,78 @@ class DescriptionTest(common.BaseTestCase,common.CommonDescriptionTestCase):
         return str(val)
 
     def create_random_value(self):
-        #return (self.random_string(),self.random_boolean())
-        return (self.random_string(),True)
+        return (self.random_string(),self.random_boolean())
 
     def create_object(self,**kwargs):
         return descriptions.Description(**kwargs)
 
-    def test_operator_lt(self): assert True   # A<B
-    def test_operator_gt(self): assert True   # A>B
-    def test_operator_eq(self): assert True   # A==B
-    def test_operator_ne(self): assert True   # A!=B
-    def test_operator_le(self): assert True   # A<B
-    def test_operator_ge(self): assert True   # A>B
+    def create_two_kwargs_disjointed(self):
+        kwargs1,kwargs2=super().create_two_kwargs_disjointed()
+        # ensure data has at least one value not inverted
+        k=self.random_choices(list(kwargs1.keys()))[0]
+        kwargs1[k]=(kwargs1[k][0],False)
+        k=self.random_choices(list(kwargs2.keys()))[0]
+        kwargs2[k]=(kwargs2[k][0],False)
+        return kwargs1,kwargs2
+
+    def test_operator_cfr_disjointed_all_inverted(self): 
+        kwargs1,kwargs2=self.create_two_kwargs_disjointed()
+        kwargs3={}
+        for k in kwargs1:
+            kwargs3[k]=(kwargs1[k][0],True)
+        kwargs4={}
+        for k in kwargs2:
+            kwargs4[k]=(kwargs2[k][0],True)
+        obj1=self.create_object(**kwargs1)
+        obj2=self.create_object(**kwargs2)
+        obj3=self.create_object(**kwargs3)
+        obj4=self.create_object(**kwargs4)
+
+        with self.subTest(case="obj3 vs. obj2",operator="=="): self.assertFalse(obj3==obj2)
+        with self.subTest(case="obj3 vs. obj2",operator="<"):  self.assertTrue(obj3<obj2)
+        with self.subTest(case="obj3 vs. obj2",operator="<="): self.assertTrue(obj3<=obj2)
+        with self.subTest(case="obj3 vs. obj2",operator=">"):  self.assertFalse(obj3>obj2)
+        with self.subTest(case="obj3 vs. obj2",operator=">="): self.assertFalse(obj3>=obj2)
+        with self.subTest(case="obj3 vs. obj2",operator="!="): self.assertTrue(obj3!=obj2)
+
+        with self.subTest(case="obj1 vs. obj4",operator="=="): self.assertFalse(obj1==obj4)
+        with self.subTest(case="obj1 vs. obj4",operator="<"):  self.assertFalse(obj1<obj4)
+        with self.subTest(case="obj1 vs. obj4",operator="<="): self.assertFalse(obj1<=obj4)
+        with self.subTest(case="obj1 vs. obj4",operator=">"):  self.assertTrue(obj1>obj4)
+        with self.subTest(case="obj1 vs. obj4",operator=">="): self.assertTrue(obj1>=obj4)
+        with self.subTest(case="obj1 vs. obj4",operator="!="): self.assertTrue(obj1!=obj4)
+
+    def test_operator_cfr_overlapping_all_inverted(self): 
+        kwargs1,kwargs2=self.create_two_kwargs_overlapping()
+        kwargs3={}
+        for k in kwargs1:
+            kwargs3[k]=(kwargs1[k][0],True)
+            if k in kwargs2:
+                kwargs2[k]=(kwargs1[k][0],True)
+        kwargs4={}
+        for k in kwargs2:
+            kwargs4[k]=(kwargs2[k][0],True)
+            if k in kwargs1:
+                kwargs1[k]=(kwargs2[k][0],True)
+        obj1=self.create_object(**kwargs1)
+        obj2=self.create_object(**kwargs2)
+        obj3=self.create_object(**kwargs3)
+        obj4=self.create_object(**kwargs4)
+
+        with self.subTest(case="obj3 vs. obj2",operator="=="): self.assertFalse(obj3==obj2)
+        with self.subTest(case="obj3 vs. obj2",operator="<"):  self.assertTrue(obj3<obj2)
+        with self.subTest(case="obj3 vs. obj2",operator="<="): self.assertTrue(obj3<=obj2)
+        with self.subTest(case="obj3 vs. obj2",operator=">"):  self.assertFalse(obj3>obj2)
+        with self.subTest(case="obj3 vs. obj2",operator=">="): self.assertFalse(obj3>=obj2)
+        with self.subTest(case="obj3 vs. obj2",operator="!="): self.assertTrue(obj3!=obj2)
+
+        with self.subTest(case="obj1 vs. obj4",operator="=="): self.assertFalse(obj1==obj4)
+        with self.subTest(case="obj1 vs. obj4",operator="<"):  self.assertFalse(obj1<obj4)
+        with self.subTest(case="obj1 vs. obj4",operator="<="): self.assertFalse(obj1<=obj4)
+        with self.subTest(case="obj1 vs. obj4",operator=">"):  self.assertTrue(obj1>obj4)
+        with self.subTest(case="obj1 vs. obj4",operator=">="): self.assertTrue(obj1>=obj4)
+        with self.subTest(case="obj1 vs. obj4",operator="!="): self.assertTrue(obj1!=obj4)
+
 
 class TemaTest(common.BaseTestCase,common.CommonDescriptionTestCase):
     def value_to_str(self,val):

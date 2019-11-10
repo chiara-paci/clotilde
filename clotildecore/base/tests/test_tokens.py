@@ -40,7 +40,7 @@ class FunctionTest(common.BaseTestCase):
         t.append(S[breaks[-1]:])
 
         repl=self.random_string()
-        new_lines=random.choices(tokens.NEW_LINES,k=num_breaks)
+        new_lines=self.random_choices(tokens.NEW_LINES,k=num_breaks)
         
         t_data=[]
         t_exp_true=[]
@@ -192,8 +192,8 @@ class TokenMarkerTest(common.BaseTestCase,common.CommonTokenTestCase):
         return tokens.TokenMarker(marker,pos)
 
     def create_random_parameters(self):
-        marker=random.choices(tokens.MARKERS)
-        pos=random.choices(["begin","end"])
+        marker=self.random_choices(tokens.MARKERS)
+        pos=self.random_choices(["begin","end"])
         return [marker,pos],{}
 
     def _mark(self,marker):
@@ -218,7 +218,7 @@ class TokenMarkerTest(common.BaseTestCase,common.CommonTokenTestCase):
         return label,text,description,final
     
     def test_attribute_values(self):
-        markers=[ random.choices([ m for m in tokens.MARKERS if m!="i" ]),
+        markers=[ self.random_choices([ m for m in tokens.MARKERS if m!="i" ]),
                   "i",self.random_string() ]
         pos=[ "begin",self.random_string() ]
         for m in markers:
@@ -233,10 +233,10 @@ class TokenMarkerTest(common.BaseTestCase,common.CommonTokenTestCase):
         p_list=[]
         N=random.randint(2,10)
         for n in range(0,N):
-            m1=random.choices(markers)
-            m2=random.choices(markers)
-            p1=random.choices(pos)
-            p2=random.choices(pos)
+            m1=self.random_choices(markers)
+            m2=self.random_choices(markers)
+            p1=self.random_choices(pos)
+            p2=self.random_choices(pos)
             p_list.append( ( (m1,p1), {} ) )
             p_list.append( ( (m1,p2), {} ) )
             p_list.append( ( (m2,p1), {} ) )

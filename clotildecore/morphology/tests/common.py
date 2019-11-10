@@ -7,7 +7,6 @@ import string
 import abc
 
 from .. import models
-from .. import descriptions
 from base.tests import common as base_common
 
 class BaseTestCase(base_common.CommonTestCase):

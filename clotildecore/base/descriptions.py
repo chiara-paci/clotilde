@@ -126,8 +126,8 @@ class Description(BaseDescription):
         if type(other) is not type(self): return NotImplemented
         for k in self:
             if k not in other: 
-                #if type(self[k]) is not tuple: return False
-                #if self[k][1]: continue
+                if type(self[k]) is not tuple: return False
+                if self[k][1]: continue
                 return False
             #if self._cfr(self[k],other[k])<=0: continue
             if self._match(self[k],other[k]): continue
