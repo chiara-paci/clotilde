@@ -38,11 +38,6 @@ def select_filter_decorator(cls):
         template = "admin/selectfilter.html"
     return DecoratedFilter
 
-#SelectListFilter=select_filter_decorator(admin.RelatedOnlyFieldListFilter)
-
-#class SelectListFilter(admin.RelatedOnlyFieldListFilter):
-#    template = "admin/selectfilter.html"
-
 class InputListFilter(admin.SimpleListFilter):
     # title = "derivation"
     # parameter_name = 'derivation'
@@ -249,36 +244,17 @@ class TokenRegexpSetAdmin(admin.ModelAdmin):
 
 admin.site.register(models.TokenRegexpSet,TokenRegexpSetAdmin)
 
-# class LanguageAdmin(admin.ModelAdmin):
-#     list_display=['name','has_case','case_set','token_regexp_set','token_regexp_expression']
-#     list_editable=['case_set','token_regexp_set']
-
-# admin.site.register(models.Language,LanguageAdmin)
-
-# class NotWordAdmin(admin.ModelAdmin):
-#     list_display=('name','word')
-
-# admin.site.register(models.NotWord,NotWordAdmin)
-
-# admin.site.register(models.SubDescription)
-
 class DescriptionEntryInline(admin.TabularInline):
     model = models.Description.entries.through
     extra = 0
 
-# class DescriptionSubDescriptionInline(admin.TabularInline):
-#     model = models.Description.subdescriptions.through
-#     extra = 0
-
 class DescriptionAdmin(admin.ModelAdmin):
-    exclude = [ "entries" ] #,"subdescriptions"]
-    inlines=[DescriptionEntryInline] #,DescriptionSubDescriptionInline]
+    exclude = [ "entries" ] 
+    inlines=[DescriptionEntryInline] 
     list_display=[ "__str__","name","count_references",
                    "count_fusionrules",
-                   #"count_roots",
                    "count_inflections",
                    "count_derivations",
-                   #"count_root_derivations",
                    "_build" ]
     list_editable=["name"]
     save_as=True
@@ -324,17 +300,14 @@ class ValueAdmin(admin.ModelAdmin):
     inlines = [EntryInline]
     list_display=["__str__","string","order","attributes","entry_count"]
     list_editable=["string","order"]
-    
 
     def entry_count(self,obj):
         return obj.entry_set.count()
 
     def attributes(self,obj):
         return ",".join([a["attribute__name"] for a in models.Entry.objects.filter(value=obj).values("attribute__name").distinct()])
-
     
 admin.site.register(models.Value,ValueAdmin)
-
 
 class AttributeAdmin(admin.ModelAdmin):
     inlines = [EntryInline]
